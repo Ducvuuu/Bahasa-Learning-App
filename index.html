@@ -309,6 +309,12 @@
             }
         }
 
+        /* Drag-over state for mnemonic drop zone */
+        .drag-over {
+            border-color: #6366f1 !important;
+            background-color: #eef2ff !important;
+        }
+
         /* Status Pill */
         .status-pill {
             font-size: 0.75rem;
@@ -851,36 +857,27 @@
             
             <!-- Mnemonic Image Section -->
             <div class="mt-4">
-                <div id="mnemonic-image-container" class="mb-3">
-                    <!-- Image will be displayed here -->
+                <div id="mnemonic-image-container" class="mb-2">
+                    <!-- Image displayed here by JS -->
                 </div>
-                <div class="text-left">
-                    <label class="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
-                        🖼️ Mnemonic Image
-                    </label>
-                    <div class="flex gap-2">
-                        <input 
-                            type="text" 
-                            id="mnemonic-url-input" 
-                            placeholder="Paste Imgur link..." 
-                            class="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        />
-                        <button 
-                            id="mnemonic-add-btn" 
-                            onclick="saveMnemonic()" 
-                            class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-semibold transition-colors"
-                        >
-                            Add
-                        </button>
-                    </div>
-                    <button 
-                        id="mnemonic-remove-btn" 
-                        onclick="removeMnemonic()" 
-                        class="hidden mt-2 text-xs text-red-500 hover:text-red-700 font-medium"
-                    >
-                        ✕ Remove Image
-                    </button>
+                <input type="file" id="mnemonic-file-input" accept="image/*" class="hidden" onchange="handleMnemonicFile(this.files[0])">
+                <div id="mnemonic-drop-zone"
+                     onclick="document.getElementById('mnemonic-file-input').click()"
+                     ondragover="event.preventDefault(); this.classList.add('drag-over')"
+                     ondragleave="this.classList.remove('drag-over')"
+                     ondrop="event.preventDefault(); this.classList.remove('drag-over'); handleMnemonicFile(event.dataTransfer.files[0])"
+                     class="cursor-pointer rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50 p-5 text-center transition-colors">
+                    <div class="text-2xl mb-1">🖼️</div>
+                    <div id="mnemonic-drop-label" class="text-sm font-semibold text-slate-500">Drop image here</div>
+                    <div class="text-xs text-slate-400 mt-0.5">or click to browse</div>
                 </div>
+                <button
+                    id="mnemonic-remove-btn"
+                    onclick="removeMnemonic()"
+                    class="hidden mt-2 text-xs text-red-500 hover:text-red-700 font-medium"
+                >
+                    ✕ Remove Image
+                </button>
             </div>
         </div>
         <button id="modal-action-btn" class="w-full py-3 rounded-xl font-bold text-white transition-transform active:scale-95 bg-indigo-500 hover:bg-indigo-600 shadow-lg shadow-indigo-200">
@@ -1808,51 +1805,52 @@
             currentVocabId = vocabId;
             const imageUrl = mnemonics[vocabId];
             const container = document.getElementById('mnemonic-image-container');
-            const input = document.getElementById('mnemonic-url-input');
-            const addBtn = document.getElementById('mnemonic-add-btn');
+            const dropLabel = document.getElementById('mnemonic-drop-label');
             const removeBtn = document.getElementById('mnemonic-remove-btn');
-            
+            document.getElementById('mnemonic-file-input').value = '';
+
             if (imageUrl) {
-                // Display existing image
                 container.innerHTML = `
-                    <div class="rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
-                        <img src="${imageUrl}" alt="Mnemonic" class="w-full max-h-64 object-contain" 
-                             onerror="this.parentElement.innerHTML='<div class=\\'p-8 text-center text-slate-400\\'>Image failed to load</div>'">
+                    <div class="rounded-lg overflow-hidden border border-slate-200 bg-slate-50 mb-2">
+                        <img src="${imageUrl}" alt="Mnemonic" class="w-full max-h-48 object-contain"
+                             onerror="this.parentElement.innerHTML='<div class=\\'p-4 text-center text-slate-400 text-sm\\'>Image failed to load</div>'">
                     </div>
                 `;
-                input.value = imageUrl;
-                addBtn.textContent = 'Update';
+                dropLabel.textContent = 'Drop to replace image';
                 removeBtn.classList.remove('hidden');
             } else {
-                // No image yet
-                container.innerHTML = `
-                    <div class="rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-                        <div class="text-4xl mb-2">📷</div>
-                        <div class="text-sm text-slate-400">No mnemonic image yet</div>
-                    </div>
-                `;
-                input.value = '';
-                addBtn.textContent = 'Add';
+                container.innerHTML = '';
+                dropLabel.textContent = 'Drop image here';
                 removeBtn.classList.add('hidden');
             }
         }
-        
-        function saveMnemonic() {
-            const input = document.getElementById('mnemonic-url-input');
-            const url = input.value.trim();
-            
-            if (!url) {
-                alert('Please paste an image URL');
-                return;
-            }
-            
-            // Basic URL validation
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                alert('Please enter a valid URL starting with http:// or https://');
-                return;
-            }
-            
-            mnemonics[currentVocabId] = url;
+
+        function resizeImageToBase64(file, maxW, maxH, quality) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let { width, height } = img;
+                        const ratio = Math.min(maxW / width, maxH / height, 1);
+                        width = Math.round(width * ratio);
+                        height = Math.round(height * ratio);
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function handleMnemonicFile(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            const base64 = await resizeImageToBase64(file, 600, 400, 0.82);
+            mnemonics[currentVocabId] = base64;
             localStorage.setItem(MNEMONICS_KEY, JSON.stringify(mnemonics));
             saveProgress();
             displayMnemonicInModal(currentVocabId);
