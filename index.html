@@ -7,13 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- 🟢 IMPORT DATA -->
-    <!-- <script src="vocab_data.js"></script> (DISABLED: Using dynamic folder loading now) -->
-    <script src="songs/index.js"></script>
-    
-    <!-- 📖 IMPORT STORIES (Built-in) -->
-    <script src="stories/index.js"></script>
-    <script src="stories/story_001_market.js"></script>
+    <!-- 🔥 FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <style>
         body {
@@ -530,17 +527,19 @@
                 <!-- Right Side: Sync & Progress -->
                 <div class="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
                     
-                    <!-- File Sync Control -->
-                    <div class="flex items-center gap-2">
-                         <button id="btn-connect" onclick="connectFile()" class="text-xs font-bold bg-slate-800 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 transition-colors shadow-sm">
-                            💾 Connect Progress
-                         </button>
-                         <button id="btn-reconnect" onclick="requestStoredFilePermission()" class="hidden text-xs font-bold bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
-                            🔄 Confirm Access
-                         </button>
-                         <div id="sync-status" class="hidden status-pill saved">
-                             <span>●</span> Auto-saving
-                         </div>
+                    <!-- Auth Control -->
+                    <div class="flex items-center gap-2" id="auth-section">
+                        <button id="btn-signin" onclick="signInWithGoogle()" class="text-xs font-bold bg-slate-800 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 transition-colors shadow-sm">
+                            Sign in with Google
+                        </button>
+                        <div id="user-info" class="hidden flex items-center gap-2">
+                            <img id="user-avatar" src="" alt="avatar" class="w-7 h-7 rounded-full border border-slate-200">
+                            <span id="user-name" class="text-xs font-semibold text-slate-600 hidden sm:inline"></span>
+                            <button onclick="signOutUser()" class="text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors">Sign out</button>
+                        </div>
+                        <div id="sync-indicator" class="hidden text-xs font-medium text-emerald-600 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span> Synced
+                        </div>
                     </div>
 
                     <!-- Progress Bar -->
@@ -612,20 +611,6 @@
                 </div>
             </div>
             
-            <!-- Setup / Error Area for Core Data -->
-             <div id="core-data-setup" class="hidden bg-blue-50 border border-blue-100 text-blue-800 px-6 py-8 rounded-3xl mb-8 flex flex-col items-center justify-center text-center">
-                <div class="text-4xl mb-4">📂</div>
-                <h3 class="text-xl font-bold mb-2">Setup Core Vocabulary</h3>
-                <p class="text-blue-600/80 mb-6 max-w-md">Data is now loaded from your computer. Select the folder containing your "day_xx.json" files.</p>
-                <div class="flex gap-3">
-                     <button onclick="connectCoreFolder()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-95">
-                        Link Core Folder
-                    </button>
-                    <button onclick="loadCoreFromFolder()" id="btn-reload-core" class="hidden bg-white text-blue-600 border border-blue-200 font-bold py-3 px-6 rounded-xl hover:bg-blue-50 transition-all">
-                        Reload
-                    </button>
-                </div>
-            </div>
 
             <!-- Changed from Grid to just a container, grid happens inside weeks -->
             <div id="days-container" class="w-full">
@@ -703,23 +688,6 @@
                         <p class="text-slate-500">Immersive stories to practice reading comprehension.</p>
                     </div>
                     
-                    <!-- FOLDER LINK CONTROLS -->
-                    <div class="flex gap-2">
-                         <button id="btn-link-stories" onclick="connectStoryFolder()" class="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl font-bold text-sm hover:bg-indigo-100 transition-colors shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-                            Link Story Folder
-                        </button>
-                        <button id="btn-reload-stories" onclick="loadStoriesFromFolder()" class="hidden flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                            Reload
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Status Message for Folder -->
-                <div id="story-folder-status" class="hidden mb-6 px-4 py-3 bg-blue-50 text-blue-700 rounded-xl text-sm border border-blue-100 flex items-center justify-between">
-                    <span>📂 Reading stories from linked folder...</span>
-                    <button onclick="loadStoriesFromFolder()" class="underline font-bold hover:text-blue-900">Reload</button>
                 </div>
                 
                 <div id="library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -777,21 +745,6 @@
                 <strong>⚠️ Song Data Missing:</strong> Please make sure song files are in the "songs/" folder.
             </div>
 
-            <!-- 📂 NEW: Dynamic Song Loader Controls -->
-            <div class="mb-6 flex items-center justify-between">
-                <div class="flex gap-2">
-                     <button id="btn-link-songs" onclick="connectSongFolder()" class="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl font-bold text-sm hover:bg-indigo-100 transition-colors shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
-                        Link Songs Folder
-                    </button>
-                    <button id="btn-reload-songs" onclick="loadSongsFromFolder()" class="hidden flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors shadow-sm">
-                        Reload Songs
-                    </button>
-                </div>
-                <div id="song-folder-status" class="hidden text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
-                    <!-- Status text injected here -->
-                </div>
-            </div>
 
             <!-- Song Header -->
             <div class="mb-8 flex flex-col lg:flex-row items-end justify-between gap-8">
@@ -949,11 +902,6 @@
         const TIMESTAMP_KEY = 'indoAdventure_timestamps'; // New Key for Timestamps
         const MNEMONICS_KEY = 'indoAdventure_mnemonics'; // New Key for Mnemonic Images
         
-        // IndexedDB Keys for Handles
-        const FILE_HANDLE_DB = 'indoAdventure_fileHandle';
-        const STORY_FOLDER_DB = 'indoAdventure_storyFolderHandle';
-        const SONG_FOLDER_DB = 'indoAdventure_songFolderHandle';
-        const CORE_FOLDER_DB = 'indoAdventure_coreFolderHandle';
         
         let coreKnown = [];
         let songProgress = {};
@@ -966,10 +914,6 @@
         let currentTab = 'core';
         let currentSong = null;
         let currentStory = null;
-        let fileHandle = null;
-        let storyDirHandle = null;
-        let songDirHandle = null;
-        let coreDirHandle = null;
 
         let audioPlayer = null;
         let isPlaying = false;
@@ -998,447 +942,173 @@
         window.coreVocabulary = window.coreVocabulary || [];
 
         // ==========================================
-        // 💾 PERSISTENCE & INIT
+        // 🔥 FIREBASE & AUTH
         // ==========================================
-        
-        function openDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open('IndoAdventureDB', 1);
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => resolve(request.result);
-                request.onupgradeneeded = (event) => {
-                    const db = event.target.result;
-                    if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings');
-                };
-            });
-        }
-        
-        async function saveDBValue(key, value) {
-            const db = await openDB();
-            const transaction = db.transaction(['settings'], 'readwrite');
-            const store = transaction.objectStore('settings');
-            store.put(value, key);
-        }
-        
-        async function getDBValue(key) {
-             try {
-                const db = await openDB();
-                const transaction = db.transaction(['settings'], 'readonly');
-                const store = transaction.objectStore('settings');
-                return new Promise((resolve, reject) => {
-                    const request = store.get(key);
-                    request.onsuccess = () => resolve(request.result);
-                    request.onerror = () => reject(request.error);
-                });
-            } catch (err) {
-                return null;
-            }
-        }
-        
-        // --- Progress File Logic ---
-        async function saveFileHandle(handle) { await saveDBValue(FILE_HANDLE_DB, handle); }
-        async function getFileHandle() { return await getDBValue(FILE_HANDLE_DB); }
-        
-        // --- Folder Handle Savers ---
-        async function saveStoryFolderHandle(handle) { await saveDBValue(STORY_FOLDER_DB, handle); }
-        async function getStoryFolderHandle() { return await getDBValue(STORY_FOLDER_DB); }
-        async function saveSongFolderHandle(handle) { await saveDBValue(SONG_FOLDER_DB, handle); }
-        async function getSongFolderHandle() { return await getDBValue(SONG_FOLDER_DB); }
-        async function saveCoreFolderHandle(handle) { await saveDBValue(CORE_FOLDER_DB, handle); }
-        async function getCoreFolderHandle() { return await getDBValue(CORE_FOLDER_DB); }
 
-        async function requestStoredFilePermission() {
-            const storedHandle = await getFileHandle();
-            if (!storedHandle) { alert('No file detected. Please use "Connect File" button.'); return; }
-            try {
-                const permission = await storedHandle.queryPermission({ mode: 'readwrite' });
-                if (permission === 'granted') { fileHandle = storedHandle; await loadFromFile(); } 
-                else {
-                    const newPermission = await storedHandle.requestPermission({ mode: 'readwrite' });
-                    if (newPermission === 'granted') { fileHandle = storedHandle; await loadFromFile(); }
-                }
-            } catch (err) {
-                alert('Could not access file. Please reconnect using "Connect File".');
-                document.getElementById('btn-reconnect').classList.add('hidden');
-                document.getElementById('btn-connect').classList.remove('hidden');
-            }
+        const firebaseConfig = {
+            apiKey: "AIzaSyCwkCTqEeKuHlzzFI1QoVZY9NUlzeeA0Bg",
+            authDomain: "bahasa-learning-app-3bfd2.firebaseapp.com",
+            projectId: "bahasa-learning-app-3bfd2",
+            storageBucket: "bahasa-learning-app-3bfd2.firebasestorage.app",
+            messagingSenderId: "555945714591",
+            appId: "1:555945714591:web:e5a89b6ceee2366fd493aa"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let saveTimer = null;
+
+        function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(err => console.error('Sign-in failed:', err));
         }
-        
-        async function loadFromFile() {
-            if (!fileHandle) return;
+
+        function signOutUser() {
+            auth.signOut();
+        }
+
+        auth.onAuthStateChanged(async (user) => {
+            currentUser = user;
+            if (user) {
+                document.getElementById('btn-signin').classList.add('hidden');
+                document.getElementById('user-info').classList.remove('hidden');
+                document.getElementById('user-avatar').src = user.photoURL || '';
+                document.getElementById('user-name').textContent = user.displayName || user.email;
+                await loadProgressFromFirestore(user.uid);
+                renderCoreDays();
+                if (currentSong) { renderSongLyrics(); renderSongVocabList(); }
+                if (currentStory) loadStory(currentStory.id);
+                updateStats();
+                showSyncIndicator();
+            } else {
+                document.getElementById('btn-signin').classList.remove('hidden');
+                document.getElementById('user-info').classList.add('hidden');
+            }
+        });
+
+        async function loadProgressFromFirestore(uid) {
             try {
-                const file = await fileHandle.getFile();
-                const contents = await file.text();
-                if(contents.trim()) {
-                    const data = JSON.parse(contents);
-                    if(data.coreKnown) coreKnown = data.coreKnown;
-                    if(data.songProgress) songProgress = data.songProgress;
-                    if(data.storyProgress) storyProgress = data.storyProgress;
-                    if(data.mnemonics) mnemonics = data.mnemonics; // LOAD MNEMONICS
-                    
-                    // LOAD TIMESTAMPS
-                    if(data.masteryTimestamps) masteryTimestamps = data.masteryTimestamps;
-                    // Ensure structure integrity
-                    if(!masteryTimestamps.core) masteryTimestamps.core = {};
-                    if(!masteryTimestamps.songs) masteryTimestamps.songs = {};
-                    if(!masteryTimestamps.stories) masteryTimestamps.stories = {};
-                    
+                const docSnap = await db.collection('users').doc(uid).get();
+                if (docSnap.exists) {
+                    const data = docSnap.data();
+                    if (data.coreKnown) coreKnown = data.coreKnown;
+                    if (data.songProgress) songProgress = data.songProgress;
+                    if (data.storyProgress) storyProgress = data.storyProgress;
+                    if (data.mnemonics) mnemonics = data.mnemonics;
+                    if (data.masteryTimestamps) masteryTimestamps = data.masteryTimestamps;
+                    if (!masteryTimestamps.core) masteryTimestamps.core = {};
+                    if (!masteryTimestamps.songs) masteryTimestamps.songs = {};
+                    if (!masteryTimestamps.stories) masteryTimestamps.stories = {};
                     localStorage.setItem(CORE_KEY, JSON.stringify(coreKnown));
                     localStorage.setItem(SONGS_KEY, JSON.stringify(songProgress));
                     localStorage.setItem(STORIES_KEY, JSON.stringify(storyProgress));
                     localStorage.setItem(TIMESTAMP_KEY, JSON.stringify(masteryTimestamps));
-                    localStorage.setItem(MNEMONICS_KEY, JSON.stringify(mnemonics)); // SAVE MNEMONICS TO LOCALSTORAGE
-                    
-                    renderCoreDays();
-                    if(currentSong) { renderSongLyrics(); renderSongVocabList(); }
-                    if(currentStory) { loadStory(currentStory.id); } 
-                    updateStats();
+                    localStorage.setItem(MNEMONICS_KEY, JSON.stringify(mnemonics));
                 }
-                document.getElementById('btn-connect').classList.add('hidden');
-                document.getElementById('btn-reconnect').classList.add('hidden');
-                document.getElementById('sync-status').classList.remove('hidden');
-            } catch (err) { console.error('Error loading file:', err); }
+            } catch (err) {
+                console.error('Failed to load from Firestore:', err);
+            }
         }
-        
-        async function connectFile() {
+
+        function saveProgress() {
+            localStorage.setItem(CORE_KEY, JSON.stringify(coreKnown));
+            localStorage.setItem(SONGS_KEY, JSON.stringify(songProgress));
+            localStorage.setItem(STORIES_KEY, JSON.stringify(storyProgress));
+            localStorage.setItem(TIMESTAMP_KEY, JSON.stringify(masteryTimestamps));
+            localStorage.setItem(MNEMONICS_KEY, JSON.stringify(mnemonics));
+            if (!currentUser) return;
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(async () => {
+                try {
+                    await db.collection('users').doc(currentUser.uid).set({
+                        coreKnown,
+                        songProgress,
+                        storyProgress,
+                        masteryTimestamps,
+                        mnemonics,
+                        updatedAt: new Date().toISOString()
+                    });
+                    showSyncIndicator();
+                } catch (err) {
+                    console.error('Firestore save failed:', err);
+                }
+            }, 1500);
+        }
+
+        function showSyncIndicator() {
+            const el = document.getElementById('sync-indicator');
+            if (!el) return;
+            el.classList.remove('hidden');
+            clearTimeout(el._hideTimer);
+            el._hideTimer = setTimeout(() => el.classList.add('hidden'), 3000);
+        }
+
+        // ==========================================
+        // 📦 CONTENT LOADING (via fetch)
+        // ==========================================
+
+        async function loadAllContent() {
             try {
-                [fileHandle] = await window.showOpenFilePicker({
-                    types: [{ description: 'JSON Progress File', accept: {'application/json': ['.json']} }],
-                    multiple: false
+                const manifest = await fetch('manifest.json').then(r => r.json());
+
+                window.coreVocabulary = [];
+                const coreData = await Promise.all(manifest.coreFiles.map(f => fetch(f).then(r => r.json()).catch(() => [])));
+                coreData.forEach(dayData => { if (Array.isArray(dayData)) window.coreVocabulary.push(...dayData); });
+
+                localStories = [];
+                const storyData = await Promise.all(manifest.storyFiles.map(f => fetch(f).then(r => r.json()).catch(() => null)));
+                storyData.forEach(story => { if (story && story.id && story.content) localStories.push(story); });
+
+                window.songs = {};
+                const songData = await Promise.all(manifest.songFiles.map(f => fetch(f).then(r => r.json()).catch(() => null)));
+                songData.forEach(song => {
+                    if (song && song.id) {
+                        song.audioFile = `songs/${song.audioFileName}`;
+                        window.songs[song.id] = song;
+                    }
                 });
-                await saveFileHandle(fileHandle);
-                await loadFromFile();
-            } catch (err) { if (err.name !== 'AbortError') alert("Could not connect to file."); }
-        }
-
-        // --- NEW: Core Folder Logic ---
-        async function connectCoreFolder() {
-            try {
-                coreDirHandle = await window.showDirectoryPicker();
-                await saveCoreFolderHandle(coreDirHandle);
-                await loadCoreFromFolder();
-            } catch(err) {
-                if (err.name !== 'AbortError') console.error("Error connecting core folder:", err);
+            } catch (err) {
+                console.error('Failed to load content:', err);
             }
         }
 
-        async function loadCoreFromFolder() {
-            if(!coreDirHandle) return;
-            try {
-                // Permission check
-                const permission = await coreDirHandle.queryPermission({ mode: 'read' });
-                if (permission !== 'granted') {
-                    const request = await coreDirHandle.requestPermission({ mode: 'read' });
-                    if (request !== 'granted') return;
-                }
+        // ==========================================
+        // 💾 PERSISTENCE & INIT
+        // ==========================================
 
-                const fileEntries = [];
-                // Collect Files
-                for await (const entry of coreDirHandle.values()) {
-                    if (entry.kind === 'file' && entry.name.endsWith('.json')) {
-                        fileEntries.push(entry);
-                    }
-                }
-
-                // CRITICAL: Sort by name to preserve index order (day_01, day_02)
-                fileEntries.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
-
-                window.coreVocabulary = []; // Reset
-                let totalLoaded = 0;
-
-                for (const entry of fileEntries) {
-                    try {
-                        const file = await entry.getFile();
-                        const text = await file.text();
-                        const dayData = JSON.parse(text);
-                        if(Array.isArray(dayData)) {
-                            window.coreVocabulary.push(...dayData);
-                            totalLoaded += dayData.length;
-                        }
-                    } catch(e) { console.error("Error parsing core file:", entry.name); }
-                }
-
-                // UI Update
-                if(totalLoaded > 0) {
-                    document.getElementById('core-data-setup').classList.add('hidden');
-                    renderCoreDays();
-                    updateStats();
-                }
-
-            } catch(err) { console.error("Core folder load failed", err); }
-        }
-
-        // --- Story Folder Logic ---
-        async function connectStoryFolder() {
-            try {
-                storyDirHandle = await window.showDirectoryPicker();
-                await saveStoryFolderHandle(storyDirHandle);
-                await loadStoriesFromFolder();
-            } catch(err) {
-                if (err.name !== 'AbortError') console.error("Error connecting folder:", err);
-            }
-        }
-        
-        async function loadStoriesFromFolder() {
-            if(!storyDirHandle) return;
-            
-            try {
-                // Request permission if needed
-                const permission = await storyDirHandle.queryPermission({ mode: 'read' });
-                if (permission !== 'granted') {
-                    const request = await storyDirHandle.requestPermission({ mode: 'read' });
-                    if (request !== 'granted') return;
-                }
-
-                // Scan folder
-                localStories = []; // Reset local cache
-                let count = 0;
-                
-                for await (const entry of storyDirHandle.values()) {
-                    if (entry.kind === 'file' && entry.name.endsWith('.json')) {
-                        const file = await entry.getFile();
-                        const text = await file.text();
-                        try {
-                            const storyData = JSON.parse(text);
-                            // Basic validation
-                            if(storyData.id && storyData.content) {
-                                localStories.push(storyData);
-                                count++;
-                            }
-                        } catch(e) { console.error("Invalid JSON:", entry.name); }
-                    }
-                }
-                
-                // UI Updates
-                if(count > 0) {
-                    document.getElementById('btn-link-stories').classList.add('hidden');
-                    document.getElementById('btn-reload-stories').classList.remove('hidden');
-                    document.getElementById('story-folder-status').classList.remove('hidden');
-                    document.getElementById('story-folder-status').innerHTML = `<span>📂 Loaded ${count} stories from folder.</span> <button onclick="loadStoriesFromFolder()" class="underline font-bold hover:text-blue-900 ml-2">Reload</button>`;
-                }
-                
-                renderLibrary();
-                
-            } catch(err) {
-                console.error("Folder scan failed:", err);
-                alert("Could not scan folder. Please reconnect.");
-            }
-        }
-
-        // --- Song Folder Logic ---
-        async function connectSongFolder() {
-            try {
-                songDirHandle = await window.showDirectoryPicker();
-                await saveSongFolderHandle(songDirHandle);
-                await loadSongsFromFolder();
-            } catch(err) {
-                if (err.name !== 'AbortError') console.error("Error connecting song folder:", err);
-            }
-        }
-
-        async function loadSongsFromFolder() {
-            if(!songDirHandle) return;
-            try {
-                const permission = await songDirHandle.queryPermission({ mode: 'read' });
-                if (permission !== 'granted') {
-                    const request = await songDirHandle.requestPermission({ mode: 'read' });
-                    if (request !== 'granted') return;
-                }
-
-                let loadedCount = 0;
-                for await (const entry of songDirHandle.values()) {
-                    if (entry.kind === 'file' && entry.name.endsWith('.json')) {
-                        const file = await entry.getFile();
-                        const text = await file.text();
-                        try {
-                            const songData = JSON.parse(text);
-                            if(songData.id && songData.audioFileName) {
-                                try {
-                                    const audioHandle = await songDirHandle.getFileHandle(songData.audioFileName);
-                                    const audioFile = await audioHandle.getFile();
-                                    songData.audioFile = URL.createObjectURL(audioFile);
-                                    if(!window.songs) window.songs = {};
-                                    window.songs[songData.id] = songData;
-                                    loadedCount++;
-                                } catch(e) { console.warn(`Found JSON for ${songData.title} but missing MP3: ${songData.audioFileName}`); }
-                            }
-                        } catch(e) { console.error("Invalid Song JSON:", entry.name); }
-                    }
-                }
-                
-                if(loadedCount > 0) {
-                    document.getElementById('btn-link-songs').classList.add('hidden');
-                    document.getElementById('btn-reload-songs').classList.remove('hidden');
-                    document.getElementById('song-error').classList.add('hidden'); 
-                    const status = document.getElementById('song-folder-status');
-                    status.classList.remove('hidden');
-                    status.textContent = `🎵 Loaded ${loadedCount} songs locally`;
-                    const selector = document.getElementById('song-select');
-                    selector.innerHTML = '<option value="">Choose a song...</option>';
-                    setupSongSelector(); 
-                }
-                
-            } catch(err) { console.error("Song folder scan failed:", err); alert("Could not scan song folder."); }
-        }
-
-        // --- Init ---
         async function init() {
-            // Check for hardcoded core data or show Setup UI
-            if (!coreVocabulary || coreVocabulary.length === 0) {
-                document.getElementById('core-data-setup').classList.remove('hidden');
-            }
-            
-            setTimeout(() => {
-                if (!window.songs || Object.keys(window.songs).length === 0) document.getElementById('song-error').classList.remove('hidden');
-                else setupSongSelector();
-            }, 500);
-            
+            await loadAllContent();
+
             const savedCore = localStorage.getItem(CORE_KEY);
             const savedSongs = localStorage.getItem(SONGS_KEY);
             const savedStories = localStorage.getItem(STORIES_KEY);
-            const savedTimestamps = localStorage.getItem(TIMESTAMP_KEY); // Load timestamps
-            const savedMnemonics = localStorage.getItem(MNEMONICS_KEY); // Load mnemonics
-            
+            const savedTimestamps = localStorage.getItem(TIMESTAMP_KEY);
+            const savedMnemonics = localStorage.getItem(MNEMONICS_KEY);
+
             if (savedCore) coreKnown = JSON.parse(savedCore);
             if (savedSongs) songProgress = JSON.parse(savedSongs);
             if (savedStories) storyProgress = JSON.parse(savedStories);
             if (savedMnemonics) mnemonics = JSON.parse(savedMnemonics);
-            
             if (savedTimestamps) {
                 masteryTimestamps = JSON.parse(savedTimestamps);
-                // integrity check on load
-                if(!masteryTimestamps.core) masteryTimestamps.core = {};
-                if(!masteryTimestamps.songs) masteryTimestamps.songs = {};
-                if(!masteryTimestamps.stories) masteryTimestamps.stories = {};
-            }
-            
-            // 1. Check for progress file
-            const storedHandle = await getFileHandle();
-            if (storedHandle) {
-                try {
-                    const permission = await storedHandle.queryPermission({ mode: 'readwrite' });
-                    if (permission === 'granted') { fileHandle = storedHandle; await loadFromFile(); } 
-                    else { document.getElementById('btn-connect').classList.add('hidden'); document.getElementById('btn-reconnect').classList.remove('hidden'); }
-                } catch (err) { console.log('Stored file handle is invalid'); }
-            }
-            
-            // 2. Check for story folder
-            const storedStoryFolder = await getStoryFolderHandle();
-            if (storedStoryFolder) {
-                storyDirHandle = storedStoryFolder;
-                document.getElementById('btn-link-stories').classList.add('hidden');
-                document.getElementById('btn-reload-stories').classList.remove('hidden');
+                if (!masteryTimestamps.core) masteryTimestamps.core = {};
+                if (!masteryTimestamps.songs) masteryTimestamps.songs = {};
+                if (!masteryTimestamps.stories) masteryTimestamps.stories = {};
             }
 
-            // 3. Check for song folder
-            const storedSongFolder = await getSongFolderHandle();
-            if (storedSongFolder) {
-                songDirHandle = storedSongFolder;
-                document.getElementById('btn-link-songs').classList.add('hidden');
-                document.getElementById('btn-reload-songs').classList.remove('hidden');
-            }
-
-            // 4. NEW: Check for core folder
-            const storedCoreFolder = await getCoreFolderHandle();
-            if (storedCoreFolder) {
-                coreDirHandle = storedCoreFolder;
-                document.getElementById('core-data-setup').classList.add('hidden');
-                // We don't auto-load immediately because it requires user gesture/permission on some browsers
-                // But we show reload button if we have handle
-                const btn = document.getElementById('btn-reload-core');
-                if(btn) {
-                    btn.classList.remove('hidden');
-                    btn.parentNode.parentNode.classList.remove('hidden'); // Ensure container is visible
-                    // Optional: Try Auto-load if permissions allow (Chrome often does for same-session)
-                     loadCoreFromFolder();
-                }
-            }
-            
             setupCoreToggle();
             setupSongReviewToggle();
-            setupStoryReviewToggle(); 
+            setupStoryReviewToggle();
             setupAudioPlayer();
             renderCoreDays();
-            setTimeout(renderLibrary, 100); 
+            setupSongSelector();
+            setTimeout(renderLibrary, 100);
             updateStats();
         }
 
-        async function autoSave() {
-            if (!fileHandle) return;
-            try {
-                // Convert core IDs to word objects
-                const coreKnownWords = coreKnown.map(id => {
-                    const word = coreVocabulary.find(w => w.originalIndex === id || coreVocabulary.indexOf(w) === id);
-                    if (!word) return { id, indo: "Unknown", eng: "Unknown", emoji: "❓" };
-                    return {
-                        id: word.originalIndex !== undefined ? word.originalIndex : id,
-                        indo: word.indo,
-                        eng: word.eng,
-                        emoji: word.emoji,
-                        day: word.day
-                    };
-                });
-
-                // Convert song progress IDs to word objects
-                const songProgressWords = {};
-                Object.keys(songProgress).forEach(songId => {
-                    const song = window.songs ? window.songs[songId] : null;
-                    if (song && song.vocabulary) {
-                        songProgressWords[songId] = songProgress[songId].map(vocabId => {
-                            const word = song.vocabulary.find(w => w.id === vocabId);
-                            if (!word) return { id: vocabId, indo: "Unknown", eng: "Unknown", emoji: "🎵" };
-                            return {
-                                id: word.id,
-                                indo: word.indo,
-                                eng: word.eng,
-                                emoji: word.emoji
-                            };
-                        });
-                    } else {
-                        songProgressWords[songId] = songProgress[songId];
-                    }
-                });
-
-                // Convert story progress IDs to word objects
-                const storyProgressWords = {};
-                Object.keys(storyProgress).forEach(storyId => {
-                    const allStories = [...(window.stories || []), ...localStories];
-                    const story = allStories.find(s => s.id === storyId);
-                    if (story && story.vocabulary) {
-                        storyProgressWords[storyId] = storyProgress[storyId].map(vocabId => {
-                            const word = story.vocabulary.find(w => w.id === vocabId);
-                            if (!word) return { id: vocabId, indo: "Unknown", eng: "Unknown", emoji: "📖" };
-                            return {
-                                id: word.id,
-                                indo: word.indo,
-                                eng: word.eng,
-                                emoji: word.emoji
-                            };
-                        });
-                    } else {
-                        storyProgressWords[storyId] = storyProgress[storyId];
-                    }
-                });
-
-                const data = {
-                    updatedAt: new Date().toISOString(),
-                    coreKnown: coreKnown, // Keep IDs for internal use
-                    coreKnownWords: coreKnownWords, // NEW: Full word objects
-                    songProgress: songProgress, // Keep IDs for internal use
-                    songProgressWords: songProgressWords, // NEW: Full word objects
-                    storyProgress: storyProgress, // Keep IDs for internal use
-                    storyProgressWords: storyProgressWords, // NEW: Full word objects
-                    masteryTimestamps: masteryTimestamps, // SAVE TIMESTAMPS
-                    mnemonics: mnemonics // SAVE MNEMONICS
-                };
-                const writable = await fileHandle.createWritable();
-                await writable.write(JSON.stringify(data, null, 2));
-                await writable.close();
-                const status = document.getElementById('sync-status');
-                status.style.opacity = '0.5';
-                setTimeout(() => status.style.opacity = '1', 200);
-            } catch (err) { console.error("Auto-save failed:", err); }
-        }
 
         // ==========================================
         // 🎨 UI LOGIC
@@ -1773,7 +1443,7 @@
             
             localStorage.setItem(STORIES_KEY, JSON.stringify(storyProgress));
             localStorage.setItem(TIMESTAMP_KEY, JSON.stringify(masteryTimestamps));
-            autoSave();
+            saveProgress();
             loadStory(sId);
         }
 
@@ -1965,7 +1635,7 @@
             }
             localStorage.setItem(CORE_KEY, JSON.stringify(coreKnown));
             localStorage.setItem(TIMESTAMP_KEY, JSON.stringify(masteryTimestamps));
-            autoSave();
+            saveProgress();
             renderCoreDays();
             if(currentTab === 'core') updateStats();
         }
@@ -2115,7 +1785,7 @@
             } 
             localStorage.setItem(SONGS_KEY, JSON.stringify(songProgress)); 
             localStorage.setItem(TIMESTAMP_KEY, JSON.stringify(masteryTimestamps));
-            autoSave(); 
+            saveProgress(); 
             
             const lyricEls = document.querySelectorAll(`#lyric-vocab-${vocabId}`); 
             lyricEls.forEach(el => el.classList.toggle('known', !isKnown)); 
@@ -2184,7 +1854,7 @@
             
             mnemonics[currentVocabId] = url;
             localStorage.setItem(MNEMONICS_KEY, JSON.stringify(mnemonics));
-            autoSave();
+            saveProgress();
             displayMnemonicInModal(currentVocabId);
         }
         
@@ -2193,7 +1863,7 @@
             
             delete mnemonics[currentVocabId];
             localStorage.setItem(MNEMONICS_KEY, JSON.stringify(mnemonics));
-            autoSave();
+            saveProgress();
             displayMnemonicInModal(currentVocabId);
         }
         
