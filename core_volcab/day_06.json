@@ -1,0 +1,97 @@
+[
+  { 
+    "day": 6, 
+    "indo": "Tempat", 
+    "eng": "Place", 
+    "emoji": "📍",
+    "family": {
+      "root_meaning": "Place / Location / Position",
+      "trees": {
+        "ber-":   { "text": "Bertempat", "meaning": "To be located / To take place" },
+        "me-kan": { "text": "Menempatkan", "meaning": "To place / To position" },
+        "di-kan": { "text": "Ditempatkan", "meaning": "To be placed (passive)" },
+        "pe-an":  { "text": "Penempatan", "meaning": "Placement / Positioning" },
+        "se-":    { "text": "Setempat", "meaning": "Local / On the spot" }
+      }
+    }
+  },
+  { "day": 6, "indo": "Toko", "eng": "Store/Shop", "emoji": "🏪" },
+  { "day": 6, "indo": "Sekolah", "eng": "School", "emoji": "🏫" },
+  { "day": 6, "indo": "Kantor", "eng": "Office", "emoji": "🏢" },
+  { "day": 6, "indo": "Rumah Sakit", "eng": "Hospital", "emoji": "🏥" },
+  { "day": 6, "indo": "Pasar", "eng": "Market", "emoji": "🏪" },
+  { "day": 6, "indo": "Mobil", "eng": "Car", "emoji": "🚗" },
+  { "day": 6, "indo": "Motor", "eng": "Motorcycle", "emoji": "🏍️" },
+  { "day": 6, "indo": "Taksi", "eng": "Taxi", "emoji": "🚕" },
+  { "day": 6, "indo": "Jembatan", "eng": "Bridge", "emoji": "🌉" },
+  { "day": 6, "indo": "Kanan", "eng": "Right", "emoji": "➡️" },
+  { "day": 6, "indo": "Kiri", "eng": "Left", "emoji": "⬅️" },
+  { "day": 6, "indo": "Lurus", "eng": "Straight", "emoji": "⬆️" },
+  { "day": 6, "indo": "Dekat", "eng": "Near/Close", "emoji": "📍" },
+  { "day": 6, "indo": "Di", "eng": "At/In/On", "emoji": "📌" },
+  { "day": 6, "indo": "Ke", "eng": "To (direction)", "emoji": "🎯" },
+  { 
+    "day": 6, 
+    "indo": "Datang", 
+    "eng": "To come/arrive", 
+    "emoji": "👋",
+    "family": {
+      "root_meaning": "Coming / Arrival",
+      "trees": {
+        "ber-":   { "text": "Berdatangan", "meaning": "To come in groups / Arriving" },
+        "men-i":  { "text": "Mendatangi", "meaning": "To come to / To visit" },
+        "di-i":   { "text": "Didatangi", "meaning": "To be visited (passive)" },
+        "ke-an":  { "text": "Kedatangan", "meaning": "Arrival (noun)" },
+        "pen-":   { "text": "Pendatang", "meaning": "Newcomer / Migrant" }
+      }
+    }
+  },
+  { 
+    "day": 6, 
+    "indo": "Tinggal", 
+    "eng": "To live/stay", 
+    "emoji": "🏠",
+    "family": {
+      "root_meaning": "To remain / To stay / To live",
+      "trees": {
+        "me-kan": { "text": "Meninggalkan", "meaning": "To leave behind / To abandon" },
+        "di-kan": { "text": "Ditinggalkan", "meaning": "To be left behind (passive)" },
+        "ter-":   { "text": "Tertinggal", "meaning": "Left behind / Missed (accidentally)" },
+        "pe-an":  { "text": "Peninggalan", "meaning": "Legacy / Relic / Inheritance" },
+        "ber-":   { "text": "Bertinggal", "meaning": "To reside (formal)" }
+      }
+    }
+  },
+  { 
+    "day": 6, 
+    "indo": "Naik", 
+    "eng": "To ride/go up", 
+    "emoji": "⬆️",
+    "family": {
+      "root_meaning": "To ascend / To rise / To board",
+      "trees": {
+        "me-":    { "text": "Menaiki", "meaning": "To climb / To ride (active)" },
+        "me-kan": { "text": "Menaikkan", "meaning": "To raise / To increase" },
+        "di-":    { "text": "Dinaiki", "meaning": "To be ridden (passive)" },
+        "ke-an":  { "text": "Kenaikan", "meaning": "Increase / Rise (noun)" },
+        "pen-an": { "text": "Penaikan", "meaning": "The act of raising" }
+      }
+    }
+  },
+  { 
+    "day": 6, 
+    "indo": "Turun", 
+    "eng": "To get off/go down", 
+    "emoji": "⬇️",
+    "family": {
+      "root_meaning": "To descend / To decrease / To alight",
+      "trees": {
+        "me-":    { "text": "Menuruni", "meaning": "To descend (active)" },
+        "me-kan": { "text": "Menurunkan", "meaning": "To lower / To decrease" },
+        "di-kan": { "text": "Diturunkan", "meaning": "To be lowered (passive)" },
+        "ke-an":  { "text": "Keturunan", "meaning": "Descendant / Lineage" },
+        "pen-an": { "text": "Penurunan", "meaning": "Decrease / Decline (noun)" }
+      }
+    }
+  }
+]

@@ -1,0 +1,1644 @@
+{
+  "updatedAt": "2026-02-11T16:31:35.654Z",
+  "coreKnown": [
+    0,
+    1,
+    2,
+    3,
+    6,
+    8,
+    4,
+    11,
+    12,
+    13,
+    14,
+    20,
+    24,
+    28,
+    10,
+    5,
+    7,
+    15,
+    16,
+    17,
+    18,
+    19,
+    9,
+    22,
+    25,
+    26,
+    27,
+    29,
+    23,
+    30,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    32,
+    40,
+    42,
+    41,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    51,
+    50,
+    70,
+    71,
+    72,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    60,
+    61,
+    62,
+    63,
+    64,
+    66,
+    68,
+    69,
+    67,
+    65,
+    59,
+    58,
+    56,
+    57,
+    55,
+    54,
+    52,
+    53,
+    21,
+    91,
+    88,
+    89,
+    87,
+    86,
+    84,
+    85,
+    80,
+    90,
+    96,
+    98,
+    99,
+    97,
+    92,
+    82,
+    94,
+    31,
+    33,
+    81,
+    93,
+    95,
+    43,
+    83,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    73,
+    120,
+    121,
+    134
+  ],
+  "coreKnownWords": [
+    {
+      "id": 0,
+      "indo": "Saya",
+      "eng": "I / Me",
+      "emoji": "🙋‍♂️",
+      "day": 1
+    },
+    {
+      "id": 1,
+      "indo": "Kamu",
+      "eng": "You",
+      "emoji": "🫵",
+      "day": 1
+    },
+    {
+      "id": 2,
+      "indo": "Dia",
+      "eng": "He / She",
+      "emoji": "🧑",
+      "day": 1
+    },
+    {
+      "id": 3,
+      "indo": "Mereka",
+      "eng": "They",
+      "emoji": "👥",
+      "day": 1
+    },
+    {
+      "id": 6,
+      "indo": "Siapa",
+      "eng": "Who",
+      "emoji": "👤",
+      "day": 1
+    },
+    {
+      "id": 8,
+      "indo": "Di mana",
+      "eng": "Where",
+      "emoji": "📍",
+      "day": 1
+    },
+    {
+      "id": 4,
+      "indo": "Kita",
+      "eng": "We (inclusive)",
+      "emoji": "🤝",
+      "day": 1
+    },
+    {
+      "id": 11,
+      "indo": "Tidak",
+      "eng": "No / Not",
+      "emoji": "❌",
+      "day": 1
+    },
+    {
+      "id": 12,
+      "indo": "Ya",
+      "eng": "Yes",
+      "emoji": "✅",
+      "day": 1
+    },
+    {
+      "id": 13,
+      "indo": "Terima kasih",
+      "eng": "Thank you",
+      "emoji": "🙏",
+      "day": 1
+    },
+    {
+      "id": 14,
+      "indo": "Sama-sama",
+      "eng": "You're welcome",
+      "emoji": "🤗",
+      "day": 1
+    },
+    {
+      "id": 20,
+      "indo": "Makan",
+      "eng": "To eat",
+      "emoji": "🍽️",
+      "day": 2
+    },
+    {
+      "id": 24,
+      "indo": "Jalan",
+      "eng": "To walk",
+      "emoji": "🚶",
+      "day": 2
+    },
+    {
+      "id": 28,
+      "indo": "Lihat",
+      "eng": "To see",
+      "emoji": "👀",
+      "day": 2
+    },
+    {
+      "id": 10,
+      "indo": "Bagaimana",
+      "eng": "How",
+      "emoji": "🛠️",
+      "day": 1
+    },
+    {
+      "id": 5,
+      "indo": "Apa",
+      "eng": "What",
+      "emoji": "❓",
+      "day": 1
+    },
+    {
+      "id": 7,
+      "indo": "Kapan",
+      "eng": "When",
+      "emoji": "⏰",
+      "day": 1
+    },
+    {
+      "id": 15,
+      "indo": "Maaf",
+      "eng": "Sorry",
+      "emoji": "😔",
+      "day": 1
+    },
+    {
+      "id": 16,
+      "indo": "Tolong",
+      "eng": "Please / Help",
+      "emoji": "🆘",
+      "day": 1
+    },
+    {
+      "id": 17,
+      "indo": "Selamat pagi",
+      "eng": "Good morning",
+      "emoji": "☀️",
+      "day": 1
+    },
+    {
+      "id": 18,
+      "indo": "Selamat malam",
+      "eng": "Good night",
+      "emoji": "🌙",
+      "day": 1
+    },
+    {
+      "id": 19,
+      "indo": "Sampai jumpa",
+      "eng": "See you later",
+      "emoji": "👋",
+      "day": 1
+    },
+    {
+      "id": 9,
+      "indo": "Kenapa",
+      "eng": "Why",
+      "emoji": "🤔",
+      "day": 1
+    },
+    {
+      "id": 22,
+      "indo": "Tidur",
+      "eng": "To sleep",
+      "emoji": "😴",
+      "day": 2
+    },
+    {
+      "id": 25,
+      "indo": "Lari",
+      "eng": "To run",
+      "emoji": "🏃",
+      "day": 2
+    },
+    {
+      "id": 26,
+      "indo": "Duduk",
+      "eng": "To sit",
+      "emoji": "🪑",
+      "day": 2
+    },
+    {
+      "id": 27,
+      "indo": "Berdiri",
+      "eng": "To stand",
+      "emoji": "🧍",
+      "day": 2
+    },
+    {
+      "id": 29,
+      "indo": "Dengar",
+      "eng": "To hear",
+      "emoji": "👂",
+      "day": 2
+    },
+    {
+      "id": 23,
+      "indo": "Bangun",
+      "eng": "To wake up",
+      "emoji": "🥱",
+      "day": 2
+    },
+    {
+      "id": 30,
+      "indo": "Bicara",
+      "eng": "To speak",
+      "emoji": "🗣️",
+      "day": 2
+    },
+    {
+      "id": 34,
+      "indo": "Bayar",
+      "eng": "To pay",
+      "emoji": "💸",
+      "day": 2
+    },
+    {
+      "id": 35,
+      "indo": "Masuk",
+      "eng": "To enter",
+      "emoji": "🚪",
+      "day": 2
+    },
+    {
+      "id": 36,
+      "indo": "Keluar",
+      "eng": "To exit",
+      "emoji": "🔙",
+      "day": 2
+    },
+    {
+      "id": 37,
+      "indo": "Buka",
+      "eng": "To open",
+      "emoji": "🔓",
+      "day": 2
+    },
+    {
+      "id": 38,
+      "indo": "Tutup",
+      "eng": "To close",
+      "emoji": "🔒",
+      "day": 2
+    },
+    {
+      "id": 39,
+      "indo": "Suka",
+      "eng": "To like",
+      "emoji": "❤️",
+      "day": 2
+    },
+    {
+      "id": 32,
+      "indo": "Tulis",
+      "eng": "To write",
+      "emoji": "✍️",
+      "day": 2
+    },
+    {
+      "id": 40,
+      "indo": "Rumah",
+      "eng": "House",
+      "emoji": "🏠",
+      "day": 3
+    },
+    {
+      "id": 42,
+      "indo": "Dapur",
+      "eng": "Kitchen",
+      "emoji": "🍳",
+      "day": 3
+    },
+    {
+      "id": 41,
+      "indo": "Kamar",
+      "eng": "Room",
+      "emoji": "🚪",
+      "day": 3
+    },
+    {
+      "id": 44,
+      "indo": "Makanan",
+      "eng": "Food",
+      "emoji": "🍱",
+      "day": 3
+    },
+    {
+      "id": 45,
+      "indo": "Buku",
+      "eng": "Book",
+      "emoji": "📚",
+      "day": 3
+    },
+    {
+      "id": 46,
+      "indo": "Uang",
+      "eng": "Money",
+      "emoji": "💵",
+      "day": 3
+    },
+    {
+      "id": 47,
+      "indo": "Satu",
+      "eng": "One",
+      "emoji": "1️⃣",
+      "day": 3
+    },
+    {
+      "id": 48,
+      "indo": "Dua",
+      "eng": "Two",
+      "emoji": "2️⃣",
+      "day": 3
+    },
+    {
+      "id": 49,
+      "indo": "Tiga",
+      "eng": "Three",
+      "emoji": "3️⃣",
+      "day": 3
+    },
+    {
+      "id": 51,
+      "indo": "Lima",
+      "eng": "Five",
+      "emoji": "5️⃣",
+      "day": 3
+    },
+    {
+      "id": 50,
+      "indo": "Empat",
+      "eng": "Four",
+      "emoji": "4️⃣",
+      "day": 3
+    },
+    {
+      "id": 70,
+      "indo": "Sudah",
+      "eng": "Already",
+      "emoji": "✔️",
+      "day": 4
+    },
+    {
+      "id": 71,
+      "indo": "Belum",
+      "eng": "Not yet",
+      "emoji": "⏸️",
+      "day": 4
+    },
+    {
+      "id": 72,
+      "indo": "Akan",
+      "eng": "Will",
+      "emoji": "➡️",
+      "day": 4
+    },
+    {
+      "id": 74,
+      "indo": "Enam",
+      "eng": "Six",
+      "emoji": "6️⃣",
+      "day": 4
+    },
+    {
+      "id": 75,
+      "indo": "Tujuh",
+      "eng": "Seven",
+      "emoji": "7️⃣",
+      "day": 4
+    },
+    {
+      "id": 76,
+      "indo": "Delapan",
+      "eng": "Eight",
+      "emoji": "8️⃣",
+      "day": 4
+    },
+    {
+      "id": 77,
+      "indo": "Sembilan",
+      "eng": "Nine",
+      "emoji": "9️⃣",
+      "day": 4
+    },
+    {
+      "id": 78,
+      "indo": "Sepuluh",
+      "eng": "Ten",
+      "emoji": "🔟",
+      "day": 4
+    },
+    {
+      "id": 79,
+      "indo": "Dengan",
+      "eng": "With",
+      "emoji": "🤝",
+      "day": 4
+    },
+    {
+      "id": 60,
+      "indo": "Hari",
+      "eng": "Day",
+      "emoji": "📅",
+      "day": 4
+    },
+    {
+      "id": 61,
+      "indo": "Minggu",
+      "eng": "Week",
+      "emoji": "🗓️",
+      "day": 4
+    },
+    {
+      "id": 62,
+      "indo": "Bulan",
+      "eng": "Month",
+      "emoji": "🌙",
+      "day": 4
+    },
+    {
+      "id": 63,
+      "indo": "Tahun",
+      "eng": "Year",
+      "emoji": "📆",
+      "day": 4
+    },
+    {
+      "id": 64,
+      "indo": "Jam",
+      "eng": "Hour/Clock",
+      "emoji": "⏰",
+      "day": 4
+    },
+    {
+      "id": 66,
+      "indo": "Nanti",
+      "eng": "Later",
+      "emoji": "⏳",
+      "day": 4
+    },
+    {
+      "id": 68,
+      "indo": "Besok",
+      "eng": "Tomorrow",
+      "emoji": "▶️",
+      "day": 4
+    },
+    {
+      "id": 69,
+      "indo": "Siang",
+      "eng": "Midday/Noon",
+      "emoji": "☀️",
+      "day": 4
+    },
+    {
+      "id": 67,
+      "indo": "Kemarin",
+      "eng": "Yesterday",
+      "emoji": "◀️",
+      "day": 4
+    },
+    {
+      "id": 65,
+      "indo": "Sekarang",
+      "eng": "Now",
+      "emoji": "⚡",
+      "day": 4
+    },
+    {
+      "id": 59,
+      "indo": "Murah",
+      "eng": "Cheap",
+      "emoji": "🏷️",
+      "day": 3
+    },
+    {
+      "id": 58,
+      "indo": "Mahal",
+      "eng": "Expensive",
+      "emoji": "💎",
+      "day": 3
+    },
+    {
+      "id": 56,
+      "indo": "Bagus",
+      "eng": "Good",
+      "emoji": "👍",
+      "day": 3
+    },
+    {
+      "id": 57,
+      "indo": "Jelek",
+      "eng": "Bad/Ugly",
+      "emoji": "👎",
+      "day": 3
+    },
+    {
+      "id": 55,
+      "indo": "Dingin",
+      "eng": "Cold",
+      "emoji": "❄️",
+      "day": 3
+    },
+    {
+      "id": 54,
+      "indo": "Panas",
+      "eng": "Hot",
+      "emoji": "🔥",
+      "day": 3
+    },
+    {
+      "id": 52,
+      "indo": "Besar",
+      "eng": "Big",
+      "emoji": "🐘",
+      "day": 3
+    },
+    {
+      "id": 53,
+      "indo": "Kecil",
+      "eng": "Small",
+      "emoji": "🐜",
+      "day": 3
+    },
+    {
+      "id": 21,
+      "indo": "Minum",
+      "eng": "To drink",
+      "emoji": "🥤",
+      "day": 2
+    },
+    {
+      "id": 91,
+      "indo": "Garam",
+      "eng": "Salt",
+      "emoji": "🧂",
+      "day": 5
+    },
+    {
+      "id": 88,
+      "indo": "Susu",
+      "eng": "Milk",
+      "emoji": "🥛",
+      "day": 5
+    },
+    {
+      "id": 89,
+      "indo": "Roti",
+      "eng": "Bread",
+      "emoji": "🍞",
+      "day": 5
+    },
+    {
+      "id": 87,
+      "indo": "Teh",
+      "eng": "Tea",
+      "emoji": "🍵",
+      "day": 5
+    },
+    {
+      "id": 86,
+      "indo": "Mangga",
+      "eng": "Mango",
+      "emoji": "🥭",
+      "day": 5
+    },
+    {
+      "id": 84,
+      "indo": "Buah",
+      "eng": "Fruit",
+      "emoji": "🍎",
+      "day": 5
+    },
+    {
+      "id": 85,
+      "indo": "Pisang",
+      "eng": "Banana",
+      "emoji": "🍌",
+      "day": 5
+    },
+    {
+      "id": 80,
+      "indo": "Nasi",
+      "eng": "Rice",
+      "emoji": "🍚",
+      "day": 5
+    },
+    {
+      "id": 90,
+      "indo": "Telur",
+      "eng": "Egg",
+      "emoji": "🥚",
+      "day": 5
+    },
+    {
+      "id": 96,
+      "indo": "Kenyang",
+      "eng": "Full/Satisfied",
+      "emoji": "😌",
+      "day": 5
+    },
+    {
+      "id": 98,
+      "indo": "Senang",
+      "eng": "Happy",
+      "emoji": "😊",
+      "day": 5
+    },
+    {
+      "id": 99,
+      "indo": "Sedih",
+      "eng": "Sad",
+      "emoji": "😢",
+      "day": 5
+    },
+    {
+      "id": 97,
+      "indo": "Pedas",
+      "eng": "Spicy",
+      "emoji": "🌶️",
+      "day": 5
+    },
+    {
+      "id": 92,
+      "indo": "Gula",
+      "eng": "Sugar",
+      "emoji": "🍬",
+      "day": 5
+    },
+    {
+      "id": 82,
+      "indo": "Ikan",
+      "eng": "Fish",
+      "emoji": "🐟",
+      "day": 5
+    },
+    {
+      "id": 94,
+      "indo": "Lapar",
+      "eng": "Hungry",
+      "emoji": "🤤",
+      "day": 5
+    },
+    {
+      "id": 31,
+      "indo": "Baca",
+      "eng": "To read",
+      "emoji": "📖",
+      "day": 2
+    },
+    {
+      "id": 33,
+      "indo": "Beli",
+      "eng": "To buy",
+      "emoji": "🛒",
+      "day": 2
+    },
+    {
+      "id": 81,
+      "indo": "Ayam",
+      "eng": "Chicken",
+      "emoji": "🍗",
+      "day": 5
+    },
+    {
+      "id": 93,
+      "indo": "Enak",
+      "eng": "Delicious",
+      "emoji": "😋",
+      "day": 5
+    },
+    {
+      "id": 95,
+      "indo": "Haus",
+      "eng": "Thirsty",
+      "emoji": "🥵",
+      "day": 5
+    },
+    {
+      "id": 43,
+      "indo": "Air",
+      "eng": "Water",
+      "emoji": "💧",
+      "day": 3
+    },
+    {
+      "id": 83,
+      "indo": "Sayur",
+      "eng": "Vegetables",
+      "emoji": "🥬",
+      "day": 5
+    },
+    {
+      "id": 100,
+      "indo": "Tempat",
+      "eng": "Place",
+      "emoji": "📍",
+      "day": 6
+    },
+    {
+      "id": 101,
+      "indo": "Toko",
+      "eng": "Store/Shop",
+      "emoji": "🏪",
+      "day": 6
+    },
+    {
+      "id": 102,
+      "indo": "Sekolah",
+      "eng": "School",
+      "emoji": "🏫",
+      "day": 6
+    },
+    {
+      "id": 103,
+      "indo": "Kantor",
+      "eng": "Office",
+      "emoji": "🏢",
+      "day": 6
+    },
+    {
+      "id": 104,
+      "indo": "Rumah Sakit",
+      "eng": "Hospital",
+      "emoji": "🏥",
+      "day": 6
+    },
+    {
+      "id": 105,
+      "indo": "Pasar",
+      "eng": "Market",
+      "emoji": "🏪",
+      "day": 6
+    },
+    {
+      "id": 106,
+      "indo": "Mobil",
+      "eng": "Car",
+      "emoji": "🚗",
+      "day": 6
+    },
+    {
+      "id": 107,
+      "indo": "Motor",
+      "eng": "Motorcycle",
+      "emoji": "🏍️",
+      "day": 6
+    },
+    {
+      "id": 108,
+      "indo": "Taksi",
+      "eng": "Taxi",
+      "emoji": "🚕",
+      "day": 6
+    },
+    {
+      "id": 109,
+      "indo": "Jembatan",
+      "eng": "Bridge",
+      "emoji": "🌉",
+      "day": 6
+    },
+    {
+      "id": 110,
+      "indo": "Kanan",
+      "eng": "Right",
+      "emoji": "➡️",
+      "day": 6
+    },
+    {
+      "id": 111,
+      "indo": "Kiri",
+      "eng": "Left",
+      "emoji": "⬅️",
+      "day": 6
+    },
+    {
+      "id": 112,
+      "indo": "Lurus",
+      "eng": "Straight",
+      "emoji": "⬆️",
+      "day": 6
+    },
+    {
+      "id": 113,
+      "indo": "Dekat",
+      "eng": "Near/Close",
+      "emoji": "📍",
+      "day": 6
+    },
+    {
+      "id": 114,
+      "indo": "Di",
+      "eng": "At/In/On",
+      "emoji": "📌",
+      "day": 6
+    },
+    {
+      "id": 115,
+      "indo": "Ke",
+      "eng": "To (direction)",
+      "emoji": "🎯",
+      "day": 6
+    },
+    {
+      "id": 116,
+      "indo": "Datang",
+      "eng": "To come/arrive",
+      "emoji": "👋",
+      "day": 6
+    },
+    {
+      "id": 117,
+      "indo": "Tinggal",
+      "eng": "To live/stay",
+      "emoji": "🏠",
+      "day": 6
+    },
+    {
+      "id": 118,
+      "indo": "Naik",
+      "eng": "To ride/go up",
+      "emoji": "⬆️",
+      "day": 6
+    },
+    {
+      "id": 119,
+      "indo": "Turun",
+      "eng": "To get off/go down",
+      "emoji": "⬇️",
+      "day": 6
+    },
+    {
+      "id": 73,
+      "indo": "Sedang",
+      "eng": "Currently/in progress",
+      "emoji": "🔄",
+      "day": 4
+    },
+    {
+      "id": 120,
+      "indo": "Keluarga",
+      "eng": "Family",
+      "emoji": "👨‍👩‍👧‍👦",
+      "day": 7
+    },
+    {
+      "id": 121,
+      "indo": "Ibu",
+      "eng": "Mother",
+      "emoji": "👩",
+      "day": 7
+    },
+    {
+      "id": 134,
+      "indo": "Nama",
+      "eng": "Name",
+      "emoji": "📛",
+      "day": 7
+    }
+  ],
+  "songProgress": {
+    "liburan-indie": [
+      8,
+      12,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      26,
+      25,
+      27,
+      28,
+      29,
+      31,
+      33,
+      32,
+      35,
+      34,
+      36,
+      37,
+      38,
+      39,
+      40,
+      30,
+      46,
+      45,
+      44,
+      43,
+      42,
+      41,
+      47,
+      49,
+      48,
+      50,
+      60,
+      63,
+      51,
+      54,
+      61,
+      52,
+      53,
+      58,
+      62,
+      57,
+      56,
+      55,
+      9,
+      2,
+      1,
+      6,
+      3,
+      4,
+      5,
+      7,
+      10,
+      11,
+      16,
+      15,
+      14,
+      13
+    ]
+  },
+  "songProgressWords": {
+    "liburan-indie": [
+      {
+        "id": 8,
+        "indo": "engkau",
+        "eng": "you (poetic)",
+        "emoji": "🫵"
+      },
+      {
+        "id": 12,
+        "indo": "melepas",
+        "eng": "to release",
+        "emoji": "🔓"
+      },
+      {
+        "id": 17,
+        "indo": "lagi",
+        "eng": "again / more",
+        "emoji": "🔄"
+      },
+      {
+        "id": 18,
+        "indo": "bersama",
+        "eng": "together / with",
+        "emoji": "👩‍❤️‍👨"
+      },
+      {
+        "id": 19,
+        "indo": "selalu",
+        "eng": "always",
+        "emoji": "♾️"
+      },
+      {
+        "id": 20,
+        "indo": "ingin",
+        "eng": "to want",
+        "emoji": "🤲"
+      },
+      {
+        "id": 21,
+        "indo": "berakhir",
+        "eng": "to end",
+        "emoji": "🏁"
+      },
+      {
+        "id": 22,
+        "indo": "waktu",
+        "eng": "time",
+        "emoji": "⏳"
+      },
+      {
+        "id": 23,
+        "indo": "menikmati",
+        "eng": "to enjoy",
+        "emoji": "😎"
+      },
+      {
+        "id": 24,
+        "indo": "pagi",
+        "eng": "morning",
+        "emoji": "🌅"
+      },
+      {
+        "id": 26,
+        "indo": "malam",
+        "eng": "night / evening",
+        "emoji": "🌙"
+      },
+      {
+        "id": 25,
+        "indo": "sore",
+        "eng": "afternoon",
+        "emoji": "🌇"
+      },
+      {
+        "id": 27,
+        "indo": "secangkir",
+        "eng": "a cup (of)",
+        "emoji": "☕"
+      },
+      {
+        "id": 28,
+        "indo": "kopi",
+        "eng": "coffee",
+        "emoji": "☕"
+      },
+      {
+        "id": 29,
+        "indo": "panas",
+        "eng": "hot",
+        "emoji": "🔥"
+      },
+      {
+        "id": 31,
+        "indo": "batas",
+        "eng": "limit / boundary",
+        "emoji": "🚧"
+      },
+      {
+        "id": 33,
+        "indo": "ada",
+        "eng": "there is / to exist",
+        "emoji": "✨"
+      },
+      {
+        "id": 32,
+        "indo": "lalu",
+        "eng": "then / next",
+        "emoji": "➡️"
+      },
+      {
+        "id": 35,
+        "indo": "musik",
+        "eng": "music",
+        "emoji": "🎵"
+      },
+      {
+        "id": 34,
+        "indo": "bernyanyi",
+        "eng": "to sing",
+        "emoji": "🎤"
+      },
+      {
+        "id": 36,
+        "indo": "kabar",
+        "eng": "news",
+        "emoji": "📰"
+      },
+      {
+        "id": 37,
+        "indo": "akan",
+        "eng": "will",
+        "emoji": "📜"
+      },
+      {
+        "id": 38,
+        "indo": "tampil",
+        "eng": "to appear / perform",
+        "emoji": "🎭"
+      },
+      {
+        "id": 39,
+        "indo": "sini",
+        "eng": "here",
+        "emoji": "👇"
+      },
+      {
+        "id": 40,
+        "indo": "kami",
+        "eng": "we (exclusive)",
+        "emoji": "👥"
+      },
+      {
+        "id": 30,
+        "indo": "santai",
+        "eng": "relaxed / chill",
+        "emoji": "️"
+      },
+      {
+        "id": 46,
+        "indo": "turut",
+        "eng": "to join in / also",
+        "emoji": "➕"
+      },
+      {
+        "id": 45,
+        "indo": "ternama",
+        "eng": "famous / renowned",
+        "emoji": "🌟"
+      },
+      {
+        "id": 44,
+        "indo": "majalah",
+        "eng": "magazine",
+        "emoji": "📖"
+      },
+      {
+        "id": 43,
+        "indo": "lagu",
+        "eng": "song",
+        "emoji": "🎶"
+      },
+      {
+        "id": 42,
+        "indo": "ditemani",
+        "eng": "accompanied by",
+        "emoji": "🤝"
+      },
+      {
+        "id": 41,
+        "indo": "hampiri",
+        "eng": "to approach",
+        "emoji": "🏃"
+      },
+      {
+        "id": 47,
+        "indo": "bangga",
+        "eng": "proud",
+        "emoji": "🦚"
+      },
+      {
+        "id": 49,
+        "indo": "terus",
+        "eng": "continue / keep",
+        "emoji": "⏩"
+      },
+      {
+        "id": 48,
+        "indo": "bertandang",
+        "eng": "to visit / play away game",
+        "emoji": "🏟️"
+      },
+      {
+        "id": 50,
+        "indo": "berlari",
+        "eng": "to run",
+        "emoji": "🏃‍♂️"
+      },
+      {
+        "id": 60,
+        "indo": "berjuang",
+        "eng": "to struggle / fight",
+        "emoji": "💪"
+      },
+      {
+        "id": 63,
+        "indo": "bisa",
+        "eng": "can / able to",
+        "emoji": "👍"
+      },
+      {
+        "id": 51,
+        "indo": "tiba-tiba",
+        "eng": "suddenly",
+        "emoji": "⚡"
+      },
+      {
+        "id": 54,
+        "indo": "tak",
+        "eng": "not (tidak)",
+        "emoji": "❌"
+      },
+      {
+        "id": 61,
+        "indo": "harus",
+        "eng": "must / have to",
+        "emoji": "⚠️"
+      },
+      {
+        "id": 52,
+        "indo": "panggilan",
+        "eng": "call / summons",
+        "emoji": "📞"
+      },
+      {
+        "id": 53,
+        "indo": "kerjaan",
+        "eng": "work / job",
+        "emoji": "💼"
+      },
+      {
+        "id": 58,
+        "indo": "siaran",
+        "eng": "broadcast / on air",
+        "emoji": "📡"
+      },
+      {
+        "id": 62,
+        "indo": "lakukan",
+        "eng": "to do / perform",
+        "emoji": "✅"
+      },
+      {
+        "id": 57,
+        "indo": "ku",
+        "eng": "I / my",
+        "emoji": "🙋‍♂️"
+      },
+      {
+        "id": 56,
+        "indo": "tapi",
+        "eng": "but",
+        "emoji": "☝️"
+      },
+      {
+        "id": 55,
+        "indo": "diabaikan",
+        "eng": "ignored",
+        "emoji": "🙈"
+      },
+      {
+        "id": 9,
+        "indo": "dari",
+        "eng": "from",
+        "emoji": "⬅️"
+      },
+      {
+        "id": 2,
+        "indo": "berjalan",
+        "eng": "to walk",
+        "emoji": "🚶"
+      },
+      {
+        "id": 1,
+        "indo": "saat",
+        "eng": "when",
+        "emoji": "⏱️"
+      },
+      {
+        "id": 6,
+        "indo": "takkan",
+        "eng": "won't (tak akan)",
+        "emoji": "🙅"
+      },
+      {
+        "id": 3,
+        "indo": "tanpa",
+        "eng": "without",
+        "emoji": "🚫"
+      },
+      {
+        "id": 4,
+        "indo": "ragu",
+        "eng": "doubt",
+        "emoji": "🤨"
+      },
+      {
+        "id": 5,
+        "indo": "bimbang",
+        "eng": "worry / hesitation",
+        "emoji": "😟"
+      },
+      {
+        "id": 7,
+        "indo": "lepaskan",
+        "eng": "to let go / release",
+        "emoji": "🕊️"
+      },
+      {
+        "id": 10,
+        "indo": "genggaman",
+        "eng": "grip / grasp",
+        "emoji": "✊"
+      },
+      {
+        "id": 11,
+        "indo": "tangan",
+        "eng": "hand",
+        "emoji": "✋"
+      },
+      {
+        "id": 16,
+        "indo": "kembali",
+        "eng": "to return / again",
+        "emoji": "🔙"
+      },
+      {
+        "id": 15,
+        "indo": "jauh",
+        "eng": "far",
+        "emoji": "🔭"
+      },
+      {
+        "id": 14,
+        "indo": "pergi",
+        "eng": "to go",
+        "emoji": "🛫"
+      },
+      {
+        "id": 13,
+        "indo": "lelah",
+        "eng": "tired / tiredness",
+        "emoji": "😫"
+      }
+    ]
+  },
+  "storyProgress": {
+    "forest-adventure": [],
+    "tidak-apa-apa-philosophy": [],
+    "pagi-di-warung-kopi": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "liburan-santai-di-jakarta": []
+  },
+  "storyProgressWords": {
+    "forest-adventure": [],
+    "tidak-apa-apa-philosophy": [],
+    "pagi-di-warung-kopi": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "liburan-santai-di-jakarta": []
+  },
+  "masteryTimestamps": {
+    "core": {
+      "21": "2026-01-25T06:39:39.422Z",
+      "31": "2026-02-01T09:59:57.709Z",
+      "33": "2026-02-01T09:59:59.481Z",
+      "43": "2026-02-01T10:00:15.286Z",
+      "52": "2026-01-23T16:17:37.957Z",
+      "53": "2026-01-23T16:17:38.885Z",
+      "54": "2026-01-23T16:17:37.237Z",
+      "55": "2026-01-23T16:17:36.677Z",
+      "56": "2026-01-23T16:17:34.749Z",
+      "57": "2026-01-23T16:17:35.293Z",
+      "58": "2026-01-23T16:17:34.189Z",
+      "59": "2026-01-23T16:17:33.365Z",
+      "60": "2026-01-23T16:17:25.413Z",
+      "61": "2026-01-23T16:17:26.261Z",
+      "62": "2026-01-23T16:17:26.965Z",
+      "63": "2026-01-23T16:17:27.705Z",
+      "64": "2026-01-23T16:17:28.401Z",
+      "65": "2026-01-23T16:17:31.965Z",
+      "66": "2026-01-23T16:17:29.053Z",
+      "67": "2026-01-23T16:17:31.045Z",
+      "68": "2026-01-23T16:17:29.693Z",
+      "69": "2026-01-23T16:17:30.349Z",
+      "70": "2026-01-23T16:17:15.357Z",
+      "71": "2026-01-23T16:17:15.905Z",
+      "72": "2026-01-23T16:17:16.637Z",
+      "73": "2026-02-04T15:58:30.140Z",
+      "74": "2026-01-23T16:17:18.189Z",
+      "75": "2026-01-23T16:17:19.189Z",
+      "76": "2026-01-23T16:17:20.262Z",
+      "77": "2026-01-23T16:17:21.261Z",
+      "78": "2026-01-23T16:17:22.397Z",
+      "79": "2026-01-23T16:17:23.405Z",
+      "80": "2026-01-27T16:38:31.482Z",
+      "81": "2026-02-01T10:00:00.497Z",
+      "82": "2026-02-01T09:59:12.213Z",
+      "83": "2026-02-01T10:47:07.797Z",
+      "84": "2026-01-27T16:38:29.170Z",
+      "85": "2026-01-27T16:38:29.762Z",
+      "86": "2026-01-27T16:38:28.650Z",
+      "87": "2026-01-27T16:38:28.114Z",
+      "88": "2026-01-27T16:38:26.586Z",
+      "89": "2026-01-27T16:38:27.082Z",
+      "90": "2026-01-31T16:25:38.531Z",
+      "91": "2026-01-27T16:38:25.466Z",
+      "92": "2026-02-01T09:30:57.685Z",
+      "93": "2026-02-01T10:00:05.665Z",
+      "94": "2026-02-01T09:59:14.573Z",
+      "95": "2026-02-01T10:00:07.001Z",
+      "96": "2026-01-31T16:25:40.339Z",
+      "97": "2026-01-31T16:25:42.003Z",
+      "98": "2026-01-31T16:25:41.027Z",
+      "99": "2026-01-31T16:25:41.483Z",
+      "100": "2026-02-01T11:28:26.701Z",
+      "101": "2026-02-01T11:34:21.725Z",
+      "102": "2026-02-01T11:48:25.603Z",
+      "103": "2026-02-01T11:56:56.186Z",
+      "104": "2026-02-01T12:05:33.818Z",
+      "105": "2026-02-01T14:45:47.111Z",
+      "106": "2026-02-01T14:45:50.881Z",
+      "107": "2026-02-01T14:45:53.292Z",
+      "108": "2026-02-01T14:45:55.121Z",
+      "109": "2026-02-01T14:53:15.296Z",
+      "110": "2026-02-01T14:59:37.268Z",
+      "111": "2026-02-01T15:02:34.911Z",
+      "112": "2026-02-01T15:08:23.730Z",
+      "113": "2026-02-02T14:42:27.872Z",
+      "114": "2026-02-02T16:24:10.740Z",
+      "115": "2026-02-02T16:24:12.232Z",
+      "116": "2026-02-02T16:24:18.355Z",
+      "117": "2026-02-02T16:32:22.756Z",
+      "118": "2026-02-02T16:45:45.764Z",
+      "119": "2026-02-02T16:47:43.616Z",
+      "120": "2026-02-11T16:31:16.344Z",
+      "121": "2026-02-11T16:31:19.750Z",
+      "134": "2026-02-11T16:31:35.651Z"
+    },
+    "songs": {
+      "liburan-indie": {
+        "1": "2026-02-01T10:10:55.824Z",
+        "2": "2026-02-01T10:10:00.992Z",
+        "3": "2026-02-05T15:22:43.125Z",
+        "4": "2026-02-05T15:22:46.490Z",
+        "5": "2026-02-05T15:22:49.122Z",
+        "6": "2026-02-01T10:10:57.648Z",
+        "7": "2026-02-05T15:22:52.082Z",
+        "9": "2026-01-27T16:45:16.710Z",
+        "10": "2026-02-05T15:22:55.485Z",
+        "11": "2026-02-05T15:22:58.654Z",
+        "13": "2026-02-08T17:00:52.720Z",
+        "14": "2026-02-05T15:33:10.042Z",
+        "15": "2026-02-05T15:33:06.786Z",
+        "16": "2026-02-05T15:33:03.562Z",
+        "41": "2026-01-23T16:19:07.677Z",
+        "42": "2026-01-23T16:19:06.557Z",
+        "43": "2026-01-23T16:19:05.341Z",
+        "44": "2026-01-23T16:19:04.573Z",
+        "45": "2026-01-23T16:19:03.825Z",
+        "46": "2026-01-23T16:19:03.125Z",
+        "47": "2026-01-23T16:19:58.313Z",
+        "48": "2026-01-23T16:25:39.353Z",
+        "49": "2026-01-23T16:24:46.217Z",
+        "50": "2026-01-23T16:25:47.817Z",
+        "51": "2026-01-23T16:27:54.266Z",
+        "52": "2026-01-23T16:30:51.188Z",
+        "53": "2026-01-23T16:32:46.297Z",
+        "54": "2026-01-23T16:29:06.233Z",
+        "55": "2026-01-25T06:44:24.727Z",
+        "56": "2026-01-25T06:44:14.655Z",
+        "57": "2026-01-25T06:44:07.751Z",
+        "58": "2026-01-24T15:01:48.348Z",
+        "60": "2026-01-23T16:26:14.308Z",
+        "61": "2026-01-23T16:29:19.136Z",
+        "62": "2026-01-24T15:09:15.795Z",
+        "63": "2026-01-23T16:27:50.445Z"
+      }
+    },
+    "stories": {
+      "pagi-di-warung-kopi": {
+        "1": "2026-01-24T15:30:18.337Z",
+        "2": "2026-01-24T15:30:20.560Z",
+        "3": "2026-01-24T15:41:16.444Z",
+        "4": "2026-01-24T15:41:27.308Z",
+        "5": "2026-01-24T15:42:03.790Z",
+        "6": "2026-01-24T15:45:16.940Z",
+        "7": "2026-01-24T15:50:30.084Z"
+      },
+      "liburan-santai-di-jakarta": {}
+    }
+  },
+  "mnemonics": {
+    "3": "https://i.imgur.com/gBjBdbf.jpeg",
+    "4": "https://i.imgur.com/O6g11l5.jpeg",
+    "5": "https://i.imgur.com/z0682UO.jpeg",
+    "7": "https://i.imgur.com/yo98NJp.jpeg",
+    "10": "https://i.imgur.com/bvDskgR.jpeg",
+    "11": "https://i.imgur.com/NpUQL9W.jpeg",
+    "13": "https://i.imgur.com/dqIdqjc.png",
+    "14": "https://i.imgur.com/MlFz2as.jpeg",
+    "15": "https://i.imgur.com/8K2jI1t.jpeg",
+    "16": "https://i.imgur.com/o4v2Fgc.jpeg",
+    "30": "https://i.imgur.com/AXDjlUq.png",
+    "37": "https://i.imgur.com/Q9PsRt0.jpeg",
+    "38": "https://i.imgur.com/xhMEEpE.jpeg",
+    "50": "https://i.imgur.com/PJmwzsm.jpeg",
+    "61": "https://i.imgur.com/hqeQ2Ng.jpeg",
+    "64": "https://i.imgur.com/lG8076Z.jpeg",
+    "67": "https://i.imgur.com/dAB3GQf.jpeg",
+    "69": "https://i.imgur.com/8X1hHnm.jpeg",
+    "73": "https://i.imgur.com/6Jxof4n.jpeg",
+    "74": "https://i.imgur.com/A67Gc6J.jpeg",
+    "75": "https://i.imgur.com/GBdfVVo.jpeg",
+    "76": "https://i.imgur.com/HQCYbYJ.jpeg",
+    "77": "https://i.imgur.com/HL1kTtm.jpeg",
+    "78": "https://i.imgur.com/crblyXl.jpeg",
+    "79": "https://i.imgur.com/cnjvqEl.jpeg",
+    "83": "https://i.imgur.com/OIE2W02.jpeg",
+    "90": "https://i.imgur.com/l0HnSuC.jpeg",
+    "91": "https://i.imgur.com/OtXkXKS.jpeg",
+    "92": "https://i.imgur.com/3A2tRzg.jpeg",
+    "94": "https://i.imgur.com/zY4OI8q.jpeg",
+    "95": "https://i.imgur.com/RXgTG73.jpeg",
+    "96": "https://i.imgur.com/cNb7WEM.jpeg",
+    "98": "https://i.imgur.com/puLflrU.jpeg",
+    "99": "https://i.imgur.com/gy7l3Z0.jpeg",
+    "100": "https://i.imgur.com/2GBIdL8.jpeg",
+    "101": "https://i.imgur.com/aEAKFCV.jpeg",
+    "102": "https://i.imgur.com/bYKeWn0.jpeg",
+    "103": "https://i.imgur.com/Hb484HM.jpeg",
+    "104": "https://i.imgur.com/ZkIP1eX.jpeg",
+    "105": "https://i.imgur.com/oIpW3vj.jpeg",
+    "109": "https://i.imgur.com/u9Wt3jY.jpeg",
+    "110": "https://i.imgur.com/BjMBepp.jpeg",
+    "111": "https://i.imgur.com/7wl5D3r.jpeg",
+    "112": "https://i.imgur.com/T8pCT6X.jpeg",
+    "113": "https://i.imgur.com/CrJ3YC8.jpeg",
+    "116": "https://i.imgur.com/39BCZYn.jpeg",
+    "117": "https://i.imgur.com/rjDZ98r.jpeg",
+    "118": "https://i.imgur.com/4Jh3J5u.jpeg",
+    "119": "https://i.imgur.com/QAW76iE.jpeg",
+    "120": "https://i.imgur.com/6EYZkVX.png"
+  }
+}

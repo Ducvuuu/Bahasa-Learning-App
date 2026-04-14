@@ -1,0 +1,2232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indo Adventure 🇮🇩</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 🟢 IMPORT DATA -->
+    <!-- <script src="vocab_data.js"></script> (DISABLED: Using dynamic folder loading now) -->
+    <script src="songs/index.js"></script>
+    
+    <!-- 📖 IMPORT STORIES (Built-in) -->
+    <script src="stories/index.js"></script>
+    <script src="stories/story_001_market.js"></script>
+
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #fafafa;
+            /* Default background - gets overridden by story themes */
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(238, 242, 255, 1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(240, 253, 244, 1) 0px, transparent 50%);
+            background-attachment: fixed;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.5s ease;
+        }
+        
+        /* Smooth transitions */
+        * { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .glass-header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* --- CARD STYLES --- */
+        .day-card, .vocab-panel, .inventory-panel, .library-card, .tree-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+        .day-card:hover, .library-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.04);
+        }
+
+        .word-item {
+            border: 1px solid transparent;
+        }
+        .word-item:hover {
+            background-color: #f8fafc;
+            transform: scale(1.01);
+        }
+        .word-item.checked {
+            background-color: #f0fdf4;
+            border-color: #dcfce7;
+            opacity: 0.8;
+        }
+
+        /* Checkbox Animation */
+        .check-circle {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .word-item.checked .check-circle {
+            background-color: #10b981;
+            border-color: #10b981;
+            transform: scale(1.1);
+        }
+        .word-item.checked .emoji-icon {
+            filter: grayscale(0.5);
+            transform: scale(0.9);
+        }
+
+        /* --- WEEK ACCORDION STYLES --- */
+        .week-container {
+            margin-bottom: 2rem;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .week-header {
+            cursor: pointer;
+            user-select: none;
+        }
+        .week-header:hover {
+            background: rgba(255,255,255,0.8);
+        }
+
+        .week-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .week-container.active .week-content {
+            max-height: 5000px; /* Large enough to fit content */
+            opacity: 1;
+            padding-bottom: 1.5rem;
+        }
+        
+        .week-chevron {
+            transition: transform 0.3s ease;
+        }
+        .week-container.active .week-chevron {
+            transform: rotate(180deg);
+        }
+        
+        /* --- INVENTORY STYLES --- */
+        .sticker-card {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .sticker-card:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.1);
+            border-color: #c7d2fe;
+        }
+        
+        .sticker-content {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sticker-hidden {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #eef2ff;
+            color: #4f46e5;
+            font-weight: 700;
+            opacity: 0;
+            transform: translateY(100%);
+            transition: all 0.3s ease;
+        }
+        .sticker-card:hover .sticker-hidden {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .sticker-card:hover .sticker-visible {
+            opacity: 0.2;
+            filter: blur(2px);
+        }
+        
+        .source-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            font-size: 0.65rem;
+            background: #f1f5f9;
+            color: #64748b;
+            padding: 2px 6px;
+            border-radius: 99px;
+            font-weight: 600;
+            opacity: 0.7;
+        }
+
+
+        /* --- SONG & STORY STYLES --- */
+        .lyric-line, .story-paragraph {
+            line-height: 2.2;
+            margin-bottom: 1.5rem;
+        }
+        .lyric-word {
+            display: inline-block;
+            padding: 0 4px;
+            margin: 0 1px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .lyric-word.vocab {
+            color: #4f46e5;
+            border-bottom: 2px dotted #a5b4fc;
+            font-weight: 500;
+        }
+        /* Story Vocab specific - base style, overridden by themes */
+        .vocab-word {
+            cursor: pointer;
+            font-weight: 600;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        /* Modal / Popover Styles */
+        .word-modal {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(120%);
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px -5px rgba(0,0,0,0.2);
+            z-index: 100;
+            padding: 24px;
+            border: 1px solid rgba(0,0,0,0.05);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .word-modal.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            pointer-events: all;
+        }
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(2px);
+            z-index: 90;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Review Mode Blurring */
+        .review-active .eng-text {
+            filter: blur(8px);
+            opacity: 0.4;
+            user-select: none;
+            background-color: #f1f5f9; /* Note: Might vary slightly on custom themes, but provides good contrast */
+            color: transparent;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        /* Reveal on hover for Core/Songs (word-item) and Stories (story-item) */
+        .review-active .word-item:hover .eng-text,
+        .review-active .story-item:hover .eng-text {
+            filter: blur(0);
+            opacity: 1;
+            background-color: transparent;
+            color: inherit; /* Inherit allows story themes to dictate text color */
+        }
+        
+        /* Tab Nav Styles */
+        .nav-tab {
+            position: relative;
+            padding-bottom: 8px;
+            color: #94a3b8;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .nav-tab.active {
+            color: #1e293b;
+        }
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #4f46e5;
+            border-radius: 10px;
+        }
+
+        @keyframes squish {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.15, 0.85); }
+            100% { transform: scale(1); }
+        }
+        .anim-squish {
+            animation: squish 0.3s ease-in-out;
+        }
+        
+        /* Dropdown Styling */
+        select.song-selector {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        /* Song Grid Layout */
+        .song-grid, .story-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        @media (min-width: 1024px) {
+            .song-grid, .story-layout {
+                grid-template-columns: 2fr 1fr; /* Content takes 2/3, Vocab Panel takes 1/3 */
+                align-items: start;
+            }
+        }
+        
+        /* Vocab Panel Sticky */
+        @media (min-width: 1024px) {
+            .sticky-panel {
+                position: sticky;
+                top: 7rem; /* Below header */
+                max-height: calc(100vh - 8rem);
+                overflow-y: auto;
+            }
+        }
+
+        /* Status Pill */
+        .status-pill {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .status-pill.unsaved { background-color: #fef3c7; color: #d97706; }
+        .status-pill.saved { background-color: #dcfce7; color: #15803d; }
+        .status-pill.auto-detected { background-color: #dbeafe; color: #1e40af; }
+        
+        /* Audio Controls Styles */
+        .audio-controls {
+            background: white;
+            border-radius: 16px;
+            padding: 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .play-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .play-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        .play-button:active {
+            transform: scale(0.95);
+        }
+        
+        .progress-bar-container {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .speed-button {
+            padding: 0.375rem 0.75rem;
+            border-radius: 8px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        
+        .speed-button:hover {
+            background: #e2e8f0;
+        }
+        
+        .speed-button.active {
+            background: #eef2ff;
+            color: #4f46e5;
+            border-color: #c7d2fe;
+        }
+
+        /* ======================== */
+        /* 🌳 TREE VIEW STYLES 🌳 */
+        /* ======================== */
+        
+        .tree-container {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 2rem;
+            position: relative;
+            background-image: 
+                linear-gradient(#e2e8f0 1px, transparent 1px), 
+                linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        
+        .tree-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        @media (min-width: 768px) {
+            .tree-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .tree-node {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            min-height: 100px;
+        }
+
+        /* Root Node (Center Top) */
+        .tree-node.root {
+            grid-column: 1 / -1;
+            align-items: center;
+            text-align: center;
+            border-color: #818cf8;
+            background: #eef2ff;
+            box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.2);
+            margin-bottom: 2rem;
+            border-width: 3px;
+        }
+
+        /* Active Branch (True) */
+        .tree-node.active {
+            border-color: #86efac;
+            background: #f0fdf4;
+            cursor: help;
+        }
+        .tree-node.active:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1);
+            border-color: #22c55e;
+            z-index: 10;
+        }
+
+        /* Dead Branch (False) */
+        .tree-node.dead {
+            opacity: 0.6;
+            background: #f1f5f9;
+            border-color: #f1f5f9;
+        }
+        .tree-node.dead .node-affix {
+            color: #94a3b8;
+        }
+
+        .node-affix {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6366f1;
+            margin-bottom: 0.25rem;
+        }
+        
+        .node-word {
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: #1e293b;
+            line-height: 1.2;
+        }
+        
+        .node-meaning {
+            font-size: 0.75rem;
+            color: #64748b;
+            line-height: 1.3;
+        }
+
+        .tree-badge {
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            background: #dcfce7;
+            color: #15803d;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 99px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            border: 1px solid #bbf7d0;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-600 pb-20">
+
+    <!-- Sticky Header -->
+    <header class="glass-header sticky top-0 z-50 px-4 md:px-6 py-4 mb-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+                
+                <!-- Logo & Title -->
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <span class="text-2xl bg-white p-2 rounded-xl shadow-sm border border-slate-100">🇮🇩</span>
+                    <div>
+                        <h1 class="text-xl font-bold text-slate-800 tracking-tight">Indo Adventure</h1>
+                        <p class="text-xs text-slate-400 font-medium">Daily Progress Tracker</p>
+                    </div>
+                </div>
+
+                <!-- Right Side: Sync & Progress -->
+                <div class="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
+                    
+                    <!-- File Sync Control -->
+                    <div class="flex items-center gap-2">
+                         <button id="btn-connect" onclick="connectFile()" class="text-xs font-bold bg-slate-800 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 transition-colors shadow-sm">
+                            💾 Connect Progress
+                         </button>
+                         <button id="btn-reconnect" onclick="requestStoredFilePermission()" class="hidden text-xs font-bold bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                            🔄 Confirm Access
+                         </button>
+                         <div id="sync-status" class="hidden status-pill saved">
+                             <span>●</span> Auto-saving
+                         </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-32 md:w-40 hidden sm:block">
+                        <div class="flex justify-between text-xs font-semibold mb-2 px-1">
+                            <span class="text-slate-400" id="progress-label">Total Mastery</span>
+                            <span id="progress-text" class="text-slate-800">0%</span>
+                        </div>
+                        <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="h-full bg-slate-800 rounded-full w-0 transition-all duration-700"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs + Review Toggles -->
+            <div class="flex justify-between items-center border-b border-slate-100">
+                <div class="flex gap-4 md:gap-8 overflow-x-auto pb-1">
+                    <button onclick="switchTab('core')" id="tab-core" class="nav-tab active whitespace-nowrap">Core Words</button>
+                    <button onclick="switchTab('inventory')" id="tab-inventory" class="nav-tab whitespace-nowrap">Inventory 🎒</button>
+                    <button onclick="switchTab('read')" id="tab-read" class="nav-tab whitespace-nowrap">Stories 📖</button>
+                    <button onclick="switchTab('songs')" id="tab-songs" class="nav-tab whitespace-nowrap">Songs 🎵</button>
+                </div>
+
+                <!-- Review Controls -->
+                <div class="flex items-center gap-2 pb-2 pl-4">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:inline">Review</span>
+                    
+                    <!-- Core Review Toggle -->
+                    <label id="core-toggle-wrapper" class="relative inline-block w-10 h-5 align-middle select-none cursor-pointer">
+                        <input type="checkbox" id="review-toggle" class="sr-only peer" />
+                        <div class="absolute inset-0 bg-slate-200 rounded-full transition-colors duration-300 peer-checked:bg-indigo-500"></div>
+                        <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
+                    </label>
+
+                    <!-- Song Review Toggle (Hidden initially) -->
+                    <label id="song-toggle-wrapper" class="relative inline-block w-10 h-5 align-middle select-none cursor-pointer hidden">
+                        <input type="checkbox" id="song-review-toggle" class="sr-only peer" />
+                        <div class="absolute inset-0 bg-slate-200 rounded-full transition-colors duration-300 peer-checked:bg-indigo-500"></div>
+                        <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
+                    </label>
+
+                    <!-- Story Review Toggle (Hidden initially) -->
+                    <label id="story-toggle-wrapper" class="relative inline-block w-10 h-5 align-middle select-none cursor-pointer hidden">
+                        <input type="checkbox" id="story-review-toggle" class="sr-only peer" />
+                        <div class="absolute inset-0 bg-slate-200 rounded-full transition-colors duration-300 peer-checked:bg-indigo-500"></div>
+                        <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-6xl mx-auto px-4 md:px-6 relative">
+        
+        <!-- ================= VIEW: CORE WORDS ================= -->
+        <div id="view-core">
+            <!-- Motivational Banner -->
+            <div class="relative w-full h-48 md:h-64 rounded-3xl overflow-hidden mb-8 shadow-xl group">
+                <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80" 
+                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
+                     alt="Scenic Landscape">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-6 md:p-10">
+                    <div class="max-w-2xl transform transition-transform duration-500 group-hover:-translate-y-1">
+                        <h2 class="text-2xl md:text-4xl font-bold text-white mb-2 tracking-tight">Semangat! (Keep going!) 🔥</h2>
+                        <p class="text-white/90 font-medium text-sm md:text-lg leading-relaxed">Focus on your daily words. Weeks are grouped below.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Setup / Error Area for Core Data -->
+             <div id="core-data-setup" class="hidden bg-blue-50 border border-blue-100 text-blue-800 px-6 py-8 rounded-3xl mb-8 flex flex-col items-center justify-center text-center">
+                <div class="text-4xl mb-4">📂</div>
+                <h3 class="text-xl font-bold mb-2">Setup Core Vocabulary</h3>
+                <p class="text-blue-600/80 mb-6 max-w-md">Data is now loaded from your computer. Select the folder containing your "day_xx.json" files.</p>
+                <div class="flex gap-3">
+                     <button onclick="connectCoreFolder()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-95">
+                        Link Core Folder
+                    </button>
+                    <button onclick="loadCoreFromFolder()" id="btn-reload-core" class="hidden bg-white text-blue-600 border border-blue-200 font-bold py-3 px-6 rounded-xl hover:bg-blue-50 transition-all">
+                        Reload
+                    </button>
+                </div>
+            </div>
+
+            <!-- Changed from Grid to just a container, grid happens inside weeks -->
+            <div id="days-container" class="w-full">
+                <!-- JS will populate Weeks and Days here -->
+            </div>
+        </div>
+        
+        <!-- ================= VIEW: INVENTORY ================= -->
+        <div id="view-inventory" class="hidden">
+            <!-- Search & Stats Header -->
+            <div class="mb-8">
+                <div class="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-slate-800 mb-1">Your Collection 🎒</h2>
+                        <p class="text-slate-500">Collected: <span id="inventory-count" class="font-bold text-indigo-600">0 words</span></p>
+                    </div>
+                    
+                    <!-- Search Bar -->
+                    <div class="relative w-full md:w-96">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </div>
+                        <input type="text" id="inventory-search" placeholder="Search stickers (Indo or English)..." 
+                               oninput="renderInventory()"
+                               class="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 sm:text-sm shadow-sm transition-all hover:border-slate-300">
+                    </div>
+                </div>
+
+                <!-- Empty State (Hidden by default) -->
+                <div id="inventory-empty" class="hidden text-center py-16 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+                    <div class="text-4xl mb-4">🕸️</div>
+                    <h3 class="text-lg font-bold text-slate-700 mb-2">Your bag is empty!</h3>
+                    <p class="text-slate-500 mb-6 max-w-sm mx-auto">Go to "Core Words" and mark some words as known to collect them here.</p>
+                    <button onclick="switchTab('core')" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">Start Collecting</button>
+                </div>
+                
+                <!-- Inventory Grid -->
+                <div id="inventory-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                    <!-- Stickers populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW: TREE MAP (NEW) ================= -->
+        <div id="view-tree" class="hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <button onclick="switchTab('inventory')" class="text-sm font-bold text-slate-400 hover:text-slate-600 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        Back to Inventory
+                    </button>
+                    <span class="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Family Tree 🌳</span>
+                </div>
+
+                <!-- Tree Card -->
+                <div class="tree-container">
+                    <div id="tree-canvas" class="tree-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= VIEW: STORIES (READING) ================= -->
+        <div id="view-read" class="hidden">
+            
+            <!-- 📚 Library Grid (Selection Screen) -->
+            <div id="library-view">
+                <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <h2 class="text-3xl font-bold text-slate-800 mb-2">Reading Library 📖</h2>
+                        <p class="text-slate-500">Immersive stories to practice reading comprehension.</p>
+                    </div>
+                    
+                    <!-- FOLDER LINK CONTROLS -->
+                    <div class="flex gap-2">
+                         <button id="btn-link-stories" onclick="connectStoryFolder()" class="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl font-bold text-sm hover:bg-indigo-100 transition-colors shadow-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                            Link Story Folder
+                        </button>
+                        <button id="btn-reload-stories" onclick="loadStoriesFromFolder()" class="hidden flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors shadow-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            Reload
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Status Message for Folder -->
+                <div id="story-folder-status" class="hidden mb-6 px-4 py-3 bg-blue-50 text-blue-700 rounded-xl text-sm border border-blue-100 flex items-center justify-between">
+                    <span>📂 Reading stories from linked folder...</span>
+                    <button onclick="loadStoriesFromFolder()" class="underline font-bold hover:text-blue-900">Reload</button>
+                </div>
+                
+                <div id="library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Library cards populated by JS -->
+                </div>
+            </div>
+            
+            <!-- 📖 Immersive Reader (Hidden initially) -->
+            <div id="reader-view" class="hidden">
+                <!-- Back Button & Progress -->
+                <div class="flex items-center justify-between mb-6">
+                    <button onclick="closeStory()" class="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        <span class="font-bold">Back to Library</span>
+                    </button>
+                    <span id="story-progress-text" class="text-sm font-bold bg-white/50 px-3 py-1 rounded-full text-slate-600 backdrop-blur-sm">0/0 Words</span>
+                </div>
+
+                <!-- Story Layout -->
+                <div class="story-layout">
+                    <!-- Story Content (Left) -->
+                    <div id="reader-card" class="library-card p-8 md:p-12 min-h-[500px] transition-colors duration-500">
+                        <div class="max-w-prose mx-auto">
+                            <h1 id="reader-title" class="text-3xl md:text-4xl font-bold mb-2">Title</h1>
+                            <div class="flex gap-2 mb-8">
+                                <span id="reader-difficulty" class="px-2 py-1 bg-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider rounded">Beginner</span>
+                                <!-- Category Tag will be injected here -->
+                                <span id="reader-category" class="hidden"></span>
+                            </div>
+                            
+                            <div id="reader-content" class="text-lg leading-relaxed space-y-6">
+                                <!-- Paragraphs injected here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Story Vocab (Right - Sticky) -->
+                    <div id="story-vocab-panel" class="library-card p-6 sticky-panel transition-colors duration-500">
+                        <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100/20">
+                            <h3 id="story-vocab-title" class="font-bold text-lg">Key Vocabulary</h3>
+                        </div>
+                        <div id="story-vocab-list" class="space-y-2">
+                            <!-- Vocab items injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW: SONGS ================= -->
+        <div id="view-songs" class="hidden">
+            
+            <!-- Error State -->
+            <div id="song-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl mb-6">
+                <strong>⚠️ Song Data Missing:</strong> Please make sure song files are in the "songs/" folder.
+            </div>
+
+            <!-- 📂 NEW: Dynamic Song Loader Controls -->
+            <div class="mb-6 flex items-center justify-between">
+                <div class="flex gap-2">
+                     <button id="btn-link-songs" onclick="connectSongFolder()" class="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl font-bold text-sm hover:bg-indigo-100 transition-colors shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+                        Link Songs Folder
+                    </button>
+                    <button id="btn-reload-songs" onclick="loadSongsFromFolder()" class="hidden flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors shadow-sm">
+                        Reload Songs
+                    </button>
+                </div>
+                <div id="song-folder-status" class="hidden text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                    <!-- Status text injected here -->
+                </div>
+            </div>
+
+            <!-- Song Header -->
+            <div class="mb-8 flex flex-col lg:flex-row items-end justify-between gap-8">
+                
+                <!-- Left: Image + Info -->
+                <div class="flex-1 flex flex-col md:flex-row items-center md:items-start gap-6 w-full">
+                    
+                    <!-- Cover Image -->
+                    <div class="w-32 h-32 flex-shrink-0 rounded-2xl overflow-hidden shadow-lg border border-slate-100 bg-slate-100 group">
+                         <img id="song-image" src="" alt="Album Art" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    </div>
+
+                    <!-- Song Info -->
+                    <div class="flex-1 w-full text-center md:text-left">
+                        <div id="now-playing-badge" class="inline-block bg-slate-100 text-slate-400 px-4 py-1.5 rounded-full text-sm font-bold mb-3">Select a Song</div>
+                        <h2 id="song-title" class="text-3xl font-bold text-slate-800 mb-1">Choose Your Learning Track</h2>
+                        <p id="song-artist" class="text-lg text-slate-500 mb-5">Pick a song from the dropdown</p>
+                        
+                        <div class="relative inline-block w-full md:w-80">
+                            <select id="song-select" onchange="changeSong(this.value)" class="song-selector block w-full bg-white border border-slate-200 hover:border-indigo-300 px-4 py-3 pr-8 rounded-xl leading-tight focus:outline-none focus:bg-white focus:border-indigo-500 transition-colors shadow-sm font-medium text-slate-700 cursor-pointer">
+                                <option value="">Choose a song...</option>
+                                <!-- Options populated by JS -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audio Player Controls -->
+            <div id="audio-controls" class="audio-controls mb-6 hidden">
+                <div class="flex items-center gap-4">
+                    <!-- Play/Pause Button -->
+                    <button id="play-pause-btn" onclick="togglePlayPause()" class="play-button">
+                        <svg id="play-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                        </svg>
+                        <svg id="pause-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M5.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75A.75.75 0 007.25 3h-1.5zM12.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-1.5z"/>
+                        </svg>
+                    </button>
+                    
+                    <!-- Progress Bar -->
+                    <div class="flex-1">
+                        <div class="progress-bar-container" onclick="seekAudio(event)">
+                            <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-500 mt-1">
+                            <span id="current-time">0:00</span>
+                            <span id="total-time">0:00</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Speed Controls -->
+                    <div class="flex gap-2">
+                        <button onclick="setPlaybackSpeed(0.75)" class="speed-button" data-speed="0.75">0.75x</button>
+                        <button onclick="setPlaybackSpeed(1.0)" class="speed-button active" data-speed="1.0">1x</button>
+                        <button onclick="setPlaybackSpeed(1.25)" class="speed-button" data-speed="1.25">1.25x</button>
+                    </div>
+                </div>
+                
+                <!-- Playback Mode Hint -->
+                <div class="mt-3 text-xs text-slate-400 text-center">
+                    <span class="font-semibold">💡 Tip:</span> Single-click = Play line once • Double-click = Play & continue
+                </div>
+            </div>
+
+            <!-- Song Content: Lyrics + Vocab Panel -->
+            <div id="song-content" class="song-grid hidden">
+                
+                <!-- Left: Lyrics Panel -->
+                <div class="vocab-panel p-8">
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                        <h3 class="text-xl font-bold text-slate-800">📜 Lyrics</h3>
+                        <span class="text-xs font-semibold text-slate-400 tracking-wider uppercase">Click to play</span>
+                    </div>
+                    <div id="lyrics-container" class="space-y-2 text-base leading-relaxed">
+                        <p class="text-slate-400 text-center py-12">Select a song to view lyrics...</p>
+                    </div>
+                </div>
+
+                <!-- Right: Vocabulary List (Sticky on Desktop) -->
+                <div class="vocab-panel p-8 sticky-panel">
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                        <h3 class="text-xl font-bold text-slate-800">📚 Vocabulary</h3>
+                        <span id="vocab-count" class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">0 words</span>
+                    </div>
+                    <div id="song-vocab-list" class="space-y-2">
+                        <p class="text-slate-400 text-center py-12">Vocabulary will appear here...</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for Word Details -->
+    <div id="word-modal-overlay" class="overlay" onclick="closeModal()"></div>
+    <div id="word-modal" class="word-modal">
+        <div class="text-center mb-4">
+            <div class="text-2xl font-bold text-slate-800 mb-1" id="modal-indo">Word</div>
+            <div class="text-lg text-slate-500 hidden" id="modal-eng">Translation</div>
+            <!-- Cultural Note Container -->
+            <div id="modal-note" class="hidden"></div>
+            
+            <!-- Mnemonic Image Section -->
+            <div class="mt-4">
+                <div id="mnemonic-image-container" class="mb-3">
+                    <!-- Image will be displayed here -->
+                </div>
+                <div class="text-left">
+                    <label class="text-sm font-semibold text-slate-700 flex items-center gap-2 mb-2">
+                        🖼️ Mnemonic Image
+                    </label>
+                    <div class="flex gap-2">
+                        <input 
+                            type="text" 
+                            id="mnemonic-url-input" 
+                            placeholder="Paste Imgur link..." 
+                            class="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        />
+                        <button 
+                            id="mnemonic-add-btn" 
+                            onclick="saveMnemonic()" 
+                            class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-semibold transition-colors"
+                        >
+                            Add
+                        </button>
+                    </div>
+                    <button 
+                        id="mnemonic-remove-btn" 
+                        onclick="removeMnemonic()" 
+                        class="hidden mt-2 text-xs text-red-500 hover:text-red-700 font-medium"
+                    >
+                        ✕ Remove Image
+                    </button>
+                </div>
+            </div>
+        </div>
+        <button id="modal-action-btn" class="w-full py-3 rounded-xl font-bold text-white transition-transform active:scale-95 bg-indigo-500 hover:bg-indigo-600 shadow-lg shadow-indigo-200">
+            Mark as Known
+        </button>
+    </div>
+
+    <!-- Hidden Audio Element -->
+    <audio id="audio-player" preload="metadata"></audio>
+
+    <script>
+        // ==========================================
+        // 📊 DATA & STATE
+        // ==========================================
+        
+        const CORE_KEY = 'indoAdventure_coreKnown';
+        const SONGS_KEY = 'indoAdventure_songProgress';
+        const STORIES_KEY = 'indoAdventure_storyProgress';
+        const TIMESTAMP_KEY = 'indoAdventure_timestamps'; // New Key for Timestamps
+        const MNEMONICS_KEY = 'indoAdventure_mnemonics'; // New Key for Mnemonic Images
+        
+        // IndexedDB Keys for Handles
+        const FILE_HANDLE_DB = 'indoAdventure_fileHandle';
+        const STORY_FOLDER_DB = 'indoAdventure_storyFolderHandle';
+        const SONG_FOLDER_DB = 'indoAdventure_songFolderHandle';
+        const CORE_FOLDER_DB = 'indoAdventure_coreFolderHandle';
+        
+        let coreKnown = [];
+        let songProgress = {};
+        let storyProgress = {}; // { storyId: [vocabId, vocabId] }
+        // NEW: Store dates when words were learned
+        let masteryTimestamps = { core: {}, songs: {}, stories: {} };
+        // NEW: Store mnemonic image URLs { vocabId: "imageURL" }
+        let mnemonics = {};
+        
+        let currentTab = 'core';
+        let currentSong = null;
+        let currentStory = null;
+        let fileHandle = null;
+        let storyDirHandle = null;
+        let songDirHandle = null;
+        let coreDirHandle = null;
+
+        let audioPlayer = null;
+        let isPlaying = false;
+        let currentLyricIndex = -1;
+        let targetEndTime = null; 
+        let clickTimer = null; 
+        let clickCount = 0;
+        
+        // Storage for local JSON stories
+        let localStories = []; 
+        
+        const accents = [
+            { bg: 'bg-indigo-100', text: 'text-indigo-700' },
+            { bg: 'bg-emerald-100', text: 'text-emerald-700' },
+            { bg: 'bg-amber-100', text: 'text-amber-700' },
+            { bg: 'bg-rose-100', text: 'text-rose-700' },
+            { bg: 'bg-purple-100', text: 'text-purple-700' },
+            { bg: 'bg-cyan-100', text: 'text-cyan-700' },
+            { bg: 'bg-pink-100', text: 'text-pink-700' },
+            { bg: 'bg-lime-100', text: 'text-lime-700' },
+            { bg: 'bg-orange-100', text: 'text-orange-700' },
+            { bg: 'bg-teal-100', text: 'text-teal-700' }
+        ];
+        
+        // Initializing empty (populated by folder)
+        window.coreVocabulary = window.coreVocabulary || [];
+
+        // ==========================================
+        // 💾 PERSISTENCE & INIT
+        // ==========================================
+        
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('IndoAdventureDB', 1);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings');
+                };
+            });
+        }
+        
+        async function saveDBValue(key, value) {
+            const db = await openDB();
+            const transaction = db.transaction(['settings'], 'readwrite');
+            const store = transaction.objectStore('settings');
+            store.put(value, key);
+        }
+        
+        async function getDBValue(key) {
+             try {
+                const db = await openDB();
+                const transaction = db.transaction(['settings'], 'readonly');
+                const store = transaction.objectStore('settings');
+                return new Promise((resolve, reject) => {
+                    const request = store.get(key);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            } catch (err) {
+                return null;
+            }
+        }
+        
+        // --- Progress File Logic ---
+        async function saveFileHandle(handle) { await saveDBValue(FILE_HANDLE_DB, handle); }
+        async function getFileHandle() { return await getDBValue(FILE_HANDLE_DB); }
+        
+        // --- Folder Handle Savers ---
+        async function saveStoryFolderHandle(handle) { await saveDBValue(STORY_FOLDER_DB, handle); }
+        async function getStoryFolderHandle() { return await getDBValue(STORY_FOLDER_DB); }
+        async function saveSongFolderHandle(handle) { await saveDBValue(SONG_FOLDER_DB, handle); }
+        async function getSongFolderHandle() { return await getDBValue(SONG_FOLDER_DB); }
+        async function saveCoreFolderHandle(handle) { await saveDBValue(CORE_FOLDER_DB, handle); }
+        async function getCoreFolderHandle() { return await getDBValue(CORE_FOLDER_DB); }
+
+        async function requestStoredFilePermission() {
+            const storedHandle = await getFileHandle();
+            if (!storedHandle) { alert('No file detected. Please use "Connect File" button.'); return; }
+            try {
+                const permission = await storedHandle.queryPermission({ mode: 'readwrite' });
+                if (permission === 'granted') { fileHandle = storedHandle; await loadFromFile(); } 
+                else {
+                    const newPermission = await storedHandle.requestPermission({ mode: 'readwrite' });
+                    if (newPermission === 'granted') { fileHandle = storedHandle; await loadFromFile(); }
+                }
+            } catch (err) {
+                alert('Could not access file. Please reconnect using "Connect File".');
+                document.getElementById('btn-reconnect').classList.add('hidden');
+                document.getElementById('btn-connect').classList.remove('hidden');
+            }
+        }
+        
+        async function loadFromFile() {
+            if (!fileHandle) return;
+            try {
+                const file = await fileHandle.getFile();
+                const contents = await file.text();
+                if(contents.trim()) {
+                    const data = JSON.parse(contents);
+                    if(data.coreKnown) coreKnown = data.coreKnown;
+                    if(data.songProgress) songProgress = data.songProgress;
+                    if(data.storyProgress) storyProgress = data.storyProgress;
+                    if(data.mnemonics) mnemonics = data.mnemonics; // LOAD MNEMONICS
+                    
+                    // LOAD TIMESTAMPS
+                    if(data.masteryTimestamps) masteryTimestamps = data.masteryTimestamps;
+                    // Ensure structure integrity
+                    if(!masteryTimestamps.core) masteryTimestamps.core = {};
+                    if(!masteryTimestamps.songs) masteryTimestamps.songs = {};
+                    if(!masteryTimestamps.stories) masteryTimestamps.stories = {};
+                    
+                    localStorage.setItem(CORE_KEY, JSON.stringify(coreKnown));
+                    localStorage.setItem(SONGS_KEY, JSON.stringify(songProgress));
+                    localStorage.setItem(STORIES_KEY, JSON.stringify(storyProgress));
+                    localStorage.setItem(TIMESTAMP_KEY, JSON.stringify(masteryTimestamps));
+                    localStorage.setItem(MNEMONICS_KEY, JSON.stringify(mnemonics)); // SAVE MNEMONICS TO LOCALSTORAGE
+                    
+                    renderCoreDays();
+                    if(currentSong) { renderSongLyrics(); renderSongVocabList(); }
+                    if(currentStory) { loadStory(currentStory.id); } 
+                    updateStats();
+                }
+                document.getElementById('btn-connect').classList.add('hidden');
+                document.getElementById('btn-reconnect').classList.add('hidden');
+                document.getElementById('sync-status').classList.remove('hidden');
+            } catch (err) { console.error('Error loading file:', err); }
+        }
+        
+        async function connectFile() {
+            try {
+                [fileHandle] = await window.showOpenFilePicker({
+                    types: [{ description: 'JSON Progress File', accept: {'application/json': ['.json']} }],
+                    multiple: false
+                });
+                await saveFileHandle(fileHandle);
+                await loadFromFile();
+            } catch (err) { if (err.name !== 'AbortError') alert("Could not connect to file."); }
+        }
+
+        // --- NEW: Core Folder Logic ---
+        async function connectCoreFolder() {
+            try {
+                coreDirHandle = await window.showDirectoryPicker();
+                await saveCoreFolderHandle(coreDirHandle);
+                await loadCoreFromFolder();
+            } catch(err) {
+                if (err.name !== 'AbortError') console.error("Error connecting core folder:", err);
+            }
+        }
+
+        async function loadCoreFromFolder() {
+            if(!coreDirHandle) return;
+            try {
+                // Permission check
+                const permission = await coreDirHandle.queryPermission({ mode: 'read' });
+                if (permission !== 'granted') {
+                    const request = await coreDirHandle.requestPermission({ mode: 'read' });
+                    if (request !== 'granted') return;
+                }
+
+                const fileEntries = [];
+                // Collect Files
+                for await (const entry of coreDirHandle.values()) {
+                    if (entry.kind === 'file' && entry.name.endsWith('.json')) {
+                        fileEntries.push(entry);
+                    }
+                }
+
+                // CRITICAL: Sort by name to preserve index order (day_01, day_02)
+                fileEntries.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+
+                window.coreVocabulary = []; // Reset
+                let totalLoaded = 0;
+
+                for (const entry of fileEntries) {
+                    try {
+                        const file = await entry.getFile();
+                        const text = await file.text();
+                        const dayData = JSON.parse(text);
+                        if(Array.isArray(dayData)) {
+                            window.coreVocabulary.push(...dayData);
+                            totalLoaded += dayData.length;
+                        }
+                    } catch(e) { console.error("Error parsing core file:", entry.name); }
+                }
+
+                // UI Update
+                if(totalLoaded > 0) {
+                    document.getElementById('core-data-setup').classList.add('hidden');
+                    renderCoreDays();
+                    updateStats();
+                }
+
+            } catch(err) { console.error("Core folder load failed", err); }
+        }
+
+        // --- Story Folder Logic ---
+        async function connectStoryFolder() {
+            try {
+                storyDirHandle = await window.showDirectoryPicker();
+                await saveStoryFolderHandle(storyDirHandle);
+                await loadStoriesFromFolder();
+            } catch(err) {
+                if (err.name !== 'AbortError') console.error("Error connecting folder:", err);
+            }
+        }
+        
+        async function loadStoriesFromFolder() {
+            if(!storyDirHandle) return;
+            
+            try {
+                // Request permission if needed
+                const permission = await storyDirHandle.queryPermission({ mode: 'read' });
+                if (permission !== 'granted') {
+                    const request = await storyDirHandle.requestPermission({ mode: 'read' });
+                    if (request !== 'granted') return;
+                }
+
+                // Scan folder
+                localStories = []; // Reset local cache
+                let count = 0;
+                
+                for await (const entry of storyDirHandle.values()) {
+                    if (entry.kind === 'file' && entry.name.endsWith('.json')) {
+                        const file = await entry.getFile();
+                        const text = await file.text();
+                        try {
+                            const storyData = JSON.parse(text);
+                            // Basic validation
+                            if(storyData.id && storyData.content) {
+                                localStories.push(storyData);
+                                count++;
+                            }
+                        } catch(e) { console.error("Invalid JSON:", entry.name); }
+                    }
+                }
+                
+                // UI Updates
+                if(count > 0) {
+                    document.getElementById('btn-link-stories').classList.add('hidden');
+                    document.getElementById('btn-reload-stories').classList.remove('hidden');
+                    document.getElementById('story-folder-status').classList.remove('hidden');
+                    document.getElementById('story-folder-status').innerHTML = `<span>📂 Loaded ${count} stories from folder.</span> <button onclick="loadStoriesFromFolder()" class="underline font-bold hover:text-blue-900 ml-2">Reload</button>`;
+                }
+                
+                renderLibrary();
+                
+            } catch(err) {
+                console.error("Folder scan failed:", err);
+                alert("Could not scan folder. Please reconnect.");
+            }
+        }
+
+        // --- Song Folder Logic ---
+        async function connectSongFolder() {
+            try {
+                songDirHandle = await window.showDirectoryPicker();
+                await saveSongFolderHandle(songDirHandle);
+                await loadSongsFromFolder();
+            } catch(err) {
+                if (err.name !== 'AbortError') console.error("Error connecting song folder:", err);
+            }
+        }
+
+        async function loadSongsFromFolder() {
+            if(!songDirHandle) return;
+            try {
+                const permission = await songDirHandle.queryPermission({ mode: 'read' });
+                if (permission !== 'granted') {
+                    const request = await songDirHandle.requestPermission({ mode: 'read' });
+                    if (request !== 'granted') return;
+                }
+
+                let loadedCount = 0;
+                for await (const entry of songDirHandle.values()) {
+                    if (entry.kind === 'file' && entry.name.endsWith('.json')) {
+                        const file = await entry.getFile();
+                        const text = await file.text();
+                        try {
+                            const songData = JSON.parse(text);
+                            if(songData.id && songData.audioFileName) {
+                                try {
+                                    const audioHandle = await songDirHandle.getFileHandle(songData.audioFileName);
+                                    const audioFile = await audioHandle.getFile();
+                                    songData.audioFile = URL.createObjectURL(audioFile);
+                                    if(!window.songs) window.songs = {};
+                                    window.songs[songData.id] = songData;
+                                    loadedCount++;
+                                } catch(e) { console.warn(`Found JSON for ${songData.title} but missing MP3: ${songData.audioFileName}`); }
+                            }
+                        } catch(e) { console.error("Invalid Song JSON:", entry.name); }
+                    }
+                }
+                
+                if(loadedCount > 0) {
+                    document.getElementById('btn-link-songs').classList.add('hidden');
+                    document.getElementById('btn-reload-songs').classList.remove('hidden');
+                    document.getElementById('song-error').classList.add('hidden'); 
+                    const status = document.getElementById('song-folder-status');
+                    status.classList.remove('hidden');
+                    status.textContent = `🎵 Loaded ${loadedCount} songs locally`;
+                    const selector = document.getElementById('song-select');
+                    selector.innerHTML = '<option value="">Choose a song...</option>';
+                    setupSongSelector(); 
+                }
+                
+            } catch(err) { console.error("Song folder scan failed:", err); alert("Could not scan song folder."); }
+        }
+
+        // --- Init ---
+        async function init() {
+            // Check for hardcoded core data or show Setup UI
+            if (!coreVocabulary || coreVocabulary.length === 0) {
+                document.getElementById('core-data-setup').classList.remove('hidden');
+            }
+            
+            setTimeout(() => {
+                if (!window.songs || Object.keys(window.songs).length === 0) document.getElementById('song-error').classList.remove('hidden');
+                else setupSongSelector();
+            }, 500);
+            
+            const savedCore = localStorage.getItem(CORE_KEY);
+            const savedSongs = localStorage.getItem(SONGS_KEY);
+            const savedStories = localStorage.getItem(STORIES_KEY);
+            const savedTimestamps = localStorage.getItem(TIMESTAMP_KEY); // Load timestamps
+            const savedMnemonics = localStorage.getItem(MNEMONICS_KEY); // Load mnemonics
+            
+            if (savedCore) coreKnown = JSON.parse(savedCore);
+            if (savedSongs) songProgress = JSON.parse(savedSongs);
+            if (savedStories) storyProgress = JSON.parse(savedStories);
+            if (savedMnemonics) mnemonics = JSON.parse(savedMnemonics);
+            
+            if (savedTimestamps) {
+                masteryTimestamps = JSON.parse(savedTimestamps);
+                // integrity check on load
+                if(!masteryTimestamps.core) masteryTimestamps.core = {};
+                if(!masteryTimestamps.songs) masteryTimestamps.songs = {};
+                if(!masteryTimestamps.stories) masteryTimestamps.stories = {};
+            }
+            
+            // 1. Check for progress file
+            const storedHandle = await getFileHandle();
+            if (storedHandle) {
+                try {
+                    const permission = await storedHandle.queryPermission({ mode: 'readwrite' });
+                    if (permission === 'granted') { fileHandle = storedHandle; await loadFromFile(); } 
+                    else { document.getElementById('btn-connect').classList.add('hidden'); document.getElementById('btn-reconnect').classList.remove('hidden'); }
+                } catch (err) { console.log('Stored file handle is invalid'); }
+            }
+            
+            // 2. Check for story folder
+            const storedStoryFolder = await getStoryFolderHandle();
+            if (storedStoryFolder) {
+                storyDirHandle = storedStoryFolder;
+                document.getElementById('btn-link-stories').classList.add('hidden');
+                document.getElementById('btn-reload-stories').classList.remove('hidden');
+            }
+
+            // 3. Check for song folder
+            const storedSongFolder = await getSongFolderHandle();
+            if (storedSongFolder) {
+                songDirHandle = storedSongFolder;
+                document.getElementById('btn-link-songs').classList.add('hidden');
+                document.getElementById('btn-reload-songs').classList.remove('hidden');
+            }
+
+            // 4. NEW: Check for core folder
+            const storedCoreFolder = await getCoreFolderHandle();
+            if (storedCoreFolder) {
+                coreDirHandle = storedCoreFolder;
+                document.getElementById('core-data-setup').classList.add('hidden');
+                // We don't auto-load immediately because it requires user gesture/permission on some browsers
+                // But we show reload button if we have handle
+                const btn = document.getElementById('btn-reload-core');
+                if(btn) {
+                    btn.classList.remove('hidden');
+                    btn.parentNode.parentNode.classList.remove('hidden'); // Ensure container is visible
+                    // Optional: Try Auto-load if permissions allow (Chrome often does for same-session)
+                     loadCoreFromFolder();
+                }
+            }
+            
+            setupCoreToggle();
+            setupSongReviewToggle();
+            setupStoryReviewToggle(); 
+            setupAudioPlayer();
+            renderCoreDays();
+            setTimeout(renderLibrary, 100); 
+            updateStats();
+        }
+
+        async function autoSave() {
+            if (!fileHandle) return;
+            try {
+                // Convert core IDs to word objects
+                const coreKnownWords = coreKnown.map(id => {
+                    const word = coreVocabulary.find(w => w.originalIndex === id || coreVocabulary.indexOf(w) === id);
+                    if (!word) return { id, indo: "Unknown", eng: "Unknown", emoji: "❓" };
+                    return {
+                        id: word.originalIndex !== undefined ? word.originalIndex : id,
+                        indo: word.indo,
+                        eng: word.eng,
+                        emoji: word.emoji,
+                        day: word.day
+                    };
+                });
+
+                // Convert song progress IDs to word objects
+                const songProgressWords = {};
+                Object.keys(songProgress).forEach(songId => {
+                    const song = window.songs ? window.songs[songId] : null;
+                    if (song && song.vocabulary) {
+                        songProgressWords[songId] = songProgress[songId].map(vocabId => {
+                            const word = song.vocabulary.find(w => w.id === vocabId);
+                            if (!word) return { id: vocabId, indo: "Unknown", eng: "Unknown", emoji: "🎵" };
+                            return {
+                                id: word.id,
+                                indo: word.indo,
+                                eng: word.eng,
+                                emoji: word.emoji
+                            };
+                        });
+                    } else {
+                        songProgressWords[songId] = songProgress[songId];
+                    }
+                });
+
+                // Convert story progress IDs to word objects
+                const storyProgressWords = {};
+                Object.keys(storyProgress).forEach(storyId => {
+                    const allStories = [...(window.stories || []), ...localStories];
+                    const story = allStories.find(s => s.id === storyId);
+                    if (story && story.vocabulary) {
+                        storyProgressWords[storyId] = storyProgress[storyId].map(vocabId => {
+                            const word = story.vocabulary.find(w => w.id === vocabId);
+                            if (!word) return { id: vocabId, indo: "Unknown", eng: "Unknown", emoji: "📖" };
+                            return {
+                                id: word.id,
+                                indo: word.indo,
+                                eng: word.eng,
+                                emoji: word.emoji
+                            };
+                        });
+                    } else {
+                        storyProgressWords[storyId] = storyProgress[storyId];
+                    }
+                });
+
+                const data = {
+                    updatedAt: new Date().toISOString(),
+                    coreKnown: coreKnown, // Keep IDs for internal use
+                    coreKnownWords: coreKnownWords, // NEW: Full word objects
+                    songProgress: songProgress, // Keep IDs for internal use
+                    songProgressWords: songProgressWords, // NEW: Full word objects
+                    storyProgress: storyProgress, // Keep IDs for internal use
+                    storyProgressWords: storyProgressWords, // NEW: Full word objects
+                    masteryTimestamps: masteryTimestamps, // SAVE TIMESTAMPS
+                    mnemonics: mnemonics // SAVE MNEMONICS
+                };
+                const writable = await fileHandle.createWritable();
+                await writable.write(JSON.stringify(data, null, 2));
+                await writable.close();
+                const status = document.getElementById('sync-status');
+                status.style.opacity = '0.5';
+                setTimeout(() => status.style.opacity = '1', 200);
+            } catch (err) { console.error("Auto-save failed:", err); }
+        }
+
+        // ==========================================
+        // 🎨 UI LOGIC
+        // ==========================================
+
+        window.switchTab = function(tab) {
+            currentTab = tab;
+            ['core', 'songs', 'inventory', 'read', 'tree'].forEach(t => {
+                const view = document.getElementById(`view-${t}`);
+                const btn = document.getElementById(`tab-${t}`);
+                if(view) view.classList.toggle('hidden', t !== tab);
+                if(btn) btn.classList.toggle('active', t === tab);
+            });
+
+            const coreWrapper = document.getElementById('core-toggle-wrapper');
+            const songWrapper = document.getElementById('song-toggle-wrapper');
+            const storyWrapper = document.getElementById('story-toggle-wrapper');
+            
+            coreWrapper.classList.add('hidden');
+            songWrapper.classList.add('hidden');
+            storyWrapper.classList.add('hidden');
+
+            if (tab === 'core') coreWrapper.classList.remove('hidden');
+            if (tab === 'songs') songWrapper.classList.remove('hidden');
+            if (tab === 'inventory') renderInventory();
+            if (tab === 'read') renderLibrary(); 
+            
+            if (tab !== 'songs' && audioPlayer) pauseAudio();
+            if (tab !== 'read') resetTheme();
+            
+            updateStats();
+        }
+
+        function setupCoreToggle() {
+            const toggle = document.getElementById('review-toggle');
+            const container = document.getElementById('days-container');
+            toggle.addEventListener('change', (e) => {
+                e.target.checked ? container.classList.add('review-active') : container.classList.remove('review-active');
+            });
+        }
+        
+        // ==========================================
+        // 📖 STORY / READING LOGIC
+        // ==========================================
+        
+        function renderLibrary() {
+            const container = document.getElementById('library-grid');
+            // COMBINE: Built-in Window Stories + Local File Stories
+            const builtIn = window.stories || [];
+            const library = [...builtIn, ...localStories];
+            
+            // Remove duplicates by ID (prefer local if collision)
+            const uniqueLib = [];
+            const seenIds = new Set();
+            library.forEach(s => {
+                if(!seenIds.has(s.id)) {
+                    seenIds.add(s.id);
+                    uniqueLib.push(s);
+                }
+            });
+            
+            if(uniqueLib.length === 0) {
+                container.innerHTML = `<div class="col-span-3 text-center py-12 text-slate-400">No stories found. Try linking a folder!</div>`;
+                return;
+            }
+            
+            container.innerHTML = uniqueLib.map(story => {
+                const knownCount = (storyProgress[story.id] || []).length;
+                const totalCount = story.vocabulary ? story.vocabulary.length : 0;
+                const percent = totalCount === 0 ? 0 : Math.round((knownCount/totalCount)*100);
+                
+                return `
+                <div onclick="loadStory('${story.id}')" class="library-card p-6 cursor-pointer group hover:border-indigo-100 transition-all">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="text-4xl group-hover:scale-110 transition-transform">${story.coverEmoji || '📖'}</div>
+                        <span class="text-xs font-bold px-2 py-1 bg-slate-100 rounded text-slate-500">${story.difficulty || 'Easy'}</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-1 group-hover:text-indigo-600 transition-colors">${story.title}</h3>
+                    <p class="text-sm text-slate-400 mb-4">${story.category || 'General'}</p>
+                    
+                    <!-- Mini Progress Bar -->
+                    <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-indigo-500" style="width: ${percent}%"></div>
+                    </div>
+                    <div class="text-xs text-slate-400 mt-2 text-right">${knownCount}/${totalCount} Words</div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        window.loadStory = function(storyId) {
+            const builtIn = window.stories || [];
+            const library = [...builtIn, ...localStories];
+            const story = library.find(s => s.id === storyId);
+            if (!story) return;
+            
+            currentStory = story;
+            const theme = story.theme || { bg: "bg-slate-50", cardBg: "bg-white", font: "font-sans", textMain: "text-slate-800", highlight: "bg-yellow-100" };
+            
+            // 1. Switch Views
+            document.getElementById('library-view').classList.add('hidden');
+            document.getElementById('reader-view').classList.remove('hidden');
+            document.getElementById('story-toggle-wrapper').classList.remove('hidden');
+
+            window.scrollTo(0, 0);
+
+            // 2. Apply Theme
+            const body = document.body;
+            body.className = `min-h-screen pb-20 transition-colors duration-500 ${theme.bg}`;
+            
+            const card = document.getElementById('reader-card');
+            const panel = document.getElementById('story-vocab-panel');
+            card.className = `library-card p-8 md:p-12 min-h-[500px] transition-colors duration-500 ${theme.cardBg} ${theme.textMain} ${theme.font}`;
+            panel.className = `library-card p-6 sticky-panel transition-colors duration-500 ${theme.cardBg} ${theme.textMain}`;
+
+            // 3. Render Title & Badges
+            document.getElementById('reader-title').textContent = story.title;
+            const diffBadge = document.getElementById('reader-difficulty');
+            diffBadge.textContent = story.difficulty || 'Reader';
+            diffBadge.className = `px-2 py-1 text-xs font-bold uppercase tracking-wider rounded border ${theme.textMuted || 'text-slate-500'} bg-transparent border-current opacity-60`;
+
+            const catBadge = document.getElementById('reader-category');
+            if(story.category) {
+                catBadge.textContent = story.category;
+                catBadge.className = `px-2 py-1 text-xs font-bold uppercase tracking-wider rounded border ml-2 ${theme.textMuted || 'text-slate-500'} bg-transparent border-current opacity-60`;
+                catBadge.classList.remove('hidden');
+            } else {
+                catBadge.classList.add('hidden');
+            }
+
+            // 4. Render Content with Images
+            const contentDiv = document.getElementById('reader-content');
+            let htmlContent = '';
+            
+            // A. Hero Image
+            if (story.images) {
+                const heroImg = story.images.find(img => img.position === "top");
+                if (heroImg) {
+                    htmlContent += `
+                    <figure class="mb-8 rounded-2xl overflow-hidden shadow-lg border border-slate-100/50">
+                        <img src="${heroImg.url}" alt="${heroImg.alt}" class="w-full h-64 md:h-80 object-cover">
+                        <figcaption class="text-xs text-center ${theme.textMuted || 'text-slate-400'} mt-2 italic">${heroImg.description}</figcaption>
+                    </figure>`;
+                }
+            }
+
+            // B. Paragraphs & Inline Images
+            story.content.forEach((para, index) => {
+                htmlContent += `<p class="story-paragraph ${theme.textMain}">${para}</p>`;
+                
+                // Check for image after this paragraph
+                if (story.images) {
+                    const inlineImg = story.images.find(img => img.position === `after-paragraph-${index + 1}`);
+                    if (inlineImg) {
+                        htmlContent += `
+                        <figure class="my-8 rounded-xl overflow-hidden shadow-md border border-slate-100/50 max-w-2xl mx-auto">
+                            <img src="${inlineImg.url}" alt="${inlineImg.alt}" class="w-full h-auto max-h-72 object-cover">
+                            <figcaption class="text-xs text-center ${theme.textMuted || 'text-slate-400'} p-2 bg-white/50 italic">${inlineImg.description}</figcaption>
+                        </figure>`;
+                    }
+                }
+            });
+
+            // C. Cultural Notes Section
+            if (story.culturalNotes && story.culturalNotes.points && story.culturalNotes.points.length > 0) {
+                htmlContent += `
+                <div class="mt-12 p-6 rounded-2xl bg-amber-50/80 border border-amber-100 text-amber-900 backdrop-blur-sm">
+                    <h3 class="font-bold text-xl mb-4 flex items-center gap-2">
+                        <span>🇮🇩</span> 
+                        ${story.culturalNotes.title || 'Cultural Insights'}
+                    </h3>
+                    <ul class="list-disc pl-5 space-y-2">
+                        ${story.culturalNotes.points.map(p => {
+                            // Replace bold markdown with strong tag
+                            return `<li>${p.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`;
+                        }).join('')}
+                    </ul>
+                </div>
+                `;
+            }
+
+            // D. Reflection Prompts
+            if (story.reflectionPrompts && story.reflectionPrompts.length > 0) {
+                htmlContent += `
+                <div class="mt-8 p-6 rounded-2xl bg-indigo-50/80 border border-indigo-100 text-indigo-900 backdrop-blur-sm">
+                    <h3 class="font-bold text-xl mb-4 flex items-center gap-2">
+                        <span>🤔</span> Reflection
+                    </h3>
+                    <ul class="space-y-4">
+                        ${story.reflectionPrompts.map(p => `
+                            <li class="flex gap-3">
+                                <span class="text-indigo-400 font-bold">•</span>
+                                <span class="font-medium italic">"${p}"</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+                `;
+            }
+            
+            // E. Vocabulary Review Groups (Optional)
+            if (story.vocabularyReview && story.vocabularyReview.categories) {
+                htmlContent += `
+                <div class="mt-8 p-6 rounded-2xl bg-slate-50/80 border border-slate-100 text-slate-700 backdrop-blur-sm">
+                    <h3 class="font-bold text-lg mb-4 text-slate-800">Review by Category</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${Object.entries(story.vocabularyReview.categories).map(([catName, words]) => `
+                            <div>
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">${catName}</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    ${words.map(w => `<span class="bg-white border border-slate-200 px-2 py-1 rounded text-sm">${w}</span>`).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                `;
+            }
+
+            contentDiv.innerHTML = htmlContent;
+
+            // 5. Interactive Vocab Setup
+            const vocabSpans = contentDiv.querySelectorAll('.vocab-word');
+            vocabSpans.forEach(span => {
+                 span.className = `vocab-word transition-all cursor-pointer ${theme.highlight}`;
+                 span.onclick = (e) => {
+                     e.stopPropagation();
+                     const id = parseInt(span.dataset.id);
+                     openStoryModal(id);
+                 };
+                 
+                 const id = parseInt(span.dataset.id);
+                 const knownIds = storyProgress[story.id] || [];
+                 if(knownIds.includes(id)) {
+                     span.style.opacity = '0.6';
+                     span.style.textDecoration = 'line-through';
+                     span.style.textDecorationColor = 'currentColor';
+                 }
+            });
+
+            renderStoryVocabPanel();
+        }
+        
+        function renderStoryVocabPanel() {
+            const list = document.getElementById('story-vocab-list');
+            const knownIds = storyProgress[currentStory.id] || [];
+            const theme = currentStory.theme || {};
+            
+            document.getElementById('story-vocab-title').className = `font-bold text-lg border-b pb-4 mb-4 ${theme.textMain} border-current opacity-80`;
+            document.getElementById('story-progress-text').textContent = `${knownIds.length}/${currentStory.vocabulary.length} Words`;
+
+            list.innerHTML = currentStory.vocabulary.map(word => {
+                const isKnown = knownIds.includes(word.id);
+                const btnStyle = isKnown ? `opacity-50` : `hover:scale-105`;
+                
+                return `
+                <div onclick="openStoryModal(${word.id})" 
+                     class="story-item group flex items-center justify-between p-3 rounded-lg border border-transparent hover:border-current hover:bg-black/5 cursor-pointer transition-all ${btnStyle}">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xl">${word.emoji}</span>
+                        <div>
+                            <div class="font-bold leading-tight ${theme.textMain}">${word.indo}</div>
+                            <div class="eng-text text-xs ${theme.textMuted || 'opacity-70'} transition-all duration-300">${word.eng}</div>
+                        </div>
+                    </div>
+                    ${isKnown ? '✅' : ''}
+                </div>
+                `;
+            }).join('');
+        }
+        
+        window.closeStory = function() {
+            document.getElementById('reader-view').classList.add('hidden');
+            document.getElementById('library-view').classList.remove('hidden');
+            document.getElementById('story-toggle-wrapper').classList.add('hidden'); // Hide Toggle
+            resetTheme();
+            renderLibrary(); 
+        }
+        
+        function resetTheme() {
+            document.body.className = "min-h-screen text-slate-600 pb-20";
+            document.body.style.backgroundImage = ""; 
+        }
+
+        window.openStoryModal = function(vocabId) {
+            const word = currentStory.vocabulary.find(w => w.id === vocabId);
+            if(!word) return;
+            document.getElementById('modal-indo').innerText = word.indo;
+            document.getElementById('modal-eng').innerText = word.eng;
+            
+            // --- CULTURAL NOTE HANDLING ---
+            const noteEl = document.getElementById('modal-note');
+            if (word.cultural_note) {
+                noteEl.innerHTML = `
+                    <div class="text-sm bg-amber-50 text-amber-900 p-3 rounded-lg mt-3 border border-amber-100 flex gap-2 text-left">
+                        <span class="text-lg">💡</span>
+                        <span class="italic leading-snug">${word.cultural_note}</span>
+                    </div>
+                `;
+                noteEl.classList.remove('hidden');
+            } else {
+                noteEl.classList.add('hidden');
+            }
+            // -----------------------------
+            
+            // Display mnemonic image
+            displayMnemonicInModal(vocabId);
+
+            const btn = document.getElementById('modal-action-btn');
+            const knownIds = storyProgress[currentStory.id] || [];
+            updateModalButton(btn, knownIds.includes(vocabId));
+            document.getElementById('word-modal').classList.add('active');
+            document.getElementById('word-modal-overlay').classList.add('active');
+            btn.onclick = function() { toggleStoryWord(vocabId); closeModal(); };
+        }
+
+        window.toggleStoryWord = function(vocabId) {
+            const sId = currentStory.id;
+            if(!storyProgress[sId]) storyProgress[sId] = [];
+            if(!masteryTimestamps.stories[sId]) masteryTimestamps.stories[sId] = {}; // Ensure obj
+
+            const idx = storyProgress[sId].indexOf(vocabId);
+            if(idx > -1) {
+                // Removing
+                storyProgress[sId].splice(idx, 1);
+                delete masteryTimestamps.stories[sId][vocabId]; // Cleanup timestamp
+            } else {
+                // Adding / Ticking
+                storyProgress[sId].push(vocabId);
+                masteryTimestamps.stories[sId][vocabId] = new Date().toISOString(); // Timestamp
+            }
+            
+            localStorage.setItem(STORIES_KEY, JSON.stringify(storyProgress));
+            localStorage.setItem(TIMESTAMP_KEY, JSON.stringify(masteryTimestamps));
+            autoSave();
+            loadStory(sId);
+        }
+
+        // ==========================================
+        // 🎒 INVENTORY (Unified)
+        // ==========================================
+        
+        window.renderInventory = function() {
+            const container = document.getElementById('inventory-grid');
+            const searchInput = document.getElementById('inventory-search');
+            const query = searchInput.value.toLowerCase().trim();
+            const emptyState = document.getElementById('inventory-empty');
+            const countLabel = document.getElementById('inventory-count');
+            
+            let allMastered = coreVocabulary
+                .map((word, index) => ({...word, originalIndex: index, type: 'core'}))
+                .filter(word => coreKnown.includes(word.originalIndex));
+
+            if (window.songs) {
+                Object.values(window.songs).forEach(song => {
+                    const knownIds = songProgress[song.id] || [];
+                    if (knownIds.length > 0 && song.vocabulary) {
+                        const songWords = song.vocabulary.filter(w => knownIds.includes(w.id)).map(w => ({...w, type: 'song', source: song.title}));
+                        allMastered = allMastered.concat(songWords);
+                    }
+                });
+            }
+            
+            // Combine Built-in and Local Stories
+            const library = [...(window.stories||[]), ...localStories];
+            library.forEach(story => {
+                const knownIds = storyProgress[story.id] || [];
+                if (knownIds.length > 0) {
+                     const storyWords = story.vocabulary.filter(w => knownIds.includes(w.id)).map(w => ({...w, type: 'story', source: story.title}));
+                     allMastered = allMastered.concat(storyWords);
+                }
+            });
+
+            const uniqueMastered = [];
+            const seenIndo = new Set();
+            allMastered.forEach(word => {
+                const key = word.indo.toLowerCase().trim();
+                if (!seenIndo.has(key)) { seenIndo.add(key); uniqueMastered.push(word); }
+            });
+            
+            let filtered = uniqueMastered;
+            if (query) {
+                filtered = uniqueMastered.filter(w => w.indo.toLowerCase().includes(query) || w.eng.toLowerCase().includes(query));
+            }
+            
+            countLabel.textContent = `${filtered.length} unique words`;
+            if (filtered.length === 0 && !query) { container.innerHTML = ''; emptyState.classList.remove('hidden'); return; }
+            emptyState.classList.add('hidden');
+            
+            const html = filtered.map(word => {
+                let badge = '';
+                if(word.type === 'song') badge = '<span class="source-badge">🎵 Song</span>';
+                if(word.type === 'story') badge = '<span class="source-badge">📖 Story</span>';
+                
+                // 🟢 CHECK FOR FAMILY DATA (Tree Badge)
+                let treeBadge = '';
+                let clickAction = '';
+                if(word.type === 'core' && word.family) {
+                    treeBadge = `
+                        <div class="tree-badge">
+                            <span>🌳</span> Tree
+                        </div>
+                    `;
+                    clickAction = `onclick="event.stopPropagation(); openTree(${word.originalIndex})"`;
+                }
+
+                return `
+                <div ${clickAction} class="sticker-card bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center text-center gap-2 aspect-[4/3] shadow-sm transition-all">
+                    ${badge}
+                    <div class="sticker-visible flex flex-col items-center gap-2 transition-all duration-300">
+                        <div class="text-3xl">${word.emoji}</div>
+                        <div class="font-bold text-slate-800 text-lg leading-tight">${word.indo}</div>
+                    </div>
+                    <div class="sticker-hidden rounded-2xl">
+                        <div class="text-center px-2">
+                            <div class="text-2xl mb-1">${word.emoji}</div>
+                            <span class="uppercase tracking-wide text-sm">${word.eng}</span>
+                        </div>
+                    </div>
+                    ${treeBadge}
+                </div>`;
+            }).join('');
+            container.innerHTML = html;
+        }
+
+        // ==========================================
+        // 🌳 TREE VIEW LOGIC
+        // ==========================================
+
+        const AFFIX_MASTER_LIST = [
+           { id: 'me-', label: 'Me-', type: 'verb' },
+           { id: 'ber-', label: 'Ber-', type: 'verb' },
+           { id: 'di-', label: 'Di-', type: 'verb' },
+           { id: 'ter-', label: 'Ter-', type: 'verb' },
+           { id: 'pe-', label: 'Pe-', type: 'noun' },
+           { id: '-an', label: '-an', type: 'noun' },
+           { id: 'pe-an', label: 'Pe-...-an', type: 'abstract' },
+           { id: 'ke-an', label: 'Ke-...-an', type: 'abstract' },
+           { id: 'me-kan', label: 'Me-...-kan', type: 'causative' },
+           { id: 'me-i', label: 'Me-...-i', type: 'causative' }
+        ];
+
+        window.openTree = function(index) {
+            const word = coreVocabulary[index];
+            if(!word || !word.family) return;
+
+            const container = document.getElementById('tree-canvas');
+            container.innerHTML = '';
+
+            // 1. Render ROOT Node
+            const rootNode = document.createElement('div');
+            rootNode.className = 'tree-node root';
+            rootNode.innerHTML = `
+                <div class="text-3xl mb-1">${word.emoji}</div>
+                <div class="node-word text-2xl">${word.indo}</div>
+                <div class="node-meaning text-indigo-500 font-medium">${word.family.root_meaning}</div>
+            `;
+            container.appendChild(rootNode);
+
+            // 2. Render Branches based on Master List
+            AFFIX_MASTER_LIST.forEach(affix => {
+                const branchData = word.family.trees[affix.id];
+                const node = document.createElement('div');
+                
+                if (branchData) {
+                    // Active Branch (True)
+                    node.className = 'tree-node active';
+                    node.innerHTML = `
+                        <div class="node-affix">${affix.label}</div>
+                        <div class="node-word">${branchData.text}</div>
+                        <div class="node-meaning">${branchData.meaning}</div>
+                    `;
+                } else {
+                    // Dead Branch (False/Implied)
+                    node.className = 'tree-node dead';
+                    node.innerHTML = `
+                        <div class="node-affix">${affix.label}</div>
+                        <div class="node-word text-slate-300">---</div>
+                    `;
+                }
+                container.appendChild(node);
+            });
+
+            switchTab('tree');
+        }
+
+
+        // Shared Logic
+        window.openCoreModal = function(index) {
+            const word = coreVocabulary.find(w => w.originalIndex === index);
+            if(!word) return;
+            
+            document.getElementById('modal-indo').innerText = word.indo;
+            document.getElementById('modal-eng').innerText = word.eng;
+            
+            // Hide cultural note for core vocab
+            document.getElementById('modal-note').classList.add('hidden');
+            
+            // Display mnemonic image
+            displayMnemonicInModal(index);
+            
+            const btn = document.getElementById('modal-action-btn');
+            const isKnown = coreKnown.includes(index);
+            updateModalButton(btn, isKnown);
+            document.getElementById('word-modal').classList.add('active');
+            document.getElementById('word-modal-overlay').classList.add('active');
+            btn.onclick = function() { toggleCoreWord(index); closeModal(); };
+        }
+        
+        window.toggleCoreWord = function(index) {
+            const el = document.getElementById(`word-card-${index}`);
+            if (coreKnown.includes(index)) { 
+                // Removing
+                coreKnown = coreKnown.filter(i => i !== index); 
+                delete masteryTimestamps.core[index]; // Remove timestamp
+                if(el) el.classList.remove('checked'); 
+            } else { 
+                // Adding / Ticking
+                coreKnown.push(index); 
+                masteryTimestamps.core[index] = new Date().toISOString(); // Timestamp
+                if(el) el.classList.add('checked'); 
+                if(el) el.classList.add('anim-squish'); 
+                setTimeout(() => { if(el) el.classList.remove('anim-squish'); }, 300); 
+            }
+            localStorage.setItem(CORE_KEY, JSON.stringify(coreKnown));
+            localStorage.setItem(TIMESTAMP_KEY, JSON.stringify(masteryTimestamps));
+            autoSave();
+            renderCoreDays();
+            if(currentTab === 'core') updateStats();
+        }
+        
+        window.toggleWeek = function(weekNum) { document.getElementById(`week-container-${weekNum}`).classList.toggle('active'); }
+        function renderCoreDays() {
+            const container = document.getElementById('days-container');
+            const openWeeks = Array.from(document.querySelectorAll('.week-container.active')).map(el => el.id);
+            container.innerHTML = '';
+            const groupedByWeek = {};
+            let maxWeek = 0;
+            coreVocabulary.forEach((word, index) => {
+                word.originalIndex = index; const weekNum = Math.ceil(word.day / 7); if (weekNum > maxWeek) maxWeek = weekNum;
+                if (!groupedByWeek[weekNum]) groupedByWeek[weekNum] = []; groupedByWeek[weekNum].push(word);
+            });
+            Object.keys(groupedByWeek).forEach((weekNumStr) => {
+                const weekNum = parseInt(weekNumStr); const wordsInWeek = groupedByWeek[weekNum];
+                const totalInWeek = wordsInWeek.length; const knownInWeek = wordsInWeek.filter(w => coreKnown.includes(w.originalIndex)).length;
+                const isComplete = knownInWeek === totalInWeek; let isActive = openWeeks.length > 0 ? openWeeks.includes(`week-container-${weekNum}`) : (weekNum === maxWeek);
+                const groupedDays = wordsInWeek.reduce((acc, word) => { if (!acc[word.day]) acc[word.day] = []; acc[word.day].push(word); return acc; }, {});
+                const weekDiv = document.createElement('div'); weekDiv.id = `week-container-${weekNum}`; weekDiv.className = `week-container ${isActive ? 'active' : ''}`;
+                const progressColor = isComplete ? 'text-emerald-600 bg-emerald-50' : 'text-slate-500 bg-slate-100';
+                let html = `<div class="week-header p-5 flex items-center justify-between" onclick="toggleWeek(${weekNum})"><div class="flex items-center gap-4"><h3 class="text-xl font-bold text-slate-800">Week ${weekNum}</h3><span class="text-xs font-bold px-3 py-1 rounded-full ${progressColor}">${knownInWeek}/${totalInWeek} Mastered</span></div><div class="week-chevron text-slate-400"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></div></div><div class="week-content px-4 md:px-6"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">`;
+                Object.keys(groupedDays).forEach((dayNum) => {
+                    const words = groupedDays[dayNum]; const accent = accents[(dayNum - 1) % accents.length];
+                    const halfPoint = Math.ceil(words.length / 2); const showHalftime = words.length > 12;
+                    html += `<div class="day-card p-5 flex flex-col h-full"><div class="flex items-center justify-between mb-4"><div class="flex items-center gap-3"><span class="${accent.bg} ${accent.text} text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Day ${dayNum}</span></div><span class="text-xs font-semibold text-slate-400">${words.length} words</span></div><div class="grid grid-cols-1 xl:grid-cols-2 gap-x-3 gap-y-2 flex-1">`;
+                    words.forEach((word, index) => {
+                        if (showHalftime && index === halfPoint) { html += `<div class="col-span-1 xl:col-span-2 py-2 flex items-center gap-3 opacity-60"><div class="h-px bg-slate-200 flex-1"></div><span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Rest Stop</span><div class="h-px bg-slate-200 flex-1"></div></div>`; }
+                        const isChecked = coreKnown.includes(word.originalIndex);
+                        html += `<div id="word-card-${word.originalIndex}" onclick="event.stopPropagation(); openCoreModal(${word.originalIndex})" class="word-item ${isChecked ? 'checked' : ''} cursor-pointer rounded-xl p-2 flex items-center justify-between group"><div class="flex items-center gap-3"><div class="emoji-icon text-xl transition-transform duration-300">${word.emoji}</div><div><div class="font-semibold text-sm text-slate-800 leading-tight">${word.indo}</div><div class="eng-text text-xs font-medium text-slate-400 mt-0.5 transition-all duration-300">${word.eng}</div></div></div><div class="check-circle w-5 h-5 rounded-full border-2 border-slate-200 flex items-center justify-center bg-white shadow-sm flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></div></div>`;
+                    });
+                    html += `</div></div>`;
+                });
+                html += `</div></div>`; weekDiv.innerHTML = html; container.appendChild(weekDiv);
+            });
+        }
+        
+        function setupAudioPlayer() { 
+            audioPlayer = document.getElementById('audio-player');
+            audioPlayer.addEventListener('timeupdate', () => { if (audioPlayer.duration) { const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100; document.getElementById('progress-bar-fill').style.width = progress + '%'; document.getElementById('current-time').textContent = formatTime(audioPlayer.currentTime); highlightCurrentLine(); if (targetEndTime !== null && audioPlayer.currentTime >= targetEndTime) { pauseAudio(); targetEndTime = null; } } });
+            audioPlayer.addEventListener('loadedmetadata', () => { document.getElementById('total-time').textContent = formatTime(audioPlayer.duration); });
+            audioPlayer.addEventListener('ended', () => { isPlaying = false; document.getElementById('play-icon').classList.remove('hidden'); document.getElementById('pause-icon').classList.add('hidden'); clearActiveLine(); targetEndTime = null; });
+        }
+        function togglePlayPause() { if (isPlaying) pauseAudio(); else playAudio(); } 
+        function playAudio() { if (audioPlayer && audioPlayer.src) { audioPlayer.play(); isPlaying = true; document.getElementById('play-icon').classList.add('hidden'); document.getElementById('pause-icon').classList.remove('hidden'); } } 
+        function pauseAudio() { if (audioPlayer) { audioPlayer.pause(); isPlaying = false; document.getElementById('play-icon').classList.remove('hidden'); document.getElementById('pause-icon').classList.add('hidden'); } } 
+        function seekAudio(event) { if (!audioPlayer || !audioPlayer.duration) return; const progressBar = event.currentTarget; const clickX = event.offsetX; const width = progressBar.offsetWidth; const percentage = clickX / width; audioPlayer.currentTime = percentage * audioPlayer.duration; }
+        function setPlaybackSpeed(speed) { if (audioPlayer) { audioPlayer.playbackRate = speed; document.querySelectorAll('.speed-button').forEach(btn => { btn.classList.remove('active'); if (parseFloat(btn.dataset.speed) === speed) btn.classList.add('active'); }); } }
+        function formatTime(seconds) { if (isNaN(seconds)) return '0:00'; const mins = Math.floor(seconds / 60); const secs = Math.floor(seconds % 60); return `${mins}:${secs.toString().padStart(2, '0')}`; }
+        function highlightCurrentLine() { if (!currentSong || !currentSong.lyrics) return; const currentTime = audioPlayer.currentTime; let activeIndex = -1; for (let i = 0; i < currentSong.lyrics.length; i++) { const lyric = currentSong.lyrics[i]; if (currentTime >= lyric.startTime && currentTime < lyric.endTime) { activeIndex = i; break; } } if (activeIndex !== currentLyricIndex) { clearActiveLine(); currentLyricIndex = activeIndex; if (activeIndex >= 0) { const lineEl = document.getElementById(`lyric-line-${activeIndex}`); if (lineEl) { lineEl.classList.add('active'); lineEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); } } } }
+        function clearActiveLine() { document.querySelectorAll('.lyric-line').forEach(line => { line.classList.remove('active'); }); currentLyricIndex = -1; }
+        function playFromLine(lineIndex, isSingleClick) { if (!currentSong || !audioPlayer || !audioPlayer.src) return; const lyric = currentSong.lyrics[lineIndex]; if (lyric && lyric.startTime !== undefined) { audioPlayer.currentTime = lyric.startTime; if (isSingleClick) { targetEndTime = lyric.endTime; } else { targetEndTime = null; } playAudio(); } }
+        function handleLineClick(lineIndex) { clickCount++; if (clickCount === 1) { clickTimer = setTimeout(() => { playFromLine(lineIndex, true); clickCount = 0; }, 300); } else if (clickCount === 2) { clearTimeout(clickTimer); playFromLine(lineIndex, false); clickCount = 0; } }
+        function setupSongSelector() { const selector = document.getElementById('song-select'); if (!window.songs) return; Object.values(window.songs).forEach(song => { const option = document.createElement('option'); option.value = song.id; option.text = `${song.title} - ${song.artist}`; selector.appendChild(option); }); }
+        
+        function setupSongReviewToggle() { 
+            const toggle = document.getElementById('song-review-toggle'); 
+            const listContainer = document.getElementById('song-vocab-list'); 
+            toggle.addEventListener('change', (e) => { 
+                e.target.checked ? listContainer.classList.add('review-active') : listContainer.classList.remove('review-active'); 
+            }); 
+        }
+
+        function setupStoryReviewToggle() {
+            const toggle = document.getElementById('story-review-toggle');
+            const listContainer = document.getElementById('story-vocab-list');
+            toggle.addEventListener('change', (e) => {
+                e.target.checked ? listContainer.classList.add('review-active') : listContainer.classList.remove('review-active');
+            });
+        }
+        
+        function changeSong(songId) { 
+            if (!songId) { 
+                document.getElementById('now-playing-badge').className = 'inline-block bg-slate-100 text-slate-400 px-4 py-1.5 rounded-full text-sm font-bold mb-3'; 
+                document.getElementById('now-playing-badge').textContent = 'Select a Song'; 
+                document.getElementById('song-title').textContent = 'Choose Your Learning Track'; 
+                document.getElementById('song-artist').textContent = 'Pick a song from the dropdown'; 
+                document.getElementById('audio-controls').classList.add('hidden'); 
+                document.getElementById('song-content').classList.add('hidden'); 
+                pauseAudio(); 
+                currentSong = null; 
+                return; 
+            } 
+            
+            currentSong = window.songs[songId]; 
+            if(!currentSong) return; 
+            
+            const imgEl = document.getElementById('song-image'); 
+            if (imgEl) imgEl.src = currentSong.image || ''; 
+            
+            document.getElementById('now-playing-badge').className = 'inline-block bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-sm font-bold mb-3'; 
+            document.getElementById('now-playing-badge').textContent = 'Now Playing'; 
+            document.getElementById('song-title').innerText = currentSong.title; 
+            document.getElementById('song-artist').innerText = "by " + currentSong.artist; 
+            document.getElementById('song-content').classList.remove('hidden'); 
+            
+            // Handle both string URLs and Blob URLs for audio
+            if (currentSong.audioFile) { 
+                audioPlayer.src = currentSong.audioFile; 
+                document.getElementById('audio-controls').classList.remove('hidden'); 
+                pauseAudio(); 
+            } 
+            
+            renderSongLyrics(); 
+            renderSongVocabList(); 
+            updateStats(); 
+        }
+
+        function renderSongLyrics() { const container = document.getElementById('lyrics-container'); const songId = currentSong.id; const knownIds = songProgress[songId] || []; let html = ''; currentSong.lyrics.forEach((lineData, lineIndex) => { if (lineData.tokens.length === 0) { html += '<div class="h-6"></div>'; return; } html += `<div class="lyric-line" id="lyric-line-${lineIndex}" onclick="handleLineClick(${lineIndex})" style="cursor: pointer;">`; lineData.tokens.forEach(token => { if (token.vocabId) { const isKnown = knownIds.includes(token.vocabId); html += `<span class="lyric-word vocab ${isKnown ? 'known' : ''}" onclick="event.stopPropagation(); openSongModal(${token.vocabId}, this)" id="lyric-vocab-${token.vocabId}" data-id="${token.vocabId}">${token.text}</span> `; } else { html += `<span class="lyric-word">${token.text}</span> `; } }); html += '</div>'; }); container.innerHTML = html; }
+        function renderSongVocabList() { const container = document.getElementById('song-vocab-list'); const songId = currentSong.id; const knownIds = songProgress[songId] || []; if(!currentSong.vocabulary || currentSong.vocabulary.length === 0) { container.innerHTML = '<div class="text-slate-400 text-center">No vocabulary found.</div>'; return; } document.getElementById('vocab-count').textContent = `${currentSong.vocabulary.length} words`; let html = ''; currentSong.vocabulary.forEach(word => { const isKnown = knownIds.includes(word.id); html += `<div id="panel-vocab-${word.id}" onclick="openSongModal(${word.id})" class="word-item ${isKnown ? 'checked' : ''} cursor-pointer rounded-xl p-3 flex items-center justify-between group border border-slate-50 shadow-sm mb-2"><div class="flex items-center gap-3"><div class="text-2xl">${word.emoji || '🎵'}</div><div><div class="font-semibold text-slate-800 leading-tight">${word.indo}</div><div class="eng-text text-xs font-medium text-slate-400 mt-0.5 transition-all duration-300">${word.eng}</div></div></div><div class="check-circle w-5 h-5 rounded-full border-2 border-slate-200 flex items-center justify-center bg-white shadow-sm flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></div></div>`; }); container.innerHTML = html; }
+        function openSongModal(vocabId, element) { 
+            const wordData = currentSong.vocabulary.find(w => w.id === vocabId); 
+            if(!wordData) return; 
+            const songId = currentSong.id; 
+            const isKnown = (songProgress[songId] || []).includes(vocabId); 
+            document.getElementById('modal-indo').innerText = wordData.indo; 
+            document.getElementById('modal-eng').innerText = wordData.eng; 
+            
+            // Hide cultural note section for songs
+            document.getElementById('modal-note').classList.add('hidden');
+            
+            // Display mnemonic image
+            displayMnemonicInModal(vocabId);
+            
+            const btn = document.getElementById('modal-action-btn'); 
+            updateModalButton(btn, isKnown); 
+            document.getElementById('word-modal').classList.add('active'); 
+            document.getElementById('word-modal-overlay').classList.add('active'); 
+            btn.onclick = function() { toggleSongWord(vocabId); closeModal(); }; 
+        }
+        function toggleSongWord(vocabId) { 
+            const songId = currentSong.id; 
+            if (!songProgress[songId]) songProgress[songId] = []; 
+            if(!masteryTimestamps.songs[songId]) masteryTimestamps.songs[songId] = {}; // Ensure obj
+
+            const index = songProgress[songId].indexOf(vocabId); 
+            const isKnown = index > -1; 
+            if (isKnown) { 
+                // Removing
+                songProgress[songId].splice(index, 1); 
+                delete masteryTimestamps.songs[songId][vocabId]; // Remove timestamp
+            } else { 
+                // Adding
+                songProgress[songId].push(vocabId); 
+                masteryTimestamps.songs[songId][vocabId] = new Date().toISOString(); // Timestamp
+            } 
+            localStorage.setItem(SONGS_KEY, JSON.stringify(songProgress)); 
+            localStorage.setItem(TIMESTAMP_KEY, JSON.stringify(masteryTimestamps));
+            autoSave(); 
+            
+            const lyricEls = document.querySelectorAll(`#lyric-vocab-${vocabId}`); 
+            lyricEls.forEach(el => el.classList.toggle('known', !isKnown)); 
+            const panelEl = document.getElementById(`panel-vocab-${vocabId}`); 
+            if(panelEl) { 
+                panelEl.classList.toggle('checked', !isKnown); 
+                if(!isKnown) { panelEl.classList.add('anim-squish'); setTimeout(() => panelEl.classList.remove('anim-squish'), 300); } 
+            } 
+            updateStats(); 
+        }
+        function updateModalButton(btn, isKnown) { if (isKnown) { btn.innerText = "Mark as Unknown"; btn.className = "w-full py-3 rounded-xl font-bold text-white transition-transform active:scale-95 bg-slate-500 hover:bg-slate-600 shadow-lg shadow-slate-200"; } else { btn.innerText = "Mark as Known"; btn.className = "w-full py-3 rounded-xl font-bold text-white transition-transform active:scale-95 bg-indigo-500 hover:bg-indigo-600 shadow-lg shadow-indigo-200"; } }
+        
+        // ==========================================
+        // 🖼️ MNEMONIC IMAGE FUNCTIONS
+        // ==========================================
+        
+        let currentVocabId = null; // Track which word is currently in the modal
+        
+        function displayMnemonicInModal(vocabId) {
+            currentVocabId = vocabId;
+            const imageUrl = mnemonics[vocabId];
+            const container = document.getElementById('mnemonic-image-container');
+            const input = document.getElementById('mnemonic-url-input');
+            const addBtn = document.getElementById('mnemonic-add-btn');
+            const removeBtn = document.getElementById('mnemonic-remove-btn');
+            
+            if (imageUrl) {
+                // Display existing image
+                container.innerHTML = `
+                    <div class="rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
+                        <img src="${imageUrl}" alt="Mnemonic" class="w-full max-h-64 object-contain" 
+                             onerror="this.parentElement.innerHTML='<div class=\\'p-8 text-center text-slate-400\\'>Image failed to load</div>'">
+                    </div>
+                `;
+                input.value = imageUrl;
+                addBtn.textContent = 'Update';
+                removeBtn.classList.remove('hidden');
+            } else {
+                // No image yet
+                container.innerHTML = `
+                    <div class="rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+                        <div class="text-4xl mb-2">📷</div>
+                        <div class="text-sm text-slate-400">No mnemonic image yet</div>
+                    </div>
+                `;
+                input.value = '';
+                addBtn.textContent = 'Add';
+                removeBtn.classList.add('hidden');
+            }
+        }
+        
+        function saveMnemonic() {
+            const input = document.getElementById('mnemonic-url-input');
+            const url = input.value.trim();
+            
+            if (!url) {
+                alert('Please paste an image URL');
+                return;
+            }
+            
+            // Basic URL validation
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                alert('Please enter a valid URL starting with http:// or https://');
+                return;
+            }
+            
+            mnemonics[currentVocabId] = url;
+            localStorage.setItem(MNEMONICS_KEY, JSON.stringify(mnemonics));
+            autoSave();
+            displayMnemonicInModal(currentVocabId);
+        }
+        
+        function removeMnemonic() {
+            if (!confirm('Remove this mnemonic image?')) return;
+            
+            delete mnemonics[currentVocabId];
+            localStorage.setItem(MNEMONICS_KEY, JSON.stringify(mnemonics));
+            autoSave();
+            displayMnemonicInModal(currentVocabId);
+        }
+        
+        function closeModal() { document.getElementById('word-modal').classList.remove('active'); document.getElementById('word-modal-overlay').classList.remove('active'); }
+
+        function updateStats() {
+            let total = 0, known = 0;
+            if (currentTab === 'core') { total = coreVocabulary.length; known = coreKnown.length; }
+            else if (currentTab === 'songs') { if(currentSong) { total = currentSong.vocabulary.length; known = (songProgress[currentSong.id]||[]).length; } }
+            else { // Inventory & Stories: Show Global
+                const coreT = coreVocabulary.length; const coreK = coreKnown.length;
+                let songT = 0, songK = 0, storyT = 0, storyK = 0;
+                if(window.songs) Object.values(window.songs).forEach(s => { if(s.vocabulary) { songT += s.vocabulary.length; songK += (songProgress[s.id]||[]).length; } });
+                const library = [...(window.stories||[]), ...localStories];
+                library.forEach(s => { storyT += s.vocabulary.length; storyK += (storyProgress[s.id]||[]).length; });
+                total = coreT + songT + storyT; known = coreK + songK + storyK;
+            }
+            
+            const percent = total === 0 ? 0 : Math.round((known / total) * 100);
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+            document.getElementById('progress-text').innerText = `${percent}%`;
+            
+            const labels = {core:'Core Mastery', songs:'Song Mastery', inventory:'Global Mastery', read:'Global Mastery'};
+            document.getElementById('progress-label').innerText = labels[currentTab] || 'Mastery';
+        }
+
+        // ==========================================
+        // 🎵 SONG FOLDER LOGIC (Dynamic MP3 Loading)
+        // ==========================================
+        
+        // --- Already Defined Above, just re-running init at end ---
+
+        init();
+    </script>
+</body>
+</html>

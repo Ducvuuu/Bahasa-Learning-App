@@ -1,0 +1,37 @@
+[
+  { "day": 5, "indo": "Nasi", "eng": "Rice", "emoji": "🍚" },
+  { "day": 5, "indo": "Ayam", "eng": "Chicken", "emoji": "🍗" },
+  { "day": 5, "indo": "Ikan", "eng": "Fish", "emoji": "🐟" },
+  { "day": 5, "indo": "Sayur", "eng": "Vegetables", "emoji": "🥬" },
+  { "day": 5, "indo": "Buah", "eng": "Fruit", "emoji": "🍎" },
+  { "day": 5, "indo": "Pisang", "eng": "Banana", "emoji": "🍌" },
+  { "day": 5, "indo": "Mangga", "eng": "Mango", "emoji": "🥭" },
+  { "day": 5, "indo": "Teh", "eng": "Tea", "emoji": "🍵" },
+  { "day": 5, "indo": "Susu", "eng": "Milk", "emoji": "🥛" },
+  { "day": 5, "indo": "Roti", "eng": "Bread", "emoji": "🍞" },
+  { "day": 5, "indo": "Telur", "eng": "Egg", "emoji": "🥚" },
+  { "day": 5, "indo": "Garam", "eng": "Salt", "emoji": "🧂" },
+  { "day": 5, "indo": "Gula", "eng": "Sugar", "emoji": "🍬" },
+  { "day": 5, "indo": "Enak", "eng": "Delicious", "emoji": "😋" },
+  { "day": 5, "indo": "Lapar", "eng": "Hungry", "emoji": "🤤" },
+  { "day": 5, "indo": "Haus", "eng": "Thirsty", "emoji": "🥵" },
+  { "day": 5, "indo": "Kenyang", "eng": "Full/Satisfied", "emoji": "😌" },
+  { "day": 5, "indo": "Pedas", "eng": "Spicy", "emoji": "🌶️" },
+  { 
+    "day": 5, 
+    "indo": "Senang", 
+    "eng": "Happy", 
+    "emoji": "😊",
+    "family": {
+      "root_meaning": "Joy / Pleasure / Happiness",
+      "trees": {
+        "ber-":   { "text": "Bersenang-senang", "meaning": "To have fun (reduplicated)" },
+        "me-kan": { "text": "Menyenangkan", "meaning": "To please / Pleasing (adj)" },
+        "di-kan": { "text": "Disenangkan", "meaning": "To be pleased (passive)" },
+        "ke-an":  { "text": "Kesenangan", "meaning": "Pleasure / Happiness (noun)" },
+        "pe-":    { "text": "Pesenang", "meaning": "Someone who pleases (rare)" }
+      }
+    }
+  },
+  { "day": 5, "indo": "Sedih", "eng": "Sad", "emoji": "😢" }
+]

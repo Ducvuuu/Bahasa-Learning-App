@@ -1,0 +1,37 @@
+[
+  { "day": 4, "indo": "Hari", "eng": "Day", "emoji": "📅" },
+  { "day": 4, "indo": "Minggu", "eng": "Week", "emoji": "🗓️" },
+  { "day": 4, "indo": "Bulan", "eng": "Month", "emoji": "🌙" },
+  { 
+    "day": 4, 
+    "indo": "Tahun", 
+    "eng": "Year", 
+    "emoji": "📆",
+    "family": {
+      "root_meaning": "Year / Annual period",
+      "trees": {
+        "ber-":  { "text": "Bertahun", "meaning": "For years (duration)" },
+        "ber-an": { "text": "Bertahun-tahun", "meaning": "Years and years (reduplicated)" },
+        "se-":   { "text": "Setahun", "meaning": "One year / A year" },
+        "per-an": { "text": "Pertahun", "meaning": "Per year / Annually" },
+        "-an":   { "text": "Tahunan", "meaning": "Yearly / Annual event" }
+      }
+    }
+  },
+  { "day": 4, "indo": "Jam", "eng": "Hour/Clock", "emoji": "⏰" },
+  { "day": 4, "indo": "Sekarang", "eng": "Now", "emoji": "⚡" },
+  { "day": 4, "indo": "Nanti", "eng": "Later", "emoji": "⏳" },
+  { "day": 4, "indo": "Kemarin", "eng": "Yesterday", "emoji": "◀️" },
+  { "day": 4, "indo": "Besok", "eng": "Tomorrow", "emoji": "▶️" },
+  { "day": 4, "indo": "Siang", "eng": "Midday/Noon", "emoji": "☀️" },
+  { "day": 4, "indo": "Sudah", "eng": "Already", "emoji": "✔️" },
+  { "day": 4, "indo": "Belum", "eng": "Not yet", "emoji": "⏸️" },
+  { "day": 4, "indo": "Akan", "eng": "Will", "emoji": "➡️" },
+  { "day": 4, "indo": "Sedang", "eng": "Currently/in progress", "emoji": "🔄" },
+  { "day": 4, "indo": "Enam", "eng": "Six", "emoji": "6️⃣" },
+  { "day": 4, "indo": "Tujuh", "eng": "Seven", "emoji": "7️⃣" },
+  { "day": 4, "indo": "Delapan", "eng": "Eight", "emoji": "8️⃣" },
+  { "day": 4, "indo": "Sembilan", "eng": "Nine", "emoji": "9️⃣" },
+  { "day": 4, "indo": "Sepuluh", "eng": "Ten", "emoji": "🔟" },
+  { "day": 4, "indo": "Dengan", "eng": "With", "emoji": "🤝" }
+]

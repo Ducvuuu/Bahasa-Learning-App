@@ -1,0 +1,153 @@
+{
+  "id": "pagi-di-warung-kopi",
+  "title": "Pagi di Warung Kopi ☕",
+  "difficulty": "Beginner",
+  "category": "Culture & Daily Life",
+  "coverEmoji": "☕",
+  
+  "theme": {
+    "bg": "bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50",
+    "cardBg": "bg-white/95 backdrop-blur-sm border-l-4 border-amber-600 shadow-xl",
+    "font": "font-serif",
+    "textMain": "text-amber-950",
+    "textMuted": "text-amber-800/70",
+    "accent": "amber",
+    "highlight": "border-b-2 border-amber-500 hover:bg-amber-100 text-amber-900 font-semibold px-1 rounded transition-all duration-200"
+  },
+  
+  "images": [
+    {
+      "id": "hero",
+      "position": "top",
+      "url": "https://images.unsplash.com/photo-1559496417-e7f25cb247f3?w=1200&q=80",
+      "description": "Traditional Indonesian warung coffee shop with morning atmosphere",
+      "alt": "Cozy Indonesian warung kopi in the morning light"
+    },
+    {
+      "id": "kopi-scene",
+      "position": "after-paragraph-2",
+      "url": "https://images.unsplash.com/photo-1511920170033-f8396924c348?w=1200&q=80",
+      "description": "Traditional Indonesian coffee (kopi) and local breakfast",
+      "alt": "Kopi panas dan nasi goreng - traditional Indonesian breakfast"
+    },
+    {
+      "id": "community",
+      "position": "after-paragraph-4",
+      "url": "https://images.unsplash.com/photo-1556388158-158ea5ccacbd?w=1200&q=80",
+      "description": "People gathering and chatting at Indonesian coffee shop",
+      "alt": "Indonesian community gathering at warung kopi"
+    },
+    {
+      "id": "morning-peace",
+      "position": "after-paragraph-7",
+      "url": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1200&q=80",
+      "description": "Peaceful morning coffee moment",
+      "alt": "Enjoying peaceful morning coffee the Indonesian way"
+    }
+  ],
+  
+  "content": [
+    "🌅 Setiap pagi, saya bangun jam enam. Saya keluar dari rumah dan pergi ke warung kopi kecil. Warung ini tidak besar dan tidak mahal. Tetapi saya selalu suka ke sini.",
+    
+    "☕ Di warung, saya minum kopi panas dan makan <span class='vocab-word' data-id='1'>nasi goreng</span>. Kopi di Indonesia murah tetapi sangat bagus. Secangkir kopi hanya lima ribu rupiah. Makanannya juga murah dan <span class='vocab-word' data-id='2'>enak</span>. 😋",
+    
+    "👥 Yang penting bukan kopi atau makanan. Yang penting adalah orang-orang. Di warung, saya bertemu dengan teman-teman. Kami duduk bersama, bicara, dan <span class='vocab-word' data-id='3'>tertawa</span>. Tidak ada yang <span class='vocab-word' data-id='4'>terburu-buru</span>.",
+    
+    "😊 <span class='vocab-word' data-id='5'>Pemilik</span> warung bernama Pak Budi. Dia selalu <span class='vocab-word' data-id='6'>ramah</span>. Dia tahu nama setiap orang. Dia bertanya: 'Apa kabar hari ini?' Dia tidak hanya menjual kopi. Dia membuat komunitas.",
+    
+    "⏰ Di negara lain, orang minum kopi dengan cepat. Mereka <span class='vocab-word' data-id='4'>terburu-buru</span> ke kantor. Tetapi di warung Indonesia, waktu berjalan santai. Orang-orang menikmati pagi mereka.",
+    
+    "❤️ Warung kopi adalah <span class='vocab-word' data-id='7'>jantung</span> komunitas. Di sini, orang kaya dan orang miskin duduk bersama. Di sini, tidak ada perbedaan. Semua orang sama.",
+    
+    "🌍 Kadang-kadang turis datang ke warung. Mereka terkejut. 'Mengapa orang Indonesia bisa santai begini?' Saya hanya tersenyum. Ini adalah cara hidup kami. 🇮🇩",
+    
+    "🙏 Jam tujuh, saya sudah selesai. Saya bayar sepuluh ribu rupiah untuk kopi dan makanan. Saya ucapkan 'terima kasih' kepada Pak Budi. Lalu saya pergi ke kantor, dengan hati yang damai dan perut yang <span class='vocab-word' data-id='8'>kenyang</span>."
+  ],
+  
+  "vocabulary": [
+    { 
+      "id": 1, 
+      "indo": "Nasi goreng", 
+      "eng": "Fried rice", 
+      "emoji": "🍚",
+      "cultural_note": "Indonesia's most iconic dish - simple, cheap, available everywhere, eaten any time of day"
+    },
+    { 
+      "id": 2, 
+      "indo": "Enak", 
+      "eng": "Delicious / Tasty", 
+      "emoji": "😋"
+    },
+    { 
+      "id": 3, 
+      "indo": "Tertawa", 
+      "eng": "To laugh", 
+      "emoji": "😂"
+    },
+    { 
+      "id": 4, 
+      "indo": "Terburu-buru", 
+      "eng": "In a hurry / Rushed", 
+      "emoji": "⏩",
+      "cultural_note": "The opposite of 'santai' - something Indonesians try to avoid in daily life"
+    },
+    { 
+      "id": 5, 
+      "indo": "Pemilik", 
+      "eng": "Owner", 
+      "emoji": "👤"
+    },
+    { 
+      "id": 6, 
+      "indo": "Ramah", 
+      "eng": "Friendly / Kind", 
+      "emoji": "😊",
+      "cultural_note": "Being 'ramah' is a core Indonesian value - warmth and friendliness to all"
+    },
+    { 
+      "id": 7, 
+      "indo": "Jantung", 
+      "eng": "Heart (literal & figurative)", 
+      "emoji": "❤️"
+    },
+    { 
+      "id": 8, 
+      "indo": "Kenyang", 
+      "eng": "Full (satisfied stomach)", 
+      "emoji": "🤰",
+      "cultural_note": "Indonesians often ask 'Sudah kenyang?' (Are you full?) as a sign of care"
+    }
+  ],
+  
+  "culturalNotes": {
+    "title": "Understanding Indonesian Warung Culture ☕",
+    "points": [
+      "**Warung** is a small family-owned shop/café - the social heart of Indonesian neighborhoods 🏘️",
+      "Unlike Western cafés focused on speed, warungs prioritize **community and connection** 🤝",
+      "**Kopi tubruk** (traditional Indonesian coffee) is made by pouring hot water directly over ground coffee ☕",
+      "Warung owners often know customers by name and act as community leaders 👨‍👩‍👧‍👦",
+      "Prices are incredibly cheap (5,000-10,000 rupiah = $0.30-$0.65 USD) making it accessible to all 💰",
+      "**'Nongkrong'** culture - hanging out without purpose, just enjoying time together 😌",
+      "The morning warung ritual is sacred - it's where news, gossip, and friendships happen 📰"
+    ]
+  },
+  
+  "reflectionPrompts": [
+    "🤔 Apakah Anda punya tempat seperti warung di negara Anda? (Do you have a place like a warung in your country?)",
+    "🆚 Apa perbedaan antara café Barat dan warung Indonesia? (What's the difference between Western cafés and Indonesian warungs?)",
+    "💭 Mengapa komunitas penting dalam budaya Indonesia? (Why is community important in Indonesian culture?)"
+  ],
+  
+  "vocabularyReview": {
+    "title": "Words You Already Know (Used in This Story) 🎯",
+    "categories": {
+      "⏰ Time & Daily Routine": ["pagi", "bangun", "jam", "hari", "sudah"],
+      "🏃 Actions": ["keluar", "pergi", "minum", "makan", "duduk", "bicara", "bayar", "suka"],
+      "🏠 Places & Things": ["rumah", "kopi", "makanan", "secangkir"],
+      "📏 Descriptions": ["kecil", "besar", "mahal", "murah", "bagus", "panas", "santai"],
+      "🔢 Numbers": ["lima", "tujuh", "sepuluh"],
+      "🤝 Social": ["bersama", "terima kasih", "kabar"],
+      "🇮🇩 Cultural": ["santai", "menikmati", "damai", "waktu"]
+    }
+  }
+}

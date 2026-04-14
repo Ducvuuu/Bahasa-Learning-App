@@ -1,0 +1,107 @@
+[
+  { 
+    "day": 7, 
+    "indo": "Keluarga", 
+    "eng": "Family", 
+    "emoji": "👨‍👩‍👧‍👦",
+    "family": {
+      "root_meaning": "Family / Household",
+      "trees": {
+        "ber-":   { "text": "Berkeluarga", "meaning": "To have a family / To be married" },
+        "ke-an":  { "text": "Kekeluargaan", "meaning": "Kinship / Family spirit" },
+        "se-":    { "text": "Sekeluarga", "meaning": "The whole family" }
+      }
+    }
+  },
+  { "day": 7, "indo": "Ibu", "eng": "Mother", "emoji": "👩" },
+  { "day": 7, "indo": "Ayah", "eng": "Father", "emoji": "👨" },
+  { "day": 7, "indo": "Anak", "eng": "Child", "emoji": "🧒" },
+  { "day": 7, "indo": "Kakak", "eng": "Older sibling", "emoji": "👧" },
+  { "day": 7, "indo": "Adik", "eng": "Younger sibling", "emoji": "👶" },
+  { "day": 7, "indo": "Suami", "eng": "Husband", "emoji": "🤵" },
+  { "day": 7, "indo": "Istri", "eng": "Wife", "emoji": "👰" },
+  { "day": 7, "indo": "Nenek", "eng": "Grandmother", "emoji": "👵" },
+  { "day": 7, "indo": "Kakek", "eng": "Grandfather", "emoji": "👴" },
+  { 
+    "day": 7, 
+    "indo": "Teman", 
+    "eng": "Friend", 
+    "emoji": "🤝",
+    "family": {
+      "root_meaning": "Friend / Companion",
+      "trees": {
+        "ber-":   { "text": "Berteman", "meaning": "To be friends" },
+        "me-i":   { "text": "Menemani", "meaning": "To accompany" },
+        "di-i":   { "text": "Ditemani", "meaning": "To be accompanied (passive)" },
+        "per-an": { "text": "Pertemanan", "meaning": "Friendship" },
+        "se-":    { "text": "Seteman", "meaning": "Fellow friend / Same friend group" }
+      }
+    }
+  },
+  { "day": 7, "indo": "Pacar", "eng": "Boyfriend/Girlfriend", "emoji": "💑" },
+  { "day": 7, "indo": "Tetangga", "eng": "Neighbor", "emoji": "🏘️" },
+  { "day": 7, "indo": "Bos", "eng": "Boss", "emoji": "💼" },
+  { "day": 7, "indo": "Nama", "eng": "Name", "emoji": "📛" },
+  { "day": 7, "indo": "Umur", "eng": "Age", "emoji": "🎂" },
+  { 
+    "day": 7, 
+    "indo": "Lahir", 
+    "eng": "To be born", 
+    "emoji": "👶",
+    "family": {
+      "root_meaning": "Birth / To be born",
+      "trees": {
+        "me-kan": { "text": "Melahirkan", "meaning": "To give birth" },
+        "di-kan": { "text": "Dilahirkan", "meaning": "To be born (passive)" },
+        "ke-an":  { "text": "Kelahiran", "meaning": "Birth (noun) / Birthplace" },
+        "per-an": { "text": "Perlahiran", "meaning": "Childbirth process" }
+      }
+    }
+  },
+  { 
+    "day": 7, 
+    "indo": "Nikah", 
+    "eng": "To marry", 
+    "emoji": "💍",
+    "family": {
+      "root_meaning": "Marriage / Wedding",
+      "trees": {
+        "me-":    { "text": "Menikah", "meaning": "To get married" },
+        "me-i":   { "text": "Menikahi", "meaning": "To marry (someone)" },
+        "di-i":   { "text": "Dinikahi", "meaning": "To be married (passive)" },
+        "per-an": { "text": "Pernikahan", "meaning": "Marriage / Wedding ceremony" }
+      }
+    }
+  },
+  { 
+    "day": 7, 
+    "indo": "Kenal", 
+    "eng": "To know (someone)", 
+    "emoji": "🫱🏻‍🫲🏽",
+    "family": {
+      "root_meaning": "To know / To recognize",
+      "trees": {
+        "me-":    { "text": "Mengenal", "meaning": "To know / To recognize" },
+        "me-kan": { "text": "Mengenalkan", "meaning": "To introduce" },
+        "di-kan": { "text": "Dikenalkan", "meaning": "To be introduced (passive)" },
+        "per-an": { "text": "Perkenalan", "meaning": "Introduction / Acquaintance" },
+        "ter-":   { "text": "Terkenal", "meaning": "Famous / Well-known" }
+      }
+    }
+  },
+  { 
+    "day": 7, 
+    "indo": "Cinta", 
+    "eng": "Love", 
+    "emoji": "❤️",
+    "family": {
+      "root_meaning": "Love / Affection",
+      "trees": {
+        "me-i":   { "text": "Mencintai", "meaning": "To love (someone)" },
+        "di-i":   { "text": "Dicintai", "meaning": "To be loved (passive)" },
+        "pe-":    { "text": "Pecinta", "meaning": "Lover / Enthusiast" },
+        "ke-an":  { "text": "Kecintaan", "meaning": "Beloved / Love (noun)" }
+      }
+    }
+  }
+]

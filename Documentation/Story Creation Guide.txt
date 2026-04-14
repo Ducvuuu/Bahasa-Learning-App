@@ -1,0 +1,124 @@
+﻿Indo Adventure: Story Creation Guide
+This guide explains how to create .json story files for the Indo Adventure app. Each story allows learners to read immersive text, click on vocabulary to collect it, and learn cultural context.
+📂 File Naming
+* Create a new .json file for your story.
+* Example: adventure_in_bali.json or eating_padang_food.json.
+* Place this file inside the stories/ folder you link to the app.
+📝 JSON Structure Overview
+The JSON object has 8 main sections. Here is the blueprint:
+{
+ "id": "unique-id-string",
+ "title": "Story Title",
+ "difficulty": "Beginner/Intermediate/Advanced",
+ "category": "Theme Category",
+ "coverEmoji": "Emoji Icon",
+ 
+ "theme": { ... },           // Visual styling (colors, fonts)
+ "images": [ ... ],          // Images to insert into the text
+ "content": [ ... ],         // The paragraphs of text
+ "vocabulary": [ ... ],      // The interactive words
+ "culturalNotes": { ... },   // Box at the bottom for insights
+ "reflectionPrompts": [ ... ], // Questions for the user
+ "vocabularyReview": { ... } // Categorized word lists
+}
+
+🎨 1. Theme Configuration (theme)
+This controls the colors and fonts used when reading the story. The app uses Tailwind CSS classes.
+Property
+	Description
+	Example Value
+	bg
+	Background gradient for the whole page
+	"bg-gradient-to-br from-amber-50 ..."
+	cardBg
+	Background for the text card
+	"bg-white/95 backdrop-blur-sm ..."
+	font
+	Font family
+	"font-serif" or "font-sans"
+	textMain
+	Main text color
+	"text-amber-950"
+	textMuted
+	Subtitle/caption color
+	"text-amber-800/70"
+	highlight
+	Hover effect for vocab words
+	"hover:bg-amber-100 border-amber-500"
+	🖼️ 2. Images (images)
+You can insert images at the top (hero) or between paragraphs.
+* position: "top": Displays as a large banner at the very top.
+* position: "after-paragraph-X": Displays the image after the specified paragraph number (starting at 1).
+"images": [
+ {
+   "id": "hero",
+   "position": "top",
+   "url": "[https://images.unsplash.com/photo-](https://images.unsplash.com/photo-)...",
+   "description": "Caption for the image",
+   "alt": "Accessibility text"
+ },
+ {
+   "id": "scene-1",
+   "position": "after-paragraph-2", 
+   "url": "...",
+   "description": "This appears after the 2nd paragraph block"
+ }
+]
+
+📖 3. Story Content (content)
+This is an array of strings. Each string represents one paragraph.
+To make a word interactive (clickable), wrap it in a special HTML <span> tag:
+<span class='vocab-word' data-id='123'>WORD</span>
+* class='vocab-word': REQUIRED. Tells the app this is clickable.
+* data-id='123': REQUIRED. Must match an id in your vocabulary list.
+Example:
+"content": [
+ "This is the first paragraph.",
+ "In this paragraph, I drink <span class='vocab-word' data-id='1'>kopi</span>."
+]
+
+📚 4. Vocabulary List (vocabulary)
+Defines the data for the words tagged in the content.
+Property
+	Description
+	id
+	Number. Must match the data-id in the content span.
+	indo
+	The Indonesian word (e.g., "Kopi").
+	eng
+	The English translation (e.g., "Coffee").
+	emoji
+	Emoji icon for the sticker/inventory.
+	cultural_note
+	Optional. A short fact that appears in the popup modal when clicked.
+	Example:
+{ 
+ "id": 1, 
+ "indo": "Kopi", 
+ "eng": "Coffee", 
+ "emoji": "☕",
+ "cultural_note": "Indonesian coffee is often served 'tubruk' style (unfiltered)."
+}
+
+💡 5. Cultural Notes & Reflection
+These sections appear at the bottom of the story to deepen learning.
+Cultural Notes:
+"culturalNotes": {
+ "title": "Understanding Warung Culture",
+ "points": [
+   "Bullet point 1",
+   "Bullet point 2 (supports **markdown bold**)"
+ ]
+}
+
+Reflection Prompts:
+"reflectionPrompts": [
+ "Question 1 for the user to think about?",
+ "Question 2?"
+]
+
+✅ Checklist for a New Story
+1. [ ] Unique ID: Ensure the file has a unique id at the top.
+2. [ ] Image URLs: Use valid URLs (Unsplash works great).
+3. [ ] Vocab IDs: Check that every data-id in content exists in vocabulary.
+4. [ ] Positions: Verify image positions don't exceed the number of paragraphs.

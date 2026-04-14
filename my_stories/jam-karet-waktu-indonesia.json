@@ -1,0 +1,168 @@
+{
+  "id": "jam-karet-waktu-indonesia",
+  "title": "Jam Karet: Waktu Indonesia ⏰",
+  "difficulty": "Beginner",
+  "category": "Culture & Philosophy",
+  "coverEmoji": "⏰",
+  
+  "theme": {
+    "bg": "bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50",
+    "cardBg": "bg-white/95 backdrop-blur-sm border-l-4 border-blue-600 shadow-xl",
+    "font": "font-sans",
+    "textMain": "text-blue-950",
+    "textMuted": "text-blue-800/70",
+    "accent": "blue",
+    "highlight": "border-b-2 border-blue-500 hover:bg-blue-100 text-blue-900 font-semibold px-1 rounded transition-all duration-200"
+  },
+  
+  "images": [
+    {
+      "id": "hero",
+      "position": "top",
+      "url": "https://images.unsplash.com/photo-1501139083538-0139583c060f?w=1200&q=80",
+      "description": "Clock and time concept representing Indonesian flexible time culture",
+      "alt": "Time flowing flexibly - the concept of jam karet"
+    },
+    {
+      "id": "meeting-scene",
+      "position": "after-paragraph-3",
+      "url": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&q=80",
+      "description": "Indonesian people gathering casually, not rushed",
+      "alt": "Relaxed Indonesian gathering - relationships over schedules"
+    },
+    {
+      "id": "traffic",
+      "position": "after-paragraph-4",
+      "url": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=1200&q=80",
+      "description": "Indonesian street life with patient attitude",
+      "alt": "Indonesian street scene - patience in daily life"
+    },
+    {
+      "id": "balance",
+      "position": "after-paragraph-7",
+      "url": "https://images.unsplash.com/photo-1499728603263-13726abce5fd?w=1200&q=80",
+      "description": "Balance between work and life in Indonesian culture",
+      "alt": "Finding balance - the wisdom of jam karet"
+    }
+  ],
+  
+  "content": [
+    "🕐 Ada <span class='vocab-word' data-id='1'>konsep</span> unik di Indonesia: 'jam karet' atau 'rubber time'. Ini berarti waktu di Indonesia <span class='vocab-word' data-id='2'>elastis</span>, seperti karet. Waktu bisa berubah dan tidak selalu <span class='vocab-word' data-id='3'>tepat</span>.",
+    
+    "📅 Misalnya: teman Anda berkata, 'Kami bertemu jam tiga sore.' Di negara Barat, ini berarti jam tiga tepat. Tetapi di Indonesia? Mungkin jam tiga tiga puluh. Mungkin jam empat. Tidak apa-apa.",
+    
+    "💭 Mengapa begini? Karena orang Indonesia percaya bahwa hubungan manusia lebih penting daripada waktu. Jika Anda sedang bicara dengan teman, Anda tidak akan terburu-buru pergi. Percakapan lebih penting.",
+    
+    "🚗 Atau misalnya: ada <span class='vocab-word' data-id='4'>macet</span> di jalan. Di negara lain, orang akan stres dan <span class='vocab-word' data-id='5'>marah</span>. Tetapi di Indonesia, orang akan bersabar. Mereka akan berkata: 'Ya sudah, <span class='vocab-word' data-id='6'>terlambat</span> sedikit tidak masalah.'",
+    
+    "🏢 'Jam karet' juga ada dalam <span class='vocab-word' data-id='7'>rapat</span> kantor. Rapat dimulai jam sembilan? Mungkin mulai jam sembilan lima belas. Semua orang tahu ini. Semua orang terima.",
+    
+    "😤 Tentu saja, 'jam karet' bisa membuat orang asing frustasi. Mereka berpikir: 'Kenapa tidak ada <span class='vocab-word' data-id='8'>disiplin</span>?' Tetapi ini bukan tentang disiplin. Ini tentang <span class='vocab-word' data-id='9'>fleksibilitas</span> dan <span class='vocab-word' data-id='10'>menghargai</span> manusia, bukan jam.",
+    
+    "✈️ Ada waktu ketika 'jam karet' tidak berlaku. Misalnya: pesawat, kereta, atau acara resmi. Untuk hal-hal ini, orang Indonesia akan tepat waktu. Mereka tahu kapan harus serius.",
+    
+    "⚖️ 'Jam karet' mengajarkan kita bahwa hidup bukan hanya tentang jadwal. Hidup adalah tentang orang, tentang momen, tentang keseimbangan. Kadang-kadang, santai sedikit adalah hal yang bagus. 🇮🇩"
+  ],
+  
+  "vocabulary": [
+    { 
+      "id": 1, 
+      "indo": "Konsep", 
+      "eng": "Concept / Idea", 
+      "emoji": "💡"
+    },
+    { 
+      "id": 2, 
+      "indo": "Elastis", 
+      "eng": "Elastic / Flexible", 
+      "emoji": "🔄",
+      "cultural_note": "Like rubber (karet), time in Indonesia can stretch and adapt to the situation"
+    },
+    { 
+      "id": 3, 
+      "indo": "Tepat", 
+      "eng": "Exact / Precise / On time", 
+      "emoji": "✓"
+    },
+    { 
+      "id": 4, 
+      "indo": "Macet", 
+      "eng": "Traffic jam / Stuck", 
+      "emoji": "🚗",
+      "cultural_note": "Traffic jams (macet) are common in Indonesian cities like Jakarta - a daily test of patience"
+    },
+    { 
+      "id": 5, 
+      "indo": "Marah", 
+      "eng": "Angry / Mad", 
+      "emoji": "😠"
+    },
+    { 
+      "id": 6, 
+      "indo": "Terlambat", 
+      "eng": "Late / Delayed", 
+      "emoji": "⏰"
+    },
+    { 
+      "id": 7, 
+      "indo": "Rapat", 
+      "eng": "Meeting / Conference", 
+      "emoji": "📋"
+    },
+    { 
+      "id": 8, 
+      "indo": "Disiplin", 
+      "eng": "Discipline", 
+      "emoji": "📏",
+      "cultural_note": "Indonesians have discipline where it matters - but value human connection over rigid punctuality"
+    },
+    { 
+      "id": 9, 
+      "indo": "Fleksibilitas", 
+      "eng": "Flexibility", 
+      "emoji": "🤸"
+    },
+    { 
+      "id": 10, 
+      "indo": "Menghargai", 
+      "eng": "To appreciate / To respect", 
+      "emoji": "🙏",
+      "cultural_note": "Respecting (menghargai) people and relationships is central to Indonesian values"
+    }
+  ],
+  
+  "culturalNotes": {
+    "title": "Understanding 'Jam Karet' Culture ⏰",
+    "points": [
+      "**'Jam karet'** literally means 'rubber time' - time that can stretch like rubber 🔄",
+      "Rooted in **'gotong royong'** (mutual cooperation) values - people over schedules 🤝",
+      "Being late 15-30 minutes is often considered **normal and acceptable** in social settings ⏳",
+      "**When punctuality matters**: Airports, trains, official government events, business with foreigners 🚄",
+      "It's about **'sabar'** (patience) and **'ikhlas'** (sincere acceptance) - don't stress about what you can't control 🧘",
+      "Western 'time is money' vs. Indonesian **'time is relationships'** - different values, not laziness 💰➡️❤️",
+      "Shows respect for **the present moment** - if you're with someone now, give them your full attention 👁️",
+      "Modern Indonesia is slowly changing with globalization, but 'jam karet' remains in daily life 🌍"
+    ]
+  },
+  
+  "reflectionPrompts": [
+    "🤔 Bagaimana budaya waktu di negara Anda? (How is time culture in your country?)",
+    "⚖️ Apa yang lebih penting: waktu yang tepat atau hubungan manusia? (What's more important: punctuality or human relationships?)",
+    "💭 Kapan 'jam karet' baik? Kapan mungkin menjadi masalah? (When is 'jam karet' good? When might it be a problem?)",
+    "🌏 Bisakah Anda belajar sesuatu dari filosofi ini? (Can you learn something from this philosophy?)"
+  ],
+  
+  "vocabularyReview": {
+    "title": "Words You Already Know (Used in This Story) 🎯",
+    "categories": {
+      "⏰ Time Words": ["waktu", "jam", "sore", "kapan", "sudah", "sedang", "akan", "sembilan"],
+      "🗣️ Communication": ["berkata", "bicara", "bertemu", "percakapan"],
+      "🌍 Places & Situations": ["Indonesia", "negara", "jalan", "kantor"],
+      "😌 Emotions & Attitudes": ["stres", "frustasi", "santai", "bersabar", "serius"],
+      "👥 People & Relationships": ["teman", "orang", "manusia", "asing"],
+      "💭 Concepts": ["misalnya", "mengapa", "begini", "tentang", "tidak apa-apa"],
+      "🔢 Numbers & Quantities": ["tiga", "empat", "lima", "belas", "sedikit"],
+      "🇮🇩 Cultural Values": ["keseimbangan", "penting", "bagus", "terima"]
+    }
+  }
+}
