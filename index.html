@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Indo Adventure">
+    <link rel="manifest" href="site.webmanifest">
     <title>Indo Adventure 🇮🇩</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -568,6 +574,7 @@
                     <button onclick="switchTab('inventory')" id="tab-inventory" class="nav-tab whitespace-nowrap">Inventory 🎒</button>
                     <button onclick="switchTab('read')" id="tab-read" class="nav-tab whitespace-nowrap">Stories 📖</button>
                     <button onclick="switchTab('songs')" id="tab-songs" class="nav-tab whitespace-nowrap">Songs 🎵</button>
+                    <button onclick="switchTab('practice')" id="tab-practice" class="nav-tab whitespace-nowrap">Practice 🤖</button>
                 </div>
 
                 <!-- Review Controls -->
@@ -885,6 +892,66 @@
         </button>
     </div>
 
+    <!-- ================= VIEW: PRACTICE ================= -->
+    <div id="view-practice" class="hidden">
+
+        <!-- Not signed in -->
+        <div id="practice-no-auth" class="hidden text-center py-20">
+            <div class="text-5xl mb-4">🔐</div>
+            <h3 class="text-xl font-bold text-slate-700 mb-2">Sign in to Practice</h3>
+            <p class="text-slate-500 mb-6">Your sessions are saved to your account across all devices.</p>
+            <button onclick="signInWithGoogle()" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-700 transition-colors shadow-sm">Sign in with Google</button>
+        </div>
+
+        <!-- Main interface -->
+        <div id="practice-interface">
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-5 gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-1">Practice Session ✨</h2>
+                    <p id="practice-word-summary" class="text-sm text-slate-500">Loading your words…</p>
+                </div>
+                <button onclick="startNewPracticeSession()"
+                        class="flex-shrink-0 text-sm font-bold bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl hover:bg-indigo-100 transition-colors shadow-sm">
+                    ↺ New Session
+                </button>
+            </div>
+
+            <!-- Chat window -->
+            <div id="practice-chat"
+                 class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-y-auto mb-4"
+                 style="height:420px">
+                <div id="practice-messages" class="p-4 space-y-4"></div>
+            </div>
+
+            <!-- Input -->
+            <div class="flex gap-3">
+                <input type="text" id="practice-input"
+                       placeholder="Type your answer and press Enter…"
+                       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendPracticeMessage();}"
+                       class="flex-1 px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
+                <button onclick="sendPracticeMessage()" id="practice-send-btn"
+                        class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-colors shadow-sm active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Past sessions -->
+            <div class="mt-6">
+                <button onclick="togglePastSessions()"
+                        class="text-xs font-bold text-slate-400 hover:text-slate-600 flex items-center gap-1 transition-colors">
+                    <svg id="past-sessions-arrow" class="w-3 h-3 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                    Past Sessions
+                </button>
+                <div id="past-sessions-list" class="hidden mt-3 space-y-2"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Hidden Audio Element -->
     <audio id="audio-player" preload="metadata"></audio>
 
@@ -1113,7 +1180,7 @@
 
         window.switchTab = function(tab) {
             currentTab = tab;
-            ['core', 'songs', 'inventory', 'read', 'tree'].forEach(t => {
+            ['core', 'songs', 'inventory', 'read', 'tree', 'practice'].forEach(t => {
                 const view = document.getElementById(`view-${t}`);
                 const btn = document.getElementById(`tab-${t}`);
                 if(view) view.classList.toggle('hidden', t !== tab);
@@ -1131,8 +1198,9 @@
             if (tab === 'core') coreWrapper.classList.remove('hidden');
             if (tab === 'songs') songWrapper.classList.remove('hidden');
             if (tab === 'inventory') renderInventory();
-            if (tab === 'read') renderLibrary(); 
-            
+            if (tab === 'read') renderLibrary();
+            if (tab === 'practice') initPracticeTab();
+
             if (tab !== 'songs' && audioPlayer) pauseAudio();
             if (tab !== 'read') resetTheme();
             
@@ -1892,7 +1960,263 @@
         // 🎵 SONG FOLDER LOGIC (Dynamic MP3 Loading)
         // ==========================================
         
-        // --- Already Defined Above, just re-running init at end ---
+        // ==========================================
+        // 🤖 PRACTICE TAB — GEMINI
+        // ==========================================
+
+        const GEMINI_API_KEY = 'AIzaSyBF8l8cyRVbyJTkfTBHmPOq6kVEE8J7lus';
+        const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+        let practiceConversation = [];
+        let currentPracticeSessionId = null;
+        let practiceWords = null;
+        let practiceActive = false;
+
+        function getPracticeWords() {
+            const now = Date.now(), DAY = 86400000;
+            const newWords = [], reviewWords = [], oldWords = [];
+
+            const bucket = (word, tsKey, tsSource) => {
+                const ts = masteryTimestamps[tsSource]?.[tsKey];
+                const age = ts ? now - new Date(ts).getTime() : Infinity;
+                if (age < 7 * DAY) newWords.push(word);
+                else if (age < 30 * DAY) reviewWords.push(word);
+                else oldWords.push(word);
+            };
+
+            coreKnown.forEach(idx => {
+                const w = coreVocabulary[idx];
+                if (w) bucket({ indo: w.indo, eng: w.eng, emoji: w.emoji || '📝' }, idx, 'core');
+            });
+            Object.entries(songProgress).forEach(([songId, ids]) => {
+                const song = window.songs?.[songId];
+                if (!song) return;
+                ids.forEach(id => {
+                    const w = song.vocabulary?.find(v => v.id === id);
+                    if (w) bucket({ indo: w.indo, eng: w.eng, emoji: w.emoji || '🎵' }, id, 'songs');
+                });
+            });
+            Object.entries(storyProgress).forEach(([storyId, ids]) => {
+                const story = localStories.find(s => s.id === storyId);
+                if (!story) return;
+                ids.forEach(id => {
+                    const w = story.vocabulary?.find(v => v.id === id);
+                    if (w) bucket({ indo: w.indo, eng: w.eng, emoji: w.emoji || '📖' }, id, 'stories');
+                });
+            });
+
+            const shuffle = a => [...a].sort(() => Math.random() - 0.5);
+            const selected = [
+                ...shuffle(newWords).slice(0, 8),
+                ...shuffle(reviewWords).slice(0, 4),
+                ...shuffle(oldWords).slice(0, 2)
+            ];
+
+            return { selected, newCount: Math.min(newWords.length, 8), reviewCount: Math.min(reviewWords.length, 4), hasWords: selected.length > 0 };
+        }
+
+        function buildSystemPrompt(words) {
+            const list = words.map(w => `${w.emoji} ${w.indo} = "${w.eng}"`).join('\n');
+            return `You are Kak Indo, a warm and encouraging Bahasa Indonesia tutor. Quiz the student on their vocabulary.
+
+TODAY'S WORDS:
+${list}
+
+RULES:
+- Begin immediately with your first question, no introduction
+- Rotate question types: translate indo→eng, translate eng→indo, fill-in-the-blank, use-in-a-sentence
+- After each answer: one line of feedback (✓ or ✗ + brief explanation), then the next question immediately
+- Keep each response SHORT — feedback + next question in 3–4 sentences max
+- Occasionally use encouraging Indonesian: "Bagus!", "Hampir!" (almost), "Luar biasa!"
+- Don't repeat the same word back-to-back
+- After about 12 exchanges, offer to wrap up or keep going`;
+        }
+
+        async function callGemini(userText) {
+            practiceConversation.push({ role: 'user', parts: [{ text: userText }] });
+            const res = await fetch(GEMINI_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    system_instruction: { parts: [{ text: buildSystemPrompt(practiceWords.selected) }] },
+                    contents: practiceConversation,
+                    generationConfig: { temperature: 0.75, maxOutputTokens: 400 }
+                })
+            });
+            if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || res.status); }
+            const data = await res.json();
+            const reply = data.candidates[0].content.parts[0].text;
+            practiceConversation.push({ role: 'model', parts: [{ text: reply }] });
+            return reply;
+        }
+
+        function appendPracticeMessage(role, text) {
+            const isUser = role === 'user';
+            const div = document.createElement('div');
+            div.className = `flex ${isUser ? 'justify-end' : 'justify-start'} items-end gap-2`;
+            const escaped = text.replace(/</g, '&lt;').replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            div.innerHTML = isUser
+                ? `<div class="max-w-xs md:max-w-md bg-indigo-600 text-white px-4 py-2.5 rounded-2xl rounded-br-md text-sm leading-relaxed">${escaped}</div>`
+                : `<div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-xs flex-shrink-0 mb-0.5">✨</div>
+                   <div class="max-w-xs md:max-w-md bg-white border border-slate-100 shadow-sm px-4 py-2.5 rounded-2xl rounded-bl-md text-sm leading-relaxed text-slate-700">${escaped}</div>`;
+            document.getElementById('practice-messages').appendChild(div);
+            const chat = document.getElementById('practice-chat');
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const div = document.createElement('div');
+            div.id = 'practice-typing';
+            div.className = 'flex justify-start items-end gap-2';
+            div.innerHTML = `
+                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-xs flex-shrink-0">✨</div>
+                <div class="bg-white border border-slate-100 shadow-sm px-4 py-3 rounded-2xl rounded-bl-md">
+                    <div class="flex gap-1 items-center">
+                        <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style="animation-delay:0ms"></span>
+                        <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style="animation-delay:150ms"></span>
+                        <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style="animation-delay:300ms"></span>
+                    </div>
+                </div>`;
+            document.getElementById('practice-messages').appendChild(div);
+            document.getElementById('practice-chat').scrollTop = 99999;
+            return div;
+        }
+
+        function setPracticeInputLock(locked) {
+            document.getElementById('practice-input').disabled = locked;
+            document.getElementById('practice-send-btn').disabled = locked;
+        }
+
+        async function sendPracticeMessage() {
+            const input = document.getElementById('practice-input');
+            const text = input.value.trim();
+            if (!text || !practiceActive) return;
+            input.value = '';
+            setPracticeInputLock(true);
+            appendPracticeMessage('user', text);
+            const typing = showTypingIndicator();
+            if (currentUser && currentPracticeSessionId) savePracticeMessage('user', text);
+            try {
+                const reply = await callGemini(text);
+                typing.remove();
+                appendPracticeMessage('model', reply);
+                if (currentUser && currentPracticeSessionId) savePracticeMessage('model', reply);
+            } catch (err) {
+                typing.remove();
+                appendPracticeMessage('model', `⚠️ Gemini error: ${err.message}. Please try again.`);
+            }
+            setPracticeInputLock(false);
+            input.focus();
+        }
+
+        async function startNewPracticeSession() {
+            practiceConversation = [];
+            practiceActive = true;
+            practiceWords = getPracticeWords();
+            document.getElementById('practice-messages').innerHTML = '';
+
+            const summary = document.getElementById('practice-word-summary');
+            if (!practiceWords.hasWords) {
+                summary.textContent = 'No mastered words yet — mark some words as known first!';
+                appendPracticeMessage('model', "Looks like you haven't mastered any words yet! 📚 Head to **Core Words**, **Stories**, or **Songs** and mark some words as known — then come back to practice.");
+                return;
+            }
+            summary.textContent = `Testing ${practiceWords.newCount} new · ${practiceWords.reviewCount} review · ${practiceWords.selected.length} total words`;
+
+            if (currentUser) {
+                currentPracticeSessionId = Date.now().toString();
+                db.collection('users').doc(currentUser.uid).collection('practiceHistory').doc(currentPracticeSessionId).set({
+                    createdAt: new Date().toISOString(),
+                    messages: [],
+                    wordsTested: practiceWords.selected.map(w => ({ indo: w.indo, eng: w.eng })),
+                    newCount: practiceWords.newCount,
+                    reviewCount: practiceWords.reviewCount
+                }).catch(console.error);
+            }
+
+            setPracticeInputLock(true);
+            const typing = showTypingIndicator();
+            try {
+                // Kickoff: hidden system message to trigger first question
+                const res = await fetch(GEMINI_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        system_instruction: { parts: [{ text: buildSystemPrompt(practiceWords.selected) }] },
+                        contents: [{ role: 'user', parts: [{ text: 'Ready! Ask me the first question.' }] }],
+                        generationConfig: { temperature: 0.75, maxOutputTokens: 300 }
+                    })
+                });
+                const data = await res.json();
+                const firstQ = data.candidates[0].content.parts[0].text;
+                // Seed conversation with this exchange
+                practiceConversation = [
+                    { role: 'user', parts: [{ text: 'Ready! Ask me the first question.' }] },
+                    { role: 'model', parts: [{ text: firstQ }] }
+                ];
+                typing.remove();
+                appendPracticeMessage('model', firstQ);
+                if (currentUser && currentPracticeSessionId) savePracticeMessage('model', firstQ);
+            } catch (err) {
+                typing.remove();
+                appendPracticeMessage('model', `⚠️ Could not connect to Gemini: ${err.message}`);
+            }
+            setPracticeInputLock(false);
+            document.getElementById('practice-input').focus();
+            if (currentUser) loadPastSessions();
+        }
+
+        async function savePracticeMessage(role, text) {
+            if (!currentUser || !currentPracticeSessionId) return;
+            db.collection('users').doc(currentUser.uid)
+                .collection('practiceHistory').doc(currentPracticeSessionId)
+                .update({ messages: firebase.firestore.FieldValue.arrayUnion({ role, text, timestamp: new Date().toISOString() }) })
+                .catch(() => {});
+        }
+
+        async function loadPastSessions() {
+            if (!currentUser) return;
+            try {
+                const snap = await db.collection('users').doc(currentUser.uid)
+                    .collection('practiceHistory').orderBy('createdAt', 'desc').limit(5).get();
+                const container = document.getElementById('past-sessions-list');
+                if (snap.empty) { container.innerHTML = '<p class="text-xs text-slate-400 py-2">No past sessions yet.</p>'; return; }
+                container.innerHTML = snap.docs.map(doc => {
+                    const d = doc.data();
+                    const date = new Date(d.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    return `<div class="bg-white border border-slate-100 rounded-xl px-4 py-3 flex justify-between items-center gap-4 text-xs">
+                        <div>
+                            <div class="font-bold text-slate-700">${date}</div>
+                            <div class="text-slate-400 mt-0.5">${d.newCount || 0} new · ${d.reviewCount || 0} review · ${d.wordsTested?.length || 0} words</div>
+                        </div>
+                        <div class="text-slate-400">${d.messages?.length || 0} messages</div>
+                    </div>`;
+                }).join('');
+            } catch (e) { console.error('Load sessions failed:', e); }
+        }
+
+        function togglePastSessions() {
+            const list = document.getElementById('past-sessions-list');
+            const arrow = document.getElementById('past-sessions-arrow');
+            const hidden = list.classList.toggle('hidden');
+            arrow.style.transform = hidden ? '' : 'rotate(90deg)';
+            if (!hidden && currentUser) loadPastSessions();
+        }
+
+        async function initPracticeTab() {
+            if (!currentUser) {
+                document.getElementById('practice-no-auth').classList.remove('hidden');
+                document.getElementById('practice-interface').classList.add('hidden');
+                return;
+            }
+            document.getElementById('practice-no-auth').classList.add('hidden');
+            document.getElementById('practice-interface').classList.remove('hidden');
+            if (!practiceActive) await startNewPracticeSession();
+        }
+
+        // ==========================================
+        // 🚀 BOOT
+        // ==========================================
 
         init();
     </script>
