@@ -1987,7 +1987,7 @@
         // ==========================================
 
         const GEMINI_KEY_STORAGE = 'indoAdventure_geminiKey';
-        const GEMINI_MODEL = 'gemini-2.0-flash';
+        const GEMINI_MODEL = 'gemini-2.5-flash';
         function getGeminiUrl() {
             const key = localStorage.getItem(GEMINI_KEY_STORAGE);
             return `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`;
