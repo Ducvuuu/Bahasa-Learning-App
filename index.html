@@ -1160,6 +1160,10 @@
                     localStorage.setItem(STORIES_KEY, JSON.stringify(storyProgress));
                     localStorage.setItem(TIMESTAMP_KEY, JSON.stringify(masteryTimestamps));
                     localStorage.setItem(MNEMONICS_KEY, JSON.stringify(mnemonics));
+                    // Restore Gemini key across devices
+                    if (data.geminiApiKey && !localStorage.getItem(GEMINI_KEY_STORAGE)) {
+                        localStorage.setItem(GEMINI_KEY_STORAGE, data.geminiApiKey);
+                    }
                 }
             } catch (err) {
                 console.error('Failed to load from Firestore:', err);
@@ -2065,6 +2069,12 @@
             const key = input.value.trim();
             if (!key) return;
             localStorage.setItem(GEMINI_KEY_STORAGE, key);
+            // Sync to Firestore so it's available on all devices
+            if (currentUser) {
+                db.collection('users').doc(currentUser.uid)
+                  .set({ geminiApiKey: key }, { merge: true })
+                  .catch(console.error);
+            }
             input.value = '';
             initPracticeTab();
         }
@@ -2072,6 +2082,12 @@
         function clearGeminiKey() {
             if (!confirm('Remove your saved API key?')) return;
             localStorage.removeItem(GEMINI_KEY_STORAGE);
+            if (currentUser) {
+                db.collection('users').doc(currentUser.uid)
+                  .set({ geminiApiKey: firebase.firestore.FieldValue.delete() }, { merge: true })
+                  .catch(console.error);
+            }
+            practiceActive = false;
             initPracticeTab();
         }
 
