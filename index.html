@@ -2148,6 +2148,11 @@ RULES:
                     })
                 });
                 const data = await res.json();
+                console.log('Gemini response:', JSON.stringify(data));
+                if (!res.ok || !data.candidates?.[0]) {
+                    const msg = data.error?.message || `HTTP ${res.status}`;
+                    throw new Error(msg);
+                }
                 const firstQ = data.candidates[0].content.parts[0].text;
                 // Seed conversation with this exchange
                 practiceConversation = [
