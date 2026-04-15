@@ -315,6 +315,40 @@
             }
         }
 
+        /* ── Practice Chat ── */
+        .practice-chat-container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px -10px rgba(79, 70, 229, 0.1);
+            border: 1px solid rgba(255,255,255,0.5);
+            height: calc(100vh - 300px);
+            min-height: 380px;
+        }
+        @media (min-width: 768px) {
+            .practice-chat-container { height: calc(100vh - 240px); min-height: 480px; }
+        }
+        .chat-scroll::-webkit-scrollbar { width: 6px; }
+        .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+        .chat-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+        .typing-dot { animation: typingBounce 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40%            { transform: scale(1); opacity: 1;   }
+        }
+        .practice-send-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            transition: all 0.2s;
+        }
+        .practice-send-btn:hover  { transform: scale(1.05); box-shadow: 0 4px 12px rgba(99,102,241,0.35); }
+        .practice-send-btn:active { transform: scale(0.95); }
+        .sessions-panel {
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .sessions-panel.open   { transform: translateX(0); }
+        .sessions-panel.closed { transform: translateX(100%); }
+
         /* Drag-over state for mnemonic drop zone */
         .drag-over {
             border-color: #6366f1 !important;
@@ -912,65 +946,98 @@
             <div class="flex gap-2">
                 <input type="password" id="gemini-key-input" placeholder="Paste your Gemini API key…"
                        class="flex-1 px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
-                <button onclick="saveGeminiKey()"
-                        class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-colors shadow-sm">
-                    Save
-                </button>
+                <button onclick="saveGeminiKey()" class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-colors shadow-sm">Save</button>
             </div>
         </div>
 
         <!-- Main interface -->
         <div id="practice-interface">
-            <!-- Header -->
-            <div class="flex items-start justify-between mb-5 gap-4">
+
+            <!-- Section Header -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-800 mb-1">Practice Session ✨</h2>
-                    <p id="practice-word-summary" class="text-sm text-slate-500">Loading your words…</p>
+                    <h2 class="text-xl md:text-3xl font-bold text-slate-800">Practice Session ✨</h2>
+                    <p id="practice-word-summary" class="text-slate-500 text-xs md:text-sm mt-1">Chat with your AI tutor using the words you've mastered.</p>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                    <button onclick="togglePastSessions()"
+                            class="text-xs md:text-sm font-medium text-slate-500 hover:text-indigo-600 flex items-center gap-1.5 transition-colors px-2 md:px-3 py-2 rounded-lg hover:bg-white border border-transparent hover:border-slate-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Past Sessions
+                    </button>
                     <button onclick="startNewPracticeSession()"
-                            class="flex-shrink-0 text-sm font-bold bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl hover:bg-indigo-100 transition-colors shadow-sm">
-                        ↺ New Session
+                            class="bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-100 font-bold px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm flex items-center gap-1.5 transition-colors shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        New Session
                     </button>
                     <button onclick="clearGeminiKey()" title="Change API key"
-                            class="flex-shrink-0 text-sm text-slate-400 hover:text-slate-600 px-3 py-2 rounded-xl hover:bg-slate-100 transition-colors">
-                        🔑
-                    </button>
+                            class="text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-100 transition-colors text-sm">🔑</button>
                 </div>
             </div>
 
-            <!-- Chat window -->
-            <div id="practice-chat"
-                 class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-y-auto mb-4"
-                 style="height:420px">
-                <div id="practice-messages" class="p-4 space-y-4"></div>
-            </div>
+            <!-- Chat Container -->
+            <div class="practice-chat-container flex flex-col overflow-hidden">
 
-            <!-- Input -->
-            <div class="flex gap-3">
-                <input type="text" id="practice-input"
-                       placeholder="Type your answer and press Enter…"
-                       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendPracticeMessage();}"
-                       class="flex-1 px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
-                <button onclick="sendPracticeMessage()" id="practice-send-btn"
-                        class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-colors shadow-sm active:scale-95">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                    </svg>
-                </button>
-            </div>
+                <!-- Chat Header -->
+                <div class="bg-white/80 backdrop-blur-md border-b border-slate-100 py-3 px-4 md:px-6 flex justify-between items-center flex-shrink-0">
+                    <div class="flex items-center gap-2 md:gap-3">
+                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white shadow-sm">
+                            <span class="text-base md:text-xl">🤖</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm md:text-base leading-tight">Guru Bot</h3>
+                            <span class="text-[10px] md:text-xs text-emerald-500 font-medium flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span> Online
+                            </span>
+                        </div>
+                    </div>
+                    <div id="practice-word-count-badge" class="text-[10px] md:text-xs font-semibold text-slate-400 bg-slate-100 px-2 md:px-3 py-1 rounded-full">
+                        — Words Mastered
+                    </div>
+                </div>
 
-            <!-- Past sessions -->
-            <div class="mt-6">
-                <button onclick="togglePastSessions()"
-                        class="text-xs font-bold text-slate-400 hover:text-slate-600 flex items-center gap-1 transition-colors">
-                    <svg id="past-sessions-arrow" class="w-3 h-3 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                    Past Sessions
-                </button>
-                <div id="past-sessions-list" class="hidden mt-3 space-y-2"></div>
+                <!-- Messages -->
+                <div id="practice-chat" class="flex-1 overflow-y-auto chat-scroll p-3 md:p-6 flex flex-col gap-4 md:gap-5">
+                    <div id="practice-messages"></div>
+                </div>
+
+                <!-- Input Bar -->
+                <div class="bg-white border-t border-slate-100 p-2 md:p-4 flex-shrink-0">
+                    <div class="max-w-4xl mx-auto relative flex items-center bg-slate-50 border border-slate-200 rounded-full focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 transition-all p-1">
+                        <input type="text" id="practice-input"
+                               placeholder="Type your answer…"
+                               onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendPracticeMessage();}"
+                               class="flex-1 bg-transparent border-none focus:outline-none px-3 md:px-4 py-2 md:py-2.5 text-slate-700 placeholder-slate-400 text-sm md:text-base">
+                        <button onclick="sendPracticeMessage()" id="practice-send-btn"
+                                class="practice-send-btn text-white p-2 md:p-2.5 rounded-full ml-1 mr-1 flex items-center justify-center">
+                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="text-center mt-1 text-[9px] md:text-[10px] text-slate-400 font-medium">Press Enter to send · AI can make mistakes</p>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Past Sessions Overlay -->
+    <div id="sessions-overlay" class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 opacity-0 pointer-events-none transition-opacity duration-300" onclick="togglePastSessions()"></div>
+
+    <!-- Past Sessions Slide Panel -->
+    <div id="sessions-panel" class="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-50 sessions-panel closed flex flex-col border-l border-slate-100">
+        <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-white/80 backdrop-blur-md">
+            <div>
+                <h3 class="text-xl font-bold text-slate-800">Past Sessions 🕰️</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Your chat history</p>
+            </div>
+            <button onclick="togglePastSessions()" class="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-200 p-2 rounded-full transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div id="past-sessions-list" class="flex-1 overflow-y-auto chat-scroll p-4 space-y-3"></div>
+        <div class="p-4 border-t border-slate-100 bg-slate-50 text-center">
+            <p class="text-xs text-slate-400">Showing last 5 sessions</p>
         </div>
     </div>
 
@@ -2091,35 +2158,64 @@ RULES:
             return reply;
         }
 
-        function appendPracticeMessage(role, text) {
+        function practiceScrollBottom() {
+            const c = document.getElementById('practice-chat');
+            if (c) c.scrollTop = c.scrollHeight;
+        }
+
+        function appendPracticeMessage(role, text, chips) {
             const isUser = role === 'user';
-            const div = document.createElement('div');
-            div.className = `flex ${isUser ? 'justify-end' : 'justify-start'} items-end gap-2`;
             const escaped = text.replace(/</g, '&lt;').replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            div.innerHTML = isUser
-                ? `<div class="max-w-xs md:max-w-md bg-indigo-600 text-white px-4 py-2.5 rounded-2xl rounded-br-md text-sm leading-relaxed">${escaped}</div>`
-                : `<div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-xs flex-shrink-0 mb-0.5">✨</div>
-                   <div class="max-w-xs md:max-w-md bg-white border border-slate-100 shadow-sm px-4 py-2.5 rounded-2xl rounded-bl-md text-sm leading-relaxed text-slate-700">${escaped}</div>`;
+            const avatarUrl = (isUser && currentUser?.photoURL) ? currentUser.photoURL : null;
+            const userAvatar = avatarUrl
+                ? `<img src="${avatarUrl}" class="w-8 h-8 rounded-full border border-slate-200 flex-shrink-0 mt-1">`
+                : `<div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs flex-shrink-0 mt-1">Me</div>`;
+
+            const chipsHtml = (!isUser && chips?.length) ? `
+                <div class="mt-3 flex flex-wrap gap-2">
+                    ${chips.map(c => `<button onclick="sendSuggestion('${c.text.replace(/'/g,"\\\'")}')" class="bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-600 hover:text-white text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-full transition-colors">${c.label}</button>`).join('')}
+                </div>` : '';
+
+            const div = document.createElement('div');
+            div.className = `flex items-start gap-2 md:gap-3 ${isUser ? 'self-end flex-row-reverse max-w-[90%] md:max-w-[80%]' : 'max-w-[90%] md:max-w-[80%]'}`;
+            div.innerHTML = isUser ? `
+                ${userAvatar}
+                <div class="flex flex-col gap-1 items-end">
+                    <span class="text-[10px] md:text-xs font-semibold text-slate-400 mr-1">You</span>
+                    <div class="bg-indigo-600 text-white px-4 md:px-5 py-2.5 md:py-3 rounded-2xl rounded-tr-sm shadow-md leading-relaxed text-sm md:text-base">${escaped}</div>
+                </div>` : `
+                <div class="w-8 h-8 flex-shrink-0 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-sm shadow-sm mt-1">🤖</div>
+                <div class="flex flex-col gap-1">
+                    <span class="text-[10px] md:text-xs font-semibold text-slate-400 ml-1">Guru Bot</span>
+                    <div class="bg-indigo-50 border border-indigo-100 text-slate-700 px-4 md:px-5 py-2.5 md:py-3 rounded-2xl rounded-tl-sm shadow-sm leading-relaxed text-sm md:text-base">${escaped}${chipsHtml}</div>
+                </div>`;
+
             document.getElementById('practice-messages').appendChild(div);
-            const chat = document.getElementById('practice-chat');
-            chat.scrollTop = chat.scrollHeight;
+            practiceScrollBottom();
+            return div;
+        }
+
+        function sendSuggestion(text) {
+            document.getElementById('practice-input').value = text;
+            sendPracticeMessage();
         }
 
         function showTypingIndicator() {
             const div = document.createElement('div');
             div.id = 'practice-typing';
-            div.className = 'flex justify-start items-end gap-2';
+            div.className = 'flex items-start gap-2 md:gap-3 max-w-[90%]';
             div.innerHTML = `
-                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-xs flex-shrink-0">✨</div>
-                <div class="bg-white border border-slate-100 shadow-sm px-4 py-3 rounded-2xl rounded-bl-md">
-                    <div class="flex gap-1 items-center">
-                        <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style="animation-delay:0ms"></span>
-                        <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style="animation-delay:150ms"></span>
-                        <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style="animation-delay:300ms"></span>
+                <div class="w-8 h-8 flex-shrink-0 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-sm shadow-sm mt-1">🤖</div>
+                <div class="flex flex-col gap-1">
+                    <span class="text-[10px] md:text-xs font-semibold text-slate-400 ml-1">Guru Bot</span>
+                    <div class="bg-indigo-50 border border-indigo-100 px-4 py-3.5 rounded-2xl rounded-tl-sm flex items-center gap-1">
+                        <div class="w-2 h-2 bg-indigo-400 rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-indigo-400 rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-indigo-400 rounded-full typing-dot"></div>
                     </div>
                 </div>`;
             document.getElementById('practice-messages').appendChild(div);
-            document.getElementById('practice-chat').scrollTop = 99999;
+            practiceScrollBottom();
             return div;
         }
 
@@ -2156,13 +2252,15 @@ RULES:
             practiceWords = getPracticeWords();
             document.getElementById('practice-messages').innerHTML = '';
 
+            const totalMastered = coreKnown.length + Object.values(songProgress).flat().length + Object.values(storyProgress).flat().length;
+            document.getElementById('practice-word-count-badge').textContent = `${totalMastered} Words Mastered`;
             const summary = document.getElementById('practice-word-summary');
             if (!practiceWords.hasWords) {
                 summary.textContent = 'No mastered words yet — mark some words as known first!';
                 appendPracticeMessage('model', "Looks like you haven't mastered any words yet! 📚 Head to **Core Words**, **Stories**, or **Songs** and mark some words as known — then come back to practice.");
                 return;
             }
-            summary.textContent = `Testing ${practiceWords.newCount} new · ${practiceWords.reviewCount} review · ${practiceWords.selected.length} total words`;
+            summary.textContent = `Testing ${practiceWords.newCount} new · ${practiceWords.reviewCount} review · ${practiceWords.selected.length} total`;
 
             if (currentUser) {
                 currentPracticeSessionId = Date.now().toString();
@@ -2201,7 +2299,12 @@ RULES:
                     { role: 'model', parts: [{ text: firstQ }] }
                 ];
                 typing.remove();
-                appendPracticeMessage('model', firstQ);
+                const chips = [
+                    { label: '🏪 Roleplay Market Scene', text: 'Let\'s roleplay a market scene!' },
+                    { label: '🔄 Review Recent Words',   text: 'Quiz me on my most recent words.' },
+                    { label: '🗣️ Translate Sentences',   text: 'Give me sentences to translate.' }
+                ];
+                appendPracticeMessage('model', firstQ, chips);
                 if (currentUser && currentPracticeSessionId) savePracticeMessage('model', firstQ);
             } catch (err) {
                 typing.remove();
@@ -2222,31 +2325,48 @@ RULES:
 
         async function loadPastSessions() {
             if (!currentUser) return;
+            const container = document.getElementById('past-sessions-list');
+            container.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">Loading…</p>';
             try {
                 const snap = await db.collection('users').doc(currentUser.uid)
                     .collection('practiceHistory').orderBy('createdAt', 'desc').limit(5).get();
-                const container = document.getElementById('past-sessions-list');
-                if (snap.empty) { container.innerHTML = '<p class="text-xs text-slate-400 py-2">No past sessions yet.</p>'; return; }
-                container.innerHTML = snap.docs.map(doc => {
+                if (snap.empty) { container.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">No past sessions yet.</p>'; return; }
+                const now = Date.now();
+                container.innerHTML = snap.docs.map((doc, i) => {
                     const d = doc.data();
-                    const date = new Date(d.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                    return `<div class="bg-white border border-slate-100 rounded-xl px-4 py-3 flex justify-between items-center gap-4 text-xs">
-                        <div>
-                            <div class="font-bold text-slate-700">${date}</div>
-                            <div class="text-slate-400 mt-0.5">${d.newCount || 0} new · ${d.reviewCount || 0} review · ${d.wordsTested?.length || 0} words</div>
+                    const ts = new Date(d.createdAt);
+                    const diffDays = Math.floor((now - ts.getTime()) / 86400000);
+                    const label = diffDays === 0 ? 'Today' : diffDays === 1 ? 'Yesterday' : ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    const isToday = diffDays === 0;
+                    const preview = d.messages?.find(m => m.role === 'model')?.text?.slice(0, 80) || '—';
+                    return `<div class="p-4 rounded-2xl border ${isToday ? 'border-indigo-100 bg-indigo-50/30 hover:border-indigo-300 hover:bg-indigo-50' : 'border-slate-100 bg-white hover:border-indigo-200 hover:bg-indigo-50/50'} cursor-pointer transition-all group">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="font-bold ${isToday ? 'text-indigo-900' : 'text-slate-800'} group-hover:text-indigo-700 text-sm flex items-center gap-2">
+                                <span>${['🗣️','🔄','📝','🎯','✏️'][i % 5]}</span> Session ${i === 0 ? '(Current)' : `#${snap.docs.length - i}`}
+                            </div>
+                            <span class="text-[10px] font-bold ${isToday ? 'text-indigo-500 bg-indigo-100' : 'text-slate-400 bg-slate-100'} px-2 py-1 rounded-md uppercase tracking-wider">${label}</span>
                         </div>
-                        <div class="text-slate-400">${d.messages?.length || 0} messages</div>
+                        <p class="text-sm text-slate-500 line-clamp-2">${preview.replace(/</g,'&lt;')}</p>
+                        <p class="text-[10px] text-slate-400 mt-2">${d.wordsTested?.length || 0} words · ${d.messages?.length || 0} messages</p>
                     </div>`;
                 }).join('');
-            } catch (e) { console.error('Load sessions failed:', e); }
+            } catch (e) { container.innerHTML = '<p class="text-xs text-red-400 py-4 text-center">Failed to load sessions.</p>'; }
         }
 
         function togglePastSessions() {
-            const list = document.getElementById('past-sessions-list');
-            const arrow = document.getElementById('past-sessions-arrow');
-            const hidden = list.classList.toggle('hidden');
-            arrow.style.transform = hidden ? '' : 'rotate(90deg)';
-            if (!hidden && currentUser) loadPastSessions();
+            const panel   = document.getElementById('sessions-panel');
+            const overlay = document.getElementById('sessions-overlay');
+            const isOpen  = panel.classList.contains('open');
+            if (isOpen) {
+                panel.classList.replace('open', 'closed');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+                overlay.classList.remove('opacity-100', 'pointer-events-auto');
+            } else {
+                panel.classList.replace('closed', 'open');
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+                overlay.classList.add('opacity-100', 'pointer-events-auto');
+                loadPastSessions();
+            }
         }
 
         async function initPracticeTab() {
