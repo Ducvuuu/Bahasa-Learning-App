@@ -707,7 +707,13 @@
                     <div class="flex-1 text-center sm:text-left">
                         <h2 id="detail-deck-title" class="text-3xl font-bold text-slate-800 mb-2"></h2>
                         <p id="detail-deck-desc" class="text-slate-500 mb-5"></p>
-                        <span id="detail-deck-progress" class="text-sm font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-4 py-1.5 rounded-full"></span>
+                        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                            <span id="detail-deck-progress" class="text-sm font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-4 py-1.5 rounded-full"></span>
+                            <button onclick="openDeckModal('edit')" class="text-sm font-bold text-slate-600 bg-slate-50 border border-slate-200 hover:bg-slate-100 px-4 py-1.5 rounded-full transition-colors flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                Edit Deck
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -1142,22 +1148,20 @@
                 </div>
             </div>
             <hr class="border-slate-200">
-            <button type="button" id="add-ai-generate-btn" class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold py-3 px-4 rounded-xl shadow-md shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-2">
+            <button type="button" id="add-ai-generate-btn" onclick="autoFillWordMeaning()" class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold py-3 px-4 rounded-xl shadow-md shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-2">
                 <span class="text-lg">✨</span>
                 <span id="add-ai-btn-text">Auto-fill Meaning & Emoji</span>
             </button>
-            <div class="flex gap-4 opacity-60 transition-opacity duration-500" id="add-ai-results-area">
+            <div class="flex gap-4 transition-opacity duration-500" id="add-ai-results-area">
                 <div class="w-20">
                     <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Emoji</label>
-                    <div id="add-output-emoji" class="w-full bg-slate-100 border border-dashed border-slate-200 text-center rounded-xl py-3 shadow-inner text-2xl h-[60px] flex items-center justify-center">
-                        <span class="text-slate-400 text-sm font-medium">?</span>
-                    </div>
+                    <input type="text" id="add-output-emoji" placeholder="?" maxlength="4"
+                           class="w-full bg-white border border-slate-200 text-center rounded-xl py-3 shadow-sm text-2xl h-[60px] focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all">
                 </div>
                 <div class="flex-1">
                     <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">English</label>
-                    <div id="add-output-eng" class="w-full bg-slate-100 border border-dashed border-slate-200 text-slate-800 rounded-xl px-4 py-3 shadow-inner h-[60px] flex items-center">
-                        <span class="text-slate-400 text-sm font-medium italic">Waiting for AI...</span>
-                    </div>
+                    <input type="text" id="add-output-eng" placeholder="Waiting for AI..."
+                           class="w-full bg-white border border-slate-200 text-slate-800 rounded-xl px-4 py-3 shadow-sm h-[60px] focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 font-medium transition-all">
                 </div>
             </div>
         </div>
@@ -2172,6 +2176,51 @@
             document.querySelectorAll('.deck-color-btn').forEach(b =>
                 b.classList.remove('ring-2', 'ring-offset-2', 'ring-slate-400', 'scale-110'));
             btn.classList.add('ring-2', 'ring-offset-2', 'ring-slate-400', 'scale-110');
+        }
+
+        async function autoFillWordMeaning() {
+            const word = document.getElementById('add-indo-word-input').value.trim();
+            if (!word) {
+                document.getElementById('add-indo-word-input').focus();
+                document.getElementById('add-indo-word-input').classList.add('ring-2', 'ring-rose-300', 'border-rose-300');
+                setTimeout(() => document.getElementById('add-indo-word-input').classList.remove('ring-2', 'ring-rose-300', 'border-rose-300'), 1500);
+                return;
+            }
+
+            const key = localStorage.getItem(GEMINI_KEY_STORAGE);
+            if (!key) {
+                alert('No Gemini API key found. Go to the Practice tab to add your key first.');
+                return;
+            }
+
+            const btn = document.getElementById('add-ai-generate-btn');
+            const btnText = document.getElementById('add-ai-btn-text');
+            btn.disabled = true;
+            btnText.textContent = 'Thinking...';
+
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ role: 'user', parts: [{ text: `For the Indonesian word or phrase "${word}", respond with ONLY a JSON object in this exact format with no other text: {"emoji":"🍉","english":"Watermelon"}` }] }],
+                        generationConfig: { temperature: 0.2, maxOutputTokens: 60 }
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
+                const raw = data.candidates[0].content.parts[0].text.trim();
+                const json = JSON.parse(raw.replace(/```json|```/g, '').trim());
+                document.getElementById('add-output-emoji').value = json.emoji || '✨';
+                document.getElementById('add-output-eng').value   = json.english || '';
+                btnText.textContent = '✓ Generated!';
+                setTimeout(() => { btnText.textContent = 'Auto-fill Meaning & Emoji'; }, 2000);
+            } catch (err) {
+                console.error('Auto-fill error:', err);
+                btnText.textContent = 'Failed — edit manually';
+                setTimeout(() => { btnText.textContent = 'Auto-fill Meaning & Emoji'; }, 2500);
+            }
+            btn.disabled = false;
         }
 
         window.toggleWeek = function(weekNum) { document.getElementById(`week-container-${weekNum}`).classList.toggle('active'); }
