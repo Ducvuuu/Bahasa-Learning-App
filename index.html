@@ -999,6 +999,9 @@
         <button id="modal-action-btn" class="w-full py-3 rounded-xl font-bold text-white transition-transform active:scale-95 bg-indigo-500 hover:bg-indigo-600 shadow-lg shadow-indigo-200">
             Mark as Known
         </button>
+        <button id="modal-delete-word-btn" class="hidden w-full mt-2 py-2.5 rounded-xl font-bold text-rose-500 border border-rose-200 hover:bg-rose-50 transition-colors text-sm">
+            Delete Word
+        </button>
     </div>
 
     <!-- ================= VIEW: PRACTICE ================= -->
@@ -1290,6 +1293,7 @@
         const MNEMONICS_KEY    = 'indoAdventure_mnemonics';
         const CUSTOM_WORDS_KEY = 'indoAdventure_customWords';
         const CUSTOM_KNOWN_KEY = 'indoAdventure_customKnown';
+        const HIDDEN_CORE_KEY  = 'indoAdventure_hiddenCore';
         
         
         let coreKnown = [];
@@ -1299,6 +1303,7 @@
         let mnemonics = {};
         let customWords = {};   // { dayNum: [{id, indo, eng, emoji}] }
         let customKnown = [];   // array of known custom word IDs
+        let hiddenCoreWords = []; // array of originalIndex values hidden by user
         let pendingImportWords = [];
         
         let currentTab = 'core';
@@ -1413,6 +1418,8 @@
                     if (data.storyProgress) storyProgress = data.storyProgress;
                     if (data.mnemonics) mnemonics = data.mnemonics;
                     if (data.masteryTimestamps) masteryTimestamps = data.masteryTimestamps;
+                    if (data.hiddenCoreWords) hiddenCoreWords = data.hiddenCoreWords;
+                    localStorage.setItem(HIDDEN_CORE_KEY, JSON.stringify(hiddenCoreWords));
                     if (!masteryTimestamps.core) masteryTimestamps.core = {};
                     if (!masteryTimestamps.songs) masteryTimestamps.songs = {};
                     if (!masteryTimestamps.stories) masteryTimestamps.stories = {};
@@ -1447,6 +1454,7 @@
                         storyProgress,
                         masteryTimestamps,
                         mnemonics,
+                        hiddenCoreWords,
                         updatedAt: new Date().toISOString()
                     });
                     showSyncIndicator();
@@ -1628,14 +1636,17 @@
                 const percent = totalCount === 0 ? 0 : Math.round((knownCount/totalCount)*100);
                 
                 return `
-                <div onclick="loadStory('${story.id}')" class="library-card p-6 cursor-pointer group hover:border-indigo-100 transition-all">
+                <div onclick="loadStory('${story.id}')" class="library-card p-6 cursor-pointer group hover:border-indigo-100 transition-all relative">
                     <div class="flex justify-between items-start mb-4">
                         <div class="text-4xl group-hover:scale-110 transition-transform">${story.coverEmoji || '📖'}</div>
-                        <span class="text-xs font-bold px-2 py-1 bg-slate-100 rounded text-slate-500">${story.difficulty || 'Easy'}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold px-2 py-1 bg-slate-100 rounded text-slate-500">${story.difficulty || 'Easy'}</span>
+                            ${knownCount > 0 ? `<button onclick="event.stopPropagation(); resetStory('${story.id}')" title="Reset progress" class="text-xs font-bold px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-400 hover:text-rose-600 rounded transition-colors">↺ Reset</button>` : ''}
+                        </div>
                     </div>
                     <h3 class="text-xl font-bold text-slate-800 mb-1 group-hover:text-indigo-600 transition-colors">${story.title}</h3>
                     <p class="text-sm text-slate-400 mb-4">${story.category || 'General'}</p>
-                    
+
                     <!-- Mini Progress Bar -->
                     <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div class="h-full bg-indigo-500" style="width: ${percent}%"></div>
@@ -1867,6 +1878,7 @@
             const btn = document.getElementById('modal-action-btn');
             const knownIds = storyProgress[currentStory.id] || [];
             updateModalButton(btn, knownIds.includes(vocabId));
+            document.getElementById('modal-delete-word-btn').classList.add('hidden');
             document.getElementById('word-modal').classList.add('active');
             document.getElementById('word-modal-overlay').classList.add('active');
             btn.onclick = function() { toggleStoryWord(vocabId); closeModal(); };
@@ -2060,6 +2072,10 @@
             const btn = document.getElementById('modal-action-btn');
             const isKnown = coreKnown.includes(index);
             updateModalButton(btn, isKnown);
+            const delBtn = document.getElementById('modal-delete-word-btn');
+            delBtn.textContent = 'Remove Word';
+            delBtn.classList.remove('hidden');
+            delBtn.onclick = function() { removeCoreWord(index); };
             document.getElementById('word-modal').classList.add('active');
             document.getElementById('word-modal-overlay').classList.add('active');
             btn.onclick = function() { toggleCoreWord(index); closeModal(); };
@@ -2079,6 +2095,11 @@
             const btn = document.getElementById('modal-action-btn');
             const isKnown = customKnown.includes(id);
             updateModalButton(btn, isKnown);
+
+            const delBtn = document.getElementById('modal-delete-word-btn');
+            delBtn.classList.remove('hidden');
+            delBtn.onclick = function() { deleteCustomWord(id); };
+
             document.getElementById('word-modal').classList.add('active');
             document.getElementById('word-modal-overlay').classList.add('active');
             btn.onclick = function() { toggleCustomWord(id); closeModal(); };
@@ -2126,11 +2147,98 @@
                 const k = localStorage.getItem(CUSTOM_KNOWN_KEY);
                 if (k) customKnown = JSON.parse(k);
             } catch(e) { customKnown = []; }
+            try {
+                const h = localStorage.getItem(HIDDEN_CORE_KEY);
+                if (h) hiddenCoreWords = JSON.parse(h);
+            } catch(e) { hiddenCoreWords = []; }
         }
 
         function saveCustomWords() {
             localStorage.setItem(CUSTOM_WORDS_KEY, JSON.stringify(customWords));
             localStorage.setItem(CUSTOM_KNOWN_KEY, JSON.stringify(customKnown));
+            localStorage.setItem(HIDDEN_CORE_KEY, JSON.stringify(hiddenCoreWords));
+        }
+
+        function removeCoreWord(index) {
+            if (!hiddenCoreWords.includes(index)) hiddenCoreWords.push(index);
+            coreKnown = coreKnown.filter(i => i !== index);
+            delete masteryTimestamps.core[index];
+            saveCustomWords();
+            saveProgress();
+            closeModal();
+            if (currentDeckDay !== null) {
+                renderDeckWordList(currentDeckDay);
+                const visibleCore = coreVocabulary.filter(w => w.day === currentDeckDay && !hiddenCoreWords.includes(w.originalIndex));
+                const custom = customWords[currentDeckDay] || [];
+                const total = visibleCore.length + custom.length;
+                const known = visibleCore.filter(w => coreKnown.includes(w.originalIndex)).length
+                            + custom.filter(w => customKnown.includes(w.id)).length;
+                document.getElementById('detail-deck-progress').textContent = `${known}/${total} Mastered`;
+            } else {
+                renderDecksOverview();
+            }
+            updateStats();
+        }
+
+        function resetDeck(dayNum) {
+            const dayIndices = coreVocabulary.filter(w => w.day === dayNum).map(w => w.originalIndex);
+            coreKnown = coreKnown.filter(i => !dayIndices.includes(i));
+            dayIndices.forEach(i => delete masteryTimestamps.core[i]);
+            hiddenCoreWords = hiddenCoreWords.filter(i => !dayIndices.includes(i));
+            const customIds = (customWords[dayNum] || []).map(w => w.id);
+            customWords[dayNum] = [];
+            customKnown = customKnown.filter(k => !customIds.includes(k));
+            saveCustomWords();
+            saveProgress();
+            closeDeckModal();
+            renderDeckWordList(dayNum);
+            const total = coreVocabulary.filter(w => w.day === dayNum).length;
+            document.getElementById('detail-deck-progress').textContent = `0/${total} Mastered`;
+            updateStats();
+        }
+
+        function resetStory(storyId) {
+            storyProgress[storyId] = [];
+            if (masteryTimestamps.stories) delete masteryTimestamps.stories[storyId];
+            saveProgress();
+            renderLibrary();
+            updateStats();
+        }
+
+        function deleteCustomWord(id) {
+            const dayNum = Object.keys(customWords).find(d => (customWords[d] || []).some(w => w.id === id));
+            if (!dayNum) return;
+            customWords[dayNum] = (customWords[dayNum] || []).filter(w => w.id !== id);
+            customKnown = customKnown.filter(k => k !== id);
+            saveCustomWords();
+            saveProgress();
+            closeModal();
+            if (currentDeckDay !== null) {
+                renderDeckWordList(currentDeckDay);
+                const total = (coreVocabulary.filter(w => w.day === currentDeckDay).length) + (customWords[currentDeckDay] || []).length;
+                const known = coreVocabulary.filter(w => w.day === currentDeckDay && coreKnown.includes(w.originalIndex)).length
+                            + (customWords[currentDeckDay] || []).filter(w => customKnown.includes(w.id)).length;
+                document.getElementById('detail-deck-progress').textContent = `${known}/${total} Mastered`;
+            } else {
+                renderDecksOverview();
+            }
+            updateStats();
+        }
+
+        function deleteDeckCustomWords(dayNum) {
+            const words = customWords[dayNum] || [];
+            if (words.length === 0) { closeDeckModal(); return; }
+            const ids = words.map(w => w.id);
+            customWords[dayNum] = [];
+            customKnown = customKnown.filter(k => !ids.includes(k));
+            saveCustomWords();
+            saveProgress();
+            closeDeckModal();
+            renderDeckWordList(dayNum);
+            const total = coreVocabulary.filter(w => w.day === dayNum).length;
+            const known = coreVocabulary.filter(w => w.day === dayNum && coreKnown.includes(w.originalIndex)).length;
+            document.getElementById('detail-deck-progress').textContent = `${known}/${total} Mastered`;
+            updateStats();
         }
 
         function toggleCustomWord(id) {
@@ -2303,7 +2411,7 @@
             }
 
             container.innerHTML = days.map((dayNum, idx) => {
-                const words = groupedByDay[dayNum];
+                const words = groupedByDay[dayNum].filter(w => !hiddenCoreWords.includes(w.originalIndex));
                 const total = words.length;
                 const known = words.filter(w => coreKnown.includes(w.originalIndex)).length;
                 const percent = total === 0 ? 0 : Math.round((known / total) * 100);
@@ -2367,7 +2475,7 @@
 
         function renderDeckWordList(dayNum) {
             const container = document.getElementById('deck-word-list');
-            const words = coreVocabulary.filter(w => w.day === dayNum);
+            const words = coreVocabulary.filter(w => w.day === dayNum && !hiddenCoreWords.includes(w.originalIndex));
             const custom = customWords[dayNum] || [];
             const total = words.length + custom.length;
 
@@ -2469,9 +2577,16 @@
                 titleEl.textContent = 'Create New Deck';
                 saveBtn.textContent = 'Create Deck';
                 deleteBtn.classList.add('hidden');
+                deleteBtn.onclick = null;
                 document.getElementById('deck-input-title').value = '';
                 document.getElementById('deck-input-icon').value  = '';
                 document.getElementById('deck-input-desc').value  = '';
+            } else if (mode === 'edit') {
+                titleEl.textContent = 'Edit Deck';
+                saveBtn.textContent = 'Save';
+                deleteBtn.classList.remove('hidden');
+                deleteBtn.textContent = 'Reset Deck';
+                deleteBtn.onclick = () => resetDeck(currentDeckDay);
             }
             overlay.classList.remove('opacity-0', 'pointer-events-none');
             overlay.classList.add('opacity-100', 'pointer-events-auto');
@@ -2667,11 +2782,12 @@
             // Display mnemonic image
             displayMnemonicInModal(vocabId);
             
-            const btn = document.getElementById('modal-action-btn'); 
-            updateModalButton(btn, isKnown); 
-            document.getElementById('word-modal').classList.add('active'); 
-            document.getElementById('word-modal-overlay').classList.add('active'); 
-            btn.onclick = function() { toggleSongWord(vocabId); closeModal(); }; 
+            const btn = document.getElementById('modal-action-btn');
+            updateModalButton(btn, isKnown);
+            document.getElementById('modal-delete-word-btn').classList.add('hidden');
+            document.getElementById('word-modal').classList.add('active');
+            document.getElementById('word-modal-overlay').classList.add('active');
+            btn.onclick = function() { toggleSongWord(vocabId); closeModal(); };
         }
         function toggleSongWord(vocabId) { 
             const songId = currentSong.id; 
