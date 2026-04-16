@@ -849,7 +849,18 @@
 
         <!-- ================= VIEW: SONGS ================= -->
         <div id="view-songs" class="hidden">
-            
+
+            <!-- Sign-in Gate -->
+            <div id="song-signin-gate" class="hidden flex flex-col items-center justify-center py-24 gap-4 text-center">
+                <div class="text-5xl mb-2">🔒</div>
+                <h3 class="text-xl font-bold text-slate-700">Sign in to access songs</h3>
+                <p class="text-sm text-slate-400 max-w-xs">Your song progress is saved to your account.</p>
+                <button onclick="signInWithGoogle()" class="mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-md shadow-indigo-200">Sign in with Google</button>
+            </div>
+
+            <!-- Song Content (hidden when not signed in) -->
+            <div id="song-main-content" class="hidden">
+
             <!-- Error State -->
             <div id="song-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-2xl mb-6">
                 <strong>⚠️ Song Data Missing:</strong> Please make sure song files are in the "songs/" folder.
@@ -947,6 +958,7 @@
                 </div>
 
             </div>
+            </div> <!-- end song-main-content -->
         </div>
     </main>
 
@@ -1544,7 +1556,18 @@
             // Show FAB only on core/decks tab on mobile
             if (fab) fab.classList.toggle('hidden', tab !== 'core');
 
-            if (tab === 'songs') songWrapper.classList.remove('hidden');
+            if (tab === 'songs') {
+                songWrapper.classList.remove('hidden');
+                const gate = document.getElementById('song-signin-gate');
+                const content = document.getElementById('song-main-content');
+                if (currentUser) {
+                    gate.classList.add('hidden');
+                    content.classList.remove('hidden');
+                } else {
+                    gate.classList.remove('hidden');
+                    content.classList.add('hidden');
+                }
+            }
             if (tab === 'inventory') renderInventory();
             if (tab === 'read') renderLibrary();
             if (tab === 'practice') initPracticeTab();
@@ -1569,6 +1592,16 @@
         
         function renderLibrary() {
             const container = document.getElementById('library-grid');
+            if (!currentUser) {
+                container.innerHTML = `
+                <div class="col-span-3 flex flex-col items-center justify-center py-24 gap-4 text-center">
+                    <div class="text-5xl mb-2">🔒</div>
+                    <h3 class="text-xl font-bold text-slate-700">Sign in to read stories</h3>
+                    <p class="text-sm text-slate-400 max-w-xs">Your reading progress is saved to your account.</p>
+                    <button onclick="signInWithGoogle()" class="mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-md shadow-indigo-200">Sign in with Google</button>
+                </div>`;
+                return;
+            }
             // COMBINE: Built-in Window Stories + Local File Stories
             const builtIn = window.stories || [];
             const library = [...builtIn, ...localStories];
@@ -2242,6 +2275,17 @@
         function renderDecksOverview() {
             const container = document.getElementById('decks-grid');
             if (!container) return;
+
+            if (!currentUser) {
+                container.innerHTML = `
+                <div class="col-span-4 flex flex-col items-center justify-center py-24 gap-4 text-center">
+                    <div class="text-5xl mb-2">🔒</div>
+                    <h3 class="text-xl font-bold text-slate-700">Sign in to access your decks</h3>
+                    <p class="text-sm text-slate-400 max-w-xs">Your progress, custom words, and settings are saved to your account.</p>
+                    <button onclick="signInWithGoogle()" class="mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-md shadow-indigo-200">Sign in with Google</button>
+                </div>`;
+                return;
+            }
 
             const groupedByDay = {};
             coreVocabulary.forEach((word, index) => {
