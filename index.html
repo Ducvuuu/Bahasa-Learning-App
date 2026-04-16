@@ -1348,6 +1348,26 @@
             auth.signOut();
         }
 
+        function clearAllUserData() {
+            // Clear localStorage
+            localStorage.removeItem(CORE_KEY);
+            localStorage.removeItem(SONGS_KEY);
+            localStorage.removeItem(STORIES_KEY);
+            localStorage.removeItem(TIMESTAMP_KEY);
+            localStorage.removeItem(MNEMONICS_KEY);
+            localStorage.removeItem(CUSTOM_WORDS_KEY);
+            localStorage.removeItem(CUSTOM_KNOWN_KEY);
+            localStorage.removeItem(GEMINI_KEY_STORAGE);
+            // Reset in-memory state
+            coreKnown = [];
+            songProgress = {};
+            storyProgress = {};
+            masteryTimestamps = { core: {}, songs: {}, stories: {} };
+            mnemonics = {};
+            customWords = {};
+            customKnown = [];
+        }
+
         auth.onAuthStateChanged(async (user) => {
             currentUser = user;
             if (user) {
@@ -1362,8 +1382,11 @@
                 updateStats();
                 showSyncIndicator();
             } else {
+                clearAllUserData();
                 document.getElementById('btn-signin').classList.remove('hidden');
                 document.getElementById('user-info').classList.add('hidden');
+                renderDecksOverview();
+                updateStats();
             }
         });
 
