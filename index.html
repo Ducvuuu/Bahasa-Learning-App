@@ -2008,6 +2008,25 @@
             btn.onclick = function() { toggleCoreWord(index); closeModal(); };
         }
         
+        window.openCustomWordModal = function(id) {
+            const dayNum = Object.keys(customWords).find(d => (customWords[d] || []).some(w => w.id === id));
+            const word = dayNum ? (customWords[dayNum] || []).find(w => w.id === id) : null;
+            if (!word) return;
+
+            document.getElementById('modal-indo').innerText = word.indo;
+            document.getElementById('modal-eng').innerText = word.eng || '';
+            document.getElementById('modal-note').classList.add('hidden');
+
+            displayMnemonicInModal(id);
+
+            const btn = document.getElementById('modal-action-btn');
+            const isKnown = customKnown.includes(id);
+            updateModalButton(btn, isKnown);
+            document.getElementById('word-modal').classList.add('active');
+            document.getElementById('word-modal-overlay').classList.add('active');
+            btn.onclick = function() { toggleCustomWord(id); closeModal(); };
+        }
+
         window.toggleCoreWord = function(index) {
             const el = document.getElementById(`word-card-${index}`);
             if (coreKnown.includes(index)) { 
@@ -2307,7 +2326,7 @@
             html += custom.map(word => {
                 const isChecked = customKnown.includes(word.id);
                 return `
-                <div id="word-card-${word.id}" onclick="toggleCustomWord('${word.id}')"
+                <div id="word-card-${word.id}" onclick="openCustomWordModal('${word.id}')"
                      class="word-item ${isChecked ? 'checked' : ''} cursor-pointer rounded-2xl p-3 flex items-center justify-between group bg-white border border-indigo-100">
                     <div class="flex items-center gap-3">
                         <div class="emoji-icon text-2xl transition-transform duration-300">${word.emoji || '📝'}</div>
