@@ -1,0 +1,553 @@
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: #fafafa;
+    /* Default background - gets overridden by story themes */
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(238, 242, 255, 1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(240, 253, 244, 1) 0px, transparent 50%);
+    background-attachment: fixed;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.5s ease;
+}
+
+/* Smooth transitions */
+* { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+
+.glass-header {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+/* --- CARD STYLES --- */
+.day-card, .vocab-panel, .inventory-panel, .library-card, .tree-card {
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+    border: 1px solid rgba(0,0,0,0.03);
+}
+.day-card:hover, .library-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.04);
+}
+
+.word-item {
+    border: 1px solid transparent;
+}
+.word-item:hover {
+    background-color: #f8fafc;
+    transform: scale(1.01);
+}
+.word-item.checked {
+    background-color: #f0fdf4;
+    border-color: #dcfce7;
+    opacity: 0.8;
+}
+
+/* Checkbox Animation */
+.check-circle {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.word-item.checked .check-circle {
+    background-color: #10b981;
+    border-color: #10b981;
+    transform: scale(1.1);
+}
+.word-item.checked .emoji-icon {
+    filter: grayscale(0.5);
+    transform: scale(0.9);
+}
+
+/* --- WEEK ACCORDION STYLES --- */
+.week-container {
+    margin-bottom: 2rem;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.week-header {
+    cursor: pointer;
+    user-select: none;
+}
+.week-header:hover {
+    background: rgba(255,255,255,0.8);
+}
+
+.week-content {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.week-container.active .week-content {
+    max-height: 5000px; /* Large enough to fit content */
+    opacity: 1;
+    padding-bottom: 1.5rem;
+}
+
+.week-chevron {
+    transition: transform 0.3s ease;
+}
+.week-container.active .week-chevron {
+    transform: rotate(180deg);
+}
+
+/* --- INVENTORY STYLES --- */
+.sticker-card {
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+.sticker-card:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(79, 70, 229, 0.1);
+    border-color: #c7d2fe;
+}
+
+.sticker-content {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sticker-hidden {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef2ff;
+    color: #4f46e5;
+    font-weight: 700;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: all 0.3s ease;
+}
+.sticker-card:hover .sticker-hidden {
+    opacity: 1;
+    transform: translateY(0);
+}
+.sticker-card:hover .sticker-visible {
+    opacity: 0.2;
+    filter: blur(2px);
+}
+
+.source-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 0.65rem;
+    background: #f1f5f9;
+    color: #64748b;
+    padding: 2px 6px;
+    border-radius: 99px;
+    font-weight: 600;
+    opacity: 0.7;
+}
+
+
+/* --- SONG & STORY STYLES --- */
+.lyric-line, .story-paragraph {
+    line-height: 2.2;
+    margin-bottom: 1.5rem;
+}
+.lyric-word {
+    display: inline-block;
+    padding: 0 4px;
+    margin: 0 1px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.lyric-word.vocab {
+    color: #4f46e5;
+    border-bottom: 2px dotted #a5b4fc;
+    font-weight: 500;
+}
+/* Story Vocab specific - base style, overridden by themes */
+.vocab-word {
+    cursor: pointer;
+    font-weight: 600;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+/* Modal / Popover Styles */
+.word-modal {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    width: 90%;
+    max-width: 400px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px -5px rgba(0,0,0,0.2);
+    z-index: 100;
+    padding: 24px;
+    border: 1px solid rgba(0,0,0,0.05);
+    opacity: 0;
+    pointer-events: none;
+}
+.word-modal.active {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: all;
+}
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.2);
+    backdrop-filter: blur(2px);
+    z-index: 90;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+.overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Review Mode Blurring */
+.review-active .eng-text {
+    filter: blur(8px);
+    opacity: 0.4;
+    user-select: none;
+    background-color: #f1f5f9; /* Note: Might vary slightly on custom themes, but provides good contrast */
+    color: transparent;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+/* Reveal on hover for Core/Songs (word-item) and Stories (story-item) */
+.review-active .word-item:hover .eng-text,
+.review-active .story-item:hover .eng-text {
+    filter: blur(0);
+    opacity: 1;
+    background-color: transparent;
+    color: inherit; /* Inherit allows story themes to dictate text color */
+}
+
+/* Tab Nav Styles */
+.nav-tab {
+    position: relative;
+    padding-bottom: 8px;
+    color: #94a3b8;
+    font-weight: 600;
+    cursor: pointer;
+}
+.nav-tab.active {
+    color: #1e293b;
+}
+.nav-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: #4f46e5;
+    border-radius: 10px;
+}
+
+@keyframes squish {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.15, 0.85); }
+    100% { transform: scale(1); }
+}
+.anim-squish {
+    animation: squish 0.3s ease-in-out;
+}
+
+/* Dropdown Styling */
+select.song-selector {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* Song Grid Layout */
+.song-grid, .story-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+@media (min-width: 1024px) {
+    .song-grid, .story-layout {
+        grid-template-columns: 2fr 1fr; /* Content takes 2/3, Vocab Panel takes 1/3 */
+        align-items: start;
+    }
+}
+
+/* Vocab Panel Sticky */
+@media (min-width: 1024px) {
+    .sticky-panel {
+        position: sticky;
+        top: 7rem; /* Below header */
+        max-height: calc(100vh - 8rem);
+        overflow-y: auto;
+    }
+}
+
+/* ── Practice Chat ── */
+.practice-chat-container {
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 10px 40px -10px rgba(79, 70, 229, 0.1);
+    border: 1px solid rgba(255,255,255,0.5);
+    height: calc(100vh - 300px);
+    min-height: 380px;
+}
+@media (min-width: 768px) {
+    .practice-chat-container { height: calc(100vh - 240px); min-height: 480px; }
+}
+.chat-scroll::-webkit-scrollbar { width: 6px; }
+.chat-scroll::-webkit-scrollbar-track { background: transparent; }
+.chat-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+.typing-dot { animation: typingBounce 1.4s infinite ease-in-out both; }
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes typingBounce {
+    0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+    40%            { transform: scale(1); opacity: 1;   }
+}
+.practice-send-btn {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    transition: all 0.2s;
+}
+.practice-send-btn:hover  { transform: scale(1.05); box-shadow: 0 4px 12px rgba(99,102,241,0.35); }
+.practice-send-btn:active { transform: scale(0.95); }
+.sessions-panel {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.sessions-panel.open   { transform: translateX(0); }
+.sessions-panel.closed { transform: translateX(100%); }
+
+/* Deck Card Hover */
+.deck-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.deck-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px -10px rgba(79, 70, 229, 0.2);
+}
+
+/* Add Word Side Panel */
+.side-panel {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.side-panel.open  { transform: translateX(0); }
+.side-panel.closed { transform: translateX(100%); }
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Drag-over state for mnemonic drop zone */
+.drag-over {
+    border-color: #6366f1 !important;
+    background-color: #eef2ff !important;
+}
+
+/* Status Pill */
+.status-pill {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+.status-pill.unsaved { background-color: #fef3c7; color: #d97706; }
+.status-pill.saved { background-color: #dcfce7; color: #15803d; }
+.status-pill.auto-detected { background-color: #dbeafe; color: #1e40af; }
+
+/* Audio Controls Styles */
+.audio-controls {
+    background: white;
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.play-button {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.play-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.play-button:active {
+    transform: scale(0.95);
+}
+
+.progress-bar-container {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+.speed-button {
+    padding: 0.375rem 0.75rem;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.speed-button:hover {
+    background: #e2e8f0;
+}
+
+.speed-button.active {
+    background: #eef2ff;
+    color: #4f46e5;
+    border-color: #c7d2fe;
+}
+
+/* ======================== */
+/* 🌳 TREE VIEW STYLES 🌳 */
+/* ======================== */
+
+.tree-container {
+    background: #f8fafc;
+    border-radius: 24px;
+    padding: 2rem;
+    position: relative;
+    background-image: 
+        linear-gradient(#e2e8f0 1px, transparent 1px), 
+        linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.tree-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+@media (min-width: 768px) {
+    .tree-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.tree-node {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    min-height: 100px;
+}
+
+/* Root Node (Center Top) */
+.tree-node.root {
+    grid-column: 1 / -1;
+    align-items: center;
+    text-align: center;
+    border-color: #818cf8;
+    background: #eef2ff;
+    box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.2);
+    margin-bottom: 2rem;
+    border-width: 3px;
+}
+
+/* Active Branch (True) */
+.tree-node.active {
+    border-color: #86efac;
+    background: #f0fdf4;
+    cursor: help;
+}
+.tree-node.active:hover {
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1);
+    border-color: #22c55e;
+    z-index: 10;
+}
+
+/* Dead Branch (False) */
+.tree-node.dead {
+    opacity: 0.6;
+    background: #f1f5f9;
+    border-color: #f1f5f9;
+}
+.tree-node.dead .node-affix {
+    color: #94a3b8;
+}
+
+.node-affix {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6366f1;
+    margin-bottom: 0.25rem;
+}
+
+.node-word {
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: #1e293b;
+    line-height: 1.2;
+}
+
+.node-meaning {
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.3;
+}
+
+.tree-badge {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 99px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    border: 1px solid #bbf7d0;
+}
