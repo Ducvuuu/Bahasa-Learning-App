@@ -1116,60 +1116,110 @@
     <div id="add-word-overlay" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300" onclick="toggleAddWordPanel()"></div>
 
     <!-- ── Add Word Side Panel ── -->
-    <div id="add-word-panel" class="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-white shadow-2xl z-50 side-panel closed flex flex-col border-l border-slate-100">
-        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+    <div id="add-word-panel" class="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white shadow-2xl z-50 side-panel closed flex flex-col border-l border-slate-100">
+
+        <!-- Header -->
+        <div class="p-5 border-b border-slate-100 flex justify-between items-center flex-shrink-0">
             <div>
-                <h3 class="text-xl font-bold text-slate-800">Add New Word</h3>
-                <p class="text-xs text-slate-500 mt-1">Add to your custom deck</p>
+                <h3 class="text-xl font-bold text-slate-800">Add Words</h3>
+                <p id="add-panel-deck-label" class="text-xs text-slate-400 mt-0.5">to current deck</p>
             </div>
             <button onclick="toggleAddWordPanel()" class="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-200 p-2 rounded-full transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
-        <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50">
-            <div>
-                <label class="block text-sm font-bold text-slate-700 mb-2">Indonesian Word</label>
-                <input type="text" id="add-indo-word-input" placeholder="e.g. Semangka" class="w-full bg-white border border-slate-200 text-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-sm text-lg font-medium transition-all">
-            </div>
-            <div class="relative group">
-                <label class="block text-sm font-bold text-slate-700 mb-2 flex justify-between items-center">
-                    Mnemonic Image <span class="text-[10px] font-normal text-slate-400 uppercase tracking-wider">Optional</span>
-                </label>
-                <div id="add-drop-zone" onclick="document.getElementById('add-image-upload').click()" class="border-2 border-dashed border-slate-300 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/50 transition-all bg-white relative overflow-hidden h-36 shadow-sm">
-                    <div id="add-drop-content" class="flex flex-col items-center pointer-events-none">
-                        <div class="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center mb-2">
-                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                        </div>
-                        <span class="text-sm font-bold text-slate-600">Drag & drop image</span>
-                        <span class="text-xs text-slate-400 mt-1">or click to browse</span>
-                    </div>
-                    <img id="add-image-preview" src="" alt="Preview" class="hidden absolute inset-0 w-full h-full object-cover rounded-xl" />
-                    <input type="file" id="add-image-upload" accept="image/*" class="hidden" />
-                </div>
-            </div>
-            <hr class="border-slate-200">
-            <button type="button" id="add-ai-generate-btn" onclick="autoFillWordMeaning()" class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold py-3 px-4 rounded-xl shadow-md shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-2">
-                <span class="text-lg">✨</span>
-                <span id="add-ai-btn-text">Auto-fill Meaning & Emoji</span>
-            </button>
-            <div class="flex gap-4 transition-opacity duration-500" id="add-ai-results-area">
-                <div class="w-20">
-                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Emoji</label>
-                    <input type="text" id="add-output-emoji" placeholder="?" maxlength="4"
-                           class="w-full bg-white border border-slate-200 text-center rounded-xl py-3 shadow-sm text-2xl h-[60px] focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all">
-                </div>
-                <div class="flex-1">
-                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">English</label>
-                    <input type="text" id="add-output-eng" placeholder="Waiting for AI..."
-                           class="w-full bg-white border border-slate-200 text-slate-800 rounded-xl px-4 py-3 shadow-sm h-[60px] focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 font-medium transition-all">
-                </div>
+
+        <!-- Tab switcher -->
+        <div class="px-5 pt-4 flex-shrink-0">
+            <div class="flex gap-1 bg-slate-100 rounded-xl p-1">
+                <button id="panel-tab-import" onclick="switchPanelTab('import')" class="flex-1 py-2 text-sm font-bold rounded-lg bg-white shadow-sm text-slate-700 transition-all">📂 Import File</button>
+                <button id="panel-tab-single" onclick="switchPanelTab('single')" class="flex-1 py-2 text-sm font-bold rounded-lg text-slate-400 hover:text-slate-600 transition-all">✏️ Single Word</button>
             </div>
         </div>
-        <div class="p-4 border-t border-slate-100 bg-white">
-            <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-200 transition-transform active:scale-95">
+
+        <!-- ── IMPORT TAB ── -->
+        <div id="panel-view-import" class="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+
+            <!-- Format instructions (collapsible) -->
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                <button onclick="toggleImportInstructions()" class="w-full flex items-center justify-between px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors">
+                    <span>📋 How to format your file</span>
+                    <svg id="import-instr-chevron" class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="import-instructions" class="hidden border-t border-slate-100 px-4 pb-4 text-xs text-slate-600 space-y-3">
+                    <p class="pt-3">Save a <code class="bg-slate-100 px-1 rounded">.json</code> file in this format:</p>
+                    <pre class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-[11px] leading-relaxed overflow-x-auto text-slate-700">[
+  { "indo": "Semangka", "eng": "Watermelon", "emoji": "🍉" },
+  { "indo": "Apel",     "eng": "Apple",      "emoji": "🍎" },
+  { "indo": "Mahal",    "eng": "Expensive",  "emoji": "💸" }
+]</pre>
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3 text-indigo-800">
+                        <p class="font-bold mb-1">💬 Ask Claude to generate it:</p>
+                        <p class="italic">"Make an Indonesian vocabulary list about [topic]. Return a JSON array where each item has <strong>indo</strong>, <strong>eng</strong>, and <strong>emoji</strong> fields."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drop zone -->
+            <div id="import-drop-zone"
+                 onclick="document.getElementById('import-file-input').click()"
+                 ondragover="event.preventDefault(); this.classList.add('border-indigo-400','bg-indigo-50')"
+                 ondragleave="this.classList.remove('border-indigo-400','bg-indigo-50')"
+                 ondrop="event.preventDefault(); this.classList.remove('border-indigo-400','bg-indigo-50'); handleImportDrop(event)"
+                 class="border-2 border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/30 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all bg-white">
+                <div class="w-12 h-12 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center mb-3">
+                    <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path></svg>
+                </div>
+                <p class="font-bold text-slate-700 mb-1">Drop your .json file here</p>
+                <p class="text-xs text-slate-400">or click to browse</p>
+                <input type="file" id="import-file-input" accept=".json,application/json" class="hidden" onchange="handleImportFileInput(this)">
+            </div>
+
+            <!-- Preview (hidden until file loaded) -->
+            <div id="import-preview" class="hidden">
+                <div class="flex items-center justify-between mb-2 px-1">
+                    <p id="import-preview-count" class="text-sm font-bold text-slate-700"></p>
+                    <button onclick="clearImportPreview()" class="text-xs text-slate-400 hover:text-rose-500 transition-colors">✕ Clear</button>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm max-h-56 overflow-y-auto mb-4">
+                    <table class="w-full text-sm">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                                <th class="text-left px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider w-10">Emoji</th>
+                                <th class="text-left px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Indonesian</th>
+                                <th class="text-left px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">English</th>
+                            </tr>
+                        </thead>
+                        <tbody id="import-preview-list" class="divide-y divide-slate-50"></tbody>
+                    </table>
+                </div>
+                <button onclick="confirmImport()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-95" id="confirm-import-btn">
+                    Add to Deck
+                </button>
+            </div>
+        </div>
+
+        <!-- ── SINGLE WORD TAB ── -->
+        <div id="panel-view-single" class="hidden flex-1 overflow-y-auto px-5 py-4 space-y-5">
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Indonesian Word / Phrase</label>
+                <input type="text" id="add-indo-word-input" placeholder="e.g. Semangka" class="w-full bg-white border border-slate-200 text-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-sm text-lg font-medium">
+            </div>
+            <div class="flex gap-3">
+                <div class="w-24">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Emoji</label>
+                    <input type="text" id="add-output-emoji" placeholder="🍉" maxlength="4" class="w-full bg-white border border-slate-200 text-center rounded-xl py-3 shadow-sm text-2xl h-[52px] focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400">
+                </div>
+                <div class="flex-1">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">English Meaning</label>
+                    <input type="text" id="add-output-eng" placeholder="e.g. Watermelon" class="w-full bg-white border border-slate-200 text-slate-800 rounded-xl px-4 py-3 shadow-sm h-[52px] focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 font-medium">
+                </div>
+            </div>
+            <button onclick="saveSingleWord()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-200 transition-transform active:scale-95">
                 Save Word
             </button>
         </div>
+
     </div>
 
     <!-- ── Create / Edit Deck Modal ── -->
@@ -1221,20 +1271,23 @@
         // 📊 DATA & STATE
         // ==========================================
         
-        const CORE_KEY = 'indoAdventure_coreKnown';
-        const SONGS_KEY = 'indoAdventure_songProgress';
-        const STORIES_KEY = 'indoAdventure_storyProgress';
-        const TIMESTAMP_KEY = 'indoAdventure_timestamps'; // New Key for Timestamps
-        const MNEMONICS_KEY = 'indoAdventure_mnemonics'; // New Key for Mnemonic Images
+        const CORE_KEY         = 'indoAdventure_coreKnown';
+        const SONGS_KEY        = 'indoAdventure_songProgress';
+        const STORIES_KEY      = 'indoAdventure_storyProgress';
+        const TIMESTAMP_KEY    = 'indoAdventure_timestamps';
+        const MNEMONICS_KEY    = 'indoAdventure_mnemonics';
+        const CUSTOM_WORDS_KEY = 'indoAdventure_customWords';
+        const CUSTOM_KNOWN_KEY = 'indoAdventure_customKnown';
         
         
         let coreKnown = [];
         let songProgress = {};
-        let storyProgress = {}; // { storyId: [vocabId, vocabId] }
-        // NEW: Store dates when words were learned
+        let storyProgress = {};
         let masteryTimestamps = { core: {}, songs: {}, stories: {} };
-        // NEW: Store mnemonic image URLs { vocabId: "imageURL" }
         let mnemonics = {};
+        let customWords = {};   // { dayNum: [{id, indo, eng, emoji}] }
+        let customKnown = [];   // array of known custom word IDs
+        let pendingImportWords = [];
         
         let currentTab = 'core';
         let currentSong = null;
@@ -1428,6 +1481,7 @@
                 if (!masteryTimestamps.stories) masteryTimestamps.stories = {};
             }
 
+            loadCustomWords();
             setupCoreToggle();
             setupSongReviewToggle();
             setupStoryReviewToggle();
@@ -1984,6 +2038,150 @@
         }
         
         // ==========================================
+        // 📦 CUSTOM WORDS — LOAD & PERSIST
+        // ==========================================
+
+        function loadCustomWords() {
+            try {
+                const c = localStorage.getItem(CUSTOM_WORDS_KEY);
+                if (c) customWords = JSON.parse(c);
+            } catch(e) { customWords = {}; }
+            try {
+                const k = localStorage.getItem(CUSTOM_KNOWN_KEY);
+                if (k) customKnown = JSON.parse(k);
+            } catch(e) { customKnown = []; }
+        }
+
+        function saveCustomWords() {
+            localStorage.setItem(CUSTOM_WORDS_KEY, JSON.stringify(customWords));
+            localStorage.setItem(CUSTOM_KNOWN_KEY, JSON.stringify(customKnown));
+        }
+
+        function toggleCustomWord(id) {
+            const el = document.getElementById(`word-card-${id}`);
+            const idx = customKnown.indexOf(id);
+            if (idx > -1) {
+                customKnown.splice(idx, 1);
+                if (el) el.classList.remove('checked');
+            } else {
+                customKnown.push(id);
+                if (el) { el.classList.add('checked'); el.classList.add('anim-squish'); setTimeout(() => el.classList.remove('anim-squish'), 300); }
+            }
+            saveCustomWords();
+            // update hero progress count
+            if (currentDeckDay !== null) {
+                const total = (coreVocabulary.filter(w => w.day === currentDeckDay).length) + (customWords[currentDeckDay]||[]).length;
+                const known = coreVocabulary.filter(w => w.day === currentDeckDay && coreKnown.includes(w.originalIndex)).length
+                            + (customWords[currentDeckDay]||[]).filter(w => customKnown.includes(w.id)).length;
+                document.getElementById('detail-deck-progress').textContent = `${known}/${total} Mastered`;
+            }
+            updateStats();
+        }
+
+        // ==========================================
+        // 📂 ADD WORD PANEL — UI & IMPORT LOGIC
+        // ==========================================
+
+        function switchPanelTab(tab) {
+            const isImport = tab === 'import';
+            document.getElementById('panel-view-import').classList.toggle('hidden', !isImport);
+            document.getElementById('panel-view-single').classList.toggle('hidden', isImport);
+            document.getElementById('panel-tab-import').className = `flex-1 py-2 text-sm font-bold rounded-lg transition-all ${isImport ? 'bg-white shadow-sm text-slate-700' : 'text-slate-400 hover:text-slate-600'}`;
+            document.getElementById('panel-tab-single').className = `flex-1 py-2 text-sm font-bold rounded-lg transition-all ${!isImport ? 'bg-white shadow-sm text-slate-700' : 'text-slate-400 hover:text-slate-600'}`;
+        }
+
+        function toggleImportInstructions() {
+            const el = document.getElementById('import-instructions');
+            const ch = document.getElementById('import-instr-chevron');
+            el.classList.toggle('hidden');
+            ch.style.transform = el.classList.contains('hidden') ? '' : 'rotate(180deg)';
+        }
+
+        function handleImportDrop(event) {
+            const file = event.dataTransfer.files[0];
+            if (file) processImportFile(file);
+        }
+
+        function handleImportFileInput(input) {
+            if (input.files[0]) processImportFile(input.files[0]);
+        }
+
+        function processImportFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!Array.isArray(data)) throw new Error('File must be a JSON array.');
+                    const words = data.map((w, i) => {
+                        if (!w.indo || !w.eng) throw new Error(`Item ${i+1} is missing "indo" or "eng" field.`);
+                        return { id: `custom_${currentDeckDay}_${Date.now()}_${i}`, indo: String(w.indo).trim(), eng: String(w.eng).trim(), emoji: String(w.emoji || '📝').trim() };
+                    });
+                    if (words.length === 0) throw new Error('No words found in file.');
+                    showImportPreview(words);
+                } catch(err) {
+                    alert(`Could not read file:\n${err.message}`);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function showImportPreview(words) {
+            pendingImportWords = words;
+            document.getElementById('import-preview-count').textContent = `${words.length} word${words.length !== 1 ? 's' : ''} ready to import`;
+            document.getElementById('import-preview-list').innerHTML = words.map(w => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-2 text-xl">${w.emoji}</td>
+                    <td class="px-4 py-2 font-semibold text-slate-800">${w.indo}</td>
+                    <td class="px-4 py-2 text-slate-500">${w.eng}</td>
+                </tr>`).join('');
+            document.getElementById('confirm-import-btn').textContent = `Add ${words.length} word${words.length !== 1 ? 's' : ''} to Deck`;
+            document.getElementById('import-preview').classList.remove('hidden');
+        }
+
+        function clearImportPreview() {
+            pendingImportWords = [];
+            document.getElementById('import-preview').classList.add('hidden');
+            document.getElementById('import-file-input').value = '';
+        }
+
+        function confirmImport() {
+            if (!pendingImportWords.length || currentDeckDay === null) return;
+            if (!customWords[currentDeckDay]) customWords[currentDeckDay] = [];
+            customWords[currentDeckDay].push(...pendingImportWords);
+            saveCustomWords();
+            clearImportPreview();
+            toggleAddWordPanel();
+            renderDeckWordList(currentDeckDay);
+            // update hero progress
+            const allWords = coreVocabulary.filter(w => w.day === currentDeckDay);
+            const custom   = customWords[currentDeckDay] || [];
+            const total    = allWords.length + custom.length;
+            const known    = allWords.filter(w => coreKnown.includes(w.originalIndex)).length
+                           + custom.filter(w => customKnown.includes(w.id)).length;
+            document.getElementById('detail-deck-progress').textContent = `${known}/${total} Mastered`;
+            document.getElementById('detail-word-count').textContent    = `Vocabulary (${total})`;
+        }
+
+        function saveSingleWord() {
+            const indo  = document.getElementById('add-indo-word-input').value.trim();
+            const emoji = document.getElementById('add-output-emoji').value.trim() || '📝';
+            const eng   = document.getElementById('add-output-eng').value.trim();
+            if (!indo || !eng) {
+                alert('Please fill in both the Indonesian word and English meaning.');
+                return;
+            }
+            const word = { id: `custom_${currentDeckDay}_${Date.now()}_0`, indo, eng, emoji };
+            if (!customWords[currentDeckDay]) customWords[currentDeckDay] = [];
+            customWords[currentDeckDay].push(word);
+            saveCustomWords();
+            document.getElementById('add-indo-word-input').value = '';
+            document.getElementById('add-output-emoji').value    = '';
+            document.getElementById('add-output-eng').value      = '';
+            toggleAddWordPanel();
+            renderDeckWordList(currentDeckDay);
+        }
+
+        // ==========================================
         // 🗂️ DECKS VIEW LOGIC
         // ==========================================
 
@@ -2083,8 +2281,10 @@
         function renderDeckWordList(dayNum) {
             const container = document.getElementById('deck-word-list');
             const words = coreVocabulary.filter(w => w.day === dayNum);
+            const custom = customWords[dayNum] || [];
+            const total = words.length + custom.length;
 
-            document.getElementById('detail-word-count').textContent = `Vocabulary (${words.length})`;
+            document.getElementById('detail-word-count').textContent = `Vocabulary (${total})`;
 
             let html = words.map(word => {
                 const isChecked = coreKnown.includes(word.originalIndex);
@@ -2100,6 +2300,27 @@
                     </div>
                     <div class="check-circle w-6 h-6 rounded-full border-2 border-slate-200 flex items-center justify-center bg-white shadow-sm flex-shrink-0">
                         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                </div>`;
+            }).join('');
+
+            html += custom.map(word => {
+                const isChecked = customKnown.includes(word.id);
+                return `
+                <div id="word-card-${word.id}" onclick="toggleCustomWord('${word.id}')"
+                     class="word-item ${isChecked ? 'checked' : ''} cursor-pointer rounded-2xl p-3 flex items-center justify-between group bg-white border border-indigo-100">
+                    <div class="flex items-center gap-3">
+                        <div class="emoji-icon text-2xl transition-transform duration-300">${word.emoji || '📝'}</div>
+                        <div>
+                            <div class="font-bold text-slate-800 leading-tight">${word.indo}</div>
+                            <div class="eng-text text-xs font-medium text-slate-400 mt-0.5 transition-all duration-300">${word.eng || ''}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-indigo-300 font-medium">custom</span>
+                        <div class="check-circle w-6 h-6 rounded-full border-2 border-slate-200 flex items-center justify-center bg-white shadow-sm flex-shrink-0">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
                     </div>
                 </div>`;
             }).join('');
@@ -2133,6 +2354,14 @@
             const overlay = document.getElementById('add-word-overlay');
             if (!panel) return;
             if (panel.classList.contains('closed')) {
+                // Set deck label
+                const labelEl = document.getElementById('add-panel-deck-label');
+                if (labelEl) {
+                    labelEl.textContent = currentDeckDay !== null ? `Day ${currentDeckDay} Deck` : 'to current deck';
+                }
+                // Reset to Import tab
+                switchPanelTab('import');
+                clearImportPreview();
                 panel.classList.replace('closed', 'open');
                 overlay.classList.remove('opacity-0', 'pointer-events-none');
                 overlay.classList.add('opacity-100', 'pointer-events-auto');
