@@ -141,9 +141,13 @@ async function loadProgressFromFirestore(uid) {
             if (data.hiddenCoreWords) hiddenCoreWords = data.hiddenCoreWords;
             if (data.deletedDecks) deletedDecks = data.deletedDecks;
             if (data.userDecks) userDecks = data.userDecks;
+            if (data.customWords) customWords = data.customWords;
+            if (data.customKnown) customKnown = data.customKnown;
             localStorage.setItem(HIDDEN_CORE_KEY, JSON.stringify(hiddenCoreWords));
             localStorage.setItem(DELETED_DECKS_KEY, JSON.stringify(deletedDecks));
             localStorage.setItem(USER_DECKS_KEY, JSON.stringify(userDecks));
+            localStorage.setItem(CUSTOM_WORDS_KEY, JSON.stringify(customWords));
+            localStorage.setItem(CUSTOM_KNOWN_KEY, JSON.stringify(customKnown));
             if (!masteryTimestamps.core) masteryTimestamps.core = {};
             if (!masteryTimestamps.songs) masteryTimestamps.songs = {};
             if (!masteryTimestamps.stories) masteryTimestamps.stories = {};
@@ -181,6 +185,8 @@ function saveProgress() {
                 hiddenCoreWords,
                 deletedDecks,
                 userDecks,
+                customWords,
+                customKnown,
                 updatedAt: new Date().toISOString()
             });
             showSyncIndicator();
