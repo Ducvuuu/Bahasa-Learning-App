@@ -1867,6 +1867,12 @@ function getPracticeWords() {
             if (w) bucket({ indo: w.indo, eng: w.eng, emoji: w.emoji || '📖' }, id, 'stories');
         });
     });
+    // Custom deck words (no mastery timestamps — treat as new so they're prioritised)
+    customKnown.forEach(id => {
+        const dayWords = Object.values(customWords).flat();
+        const w = dayWords.find(v => v.id === id);
+        if (w) newWords.push({ indo: w.indo, eng: w.eng, emoji: w.emoji || '📝' });
+    });
 
     const shuffle = a => [...a].sort(() => Math.random() - 0.5);
     const selected = [
@@ -1880,32 +1886,36 @@ function getPracticeWords() {
 
 function buildSystemPrompt(words) {
     const list = words.map(w => `${w.emoji} ${w.indo} = "${w.eng}"`).join('\n');
-    return `You are Kak Indo, an encouraging Bahasa Indonesia tutor for Anh — a Vietnamese student living in Jakarta at beginner level.
+    return `You are Kak Indo, an encouraging Bahasa Indonesia tutor for a beginner student living in Jakarta.
+
+LANGUAGE RULE (CRITICAL — never break this):
+- You MUST always write your messages in ENGLISH.
+- Indonesian only appears inside the exercises themselves (words/sentences the student must answer in Indonesian).
+- Never switch your explanations, feedback, or questions into Indonesian.
 
 STUDENT CONTEXT:
-- Name: Anh (Vietnamese, living in Jakarta)
-- Level: Beginner (~120 core words learned)
-- Always communicate with Anh in ENGLISH, even when the exercises are in Indonesian
+- Level: Beginner
+- Always address the student in ENGLISH
 
 TODAY'S WORDS:
 ${list}
 
 EXERCISE PROGRESSION (follow this order every session):
 1. VOCABULARY QUIZ — Indo → English, to check recognition (1–2 rounds max)
-2. FILL-IN-THE-GAP — short sentences with a blank, Anh fills in the correct Indonesian word
+2. FILL-IN-THE-GAP — short sentences with a blank, student fills in the correct Indonesian word
 3. ACTIVE PRODUCTION (most important — spend the most time here):
-   - Give an English sentence, Anh translates it to Indonesian
-   - Ask open-ended questions that Anh must answer in Indonesian
-   - Give a vocabulary word, ask Anh to construct his own sentence using it
+   - Give an English sentence, student translates it to Indonesian
+   - Ask open-ended questions that student must answer in Indonesian
+   - Give a vocabulary word, ask student to construct their own sentence using it
 
 RULES:
 - Start immediately with the first question — no preamble
 - After each answer: one line of feedback (✓ correct / ✗ + brief correction with explanation), then next question
 - Prioritise active production exercises over passive recognition
-- Do NOT rely on multiple choice — Anh must construct his own answers
+- Do NOT rely on multiple choice — student must construct their own answers
 - Grammar tolerance: don't penalise minor grammar mistakes early on; focus on vocabulary use and sentence construction
 - Keep responses SHORT: feedback + next question in 3–4 sentences max
-- Occasional encouragement in Indonesian is fine: "Bagus!", "Hampir!" (almost!), "Luar biasa!"
+- Occasional single-word encouragement in Indonesian is fine: "Bagus!", "Hampir!", "Luar biasa!" — but the surrounding sentence must be in English
 - Start with the newest/most recently learned words, then cycle to older ones
 - After ~12 exchanges, offer to wrap up or keep going`;
 }
@@ -2022,7 +2032,7 @@ async function startNewPracticeSession() {
     practiceWords = getPracticeWords();
     document.getElementById('practice-messages').innerHTML = '';
 
-    const totalMastered = coreKnown.length + Object.values(songProgress).flat().length + Object.values(storyProgress).flat().length;
+    const totalMastered = coreKnown.length + Object.values(songProgress).flat().length + Object.values(storyProgress).flat().length + customKnown.length;
     document.getElementById('practice-word-count-badge').textContent = `${totalMastered} Words Mastered`;
     const summary = document.getElementById('practice-word-summary');
     if (!practiceWords.hasWords) {
