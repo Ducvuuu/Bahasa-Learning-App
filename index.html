@@ -2433,12 +2433,7 @@
 
             const days = Object.keys(groupedByDay).map(Number).sort((a, b) => a - b).filter(d => !deletedDecks.includes(d));
 
-            if (days.length === 0) {
-                container.innerHTML = `<div class="col-span-4 text-center py-16 text-slate-400">No vocabulary loaded yet.</div>`;
-                return;
-            }
-
-            container.innerHTML = days.map((dayNum, idx) => {
+            container.innerHTML = days.length === 0 ? '' : days.map((dayNum, idx) => {
                 const words = groupedByDay[dayNum].filter(w => !hiddenCoreWords.includes(w.originalIndex));
                 const total = words.length;
                 const known = words.filter(w => coreKnown.includes(w.originalIndex)).length;
