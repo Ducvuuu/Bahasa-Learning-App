@@ -2200,37 +2200,25 @@
             btnText.textContent = 'Thinking...';
 
             try {
-                const res = await fetch(getGeminiUrl(), {
+                const call = (prompt, maxTokens) => fetch(getGeminiUrl(), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{
-                            role: 'user',
-                            parts: [{ text: `Translate the Indonesian word or phrase "${word}" to English and pick one fitting emoji.` }]
-                        }],
-                        generationConfig: {
-                            temperature: 0.1,
-                            maxOutputTokens: 80,
-                            responseMimeType: 'application/json',
-                            responseSchema: {
-                                type: 'object',
-                                properties: {
-                                    emoji:   { type: 'string' },
-                                    english: { type: 'string' }
-                                },
-                                required: ['emoji', 'english']
-                            }
-                        }
+                        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.1, maxOutputTokens: maxTokens }
                     })
+                }).then(r => r.json()).then(d => {
+                    if (d.error) throw new Error(d.error.message);
+                    return (d.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
                 });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
 
-                const raw    = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                const result = JSON.parse(raw);
+                const [emoji, english] = await Promise.all([
+                    call(`Reply with ONE emoji that best represents the Indonesian word "${word}". Only the emoji, nothing else.`, 5),
+                    call(`Translate the Indonesian word "${word}" to English. Reply with only the English word or short phrase, nothing else.`, 20)
+                ]);
 
-                document.getElementById('add-output-emoji').value = result.emoji   || '✨';
-                document.getElementById('add-output-eng').value   = result.english || '';
+                document.getElementById('add-output-emoji').value = emoji   || '✨';
+                document.getElementById('add-output-eng').value   = english || '';
 
                 btnText.textContent = '✓ Generated!';
                 setTimeout(() => { btnText.textContent = 'Auto-fill Meaning & Emoji'; }, 2000);
