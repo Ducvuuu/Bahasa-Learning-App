@@ -901,6 +901,17 @@ function saveCustomWords() {
     localStorage.setItem(USER_DECKS_KEY, JSON.stringify(userDecks));
 }
 
+// Immediately flush customKnown + customWords to Firestore (no debounce).
+// Called after marking words known/unknown so a quick refresh doesn't lose data.
+function saveCustomKnownNow() {
+    if (!currentUser) return;
+    db.collection('users').doc(currentUser.uid).update({
+        customKnown,
+        customWords,
+        updatedAt: new Date().toISOString()
+    }).catch(err => console.error('Firestore customKnown save failed:', err));
+}
+
 function removeCoreWord(index) {
     if (!hiddenCoreWords.includes(index)) hiddenCoreWords.push(index);
     coreKnown = coreKnown.filter(i => i !== index);
@@ -1003,6 +1014,7 @@ function toggleCustomWord(id) {
     }
     saveCustomWords();
     saveProgress();
+    saveCustomKnownNow();
     // update hero progress count
     if (currentDeckDay !== null) {
         const total = (coreVocabulary.filter(w => w.day === currentDeckDay).length) + (customWords[currentDeckDay]||[]).length;
