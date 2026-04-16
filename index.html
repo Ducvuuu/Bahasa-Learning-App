@@ -349,6 +349,26 @@
         .sessions-panel.open   { transform: translateX(0); }
         .sessions-panel.closed { transform: translateX(100%); }
 
+        /* Deck Card Hover */
+        .deck-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .deck-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px -10px rgba(79, 70, 229, 0.2);
+        }
+
+        /* Add Word Side Panel */
+        .side-panel {
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .side-panel.open  { transform: translateX(0); }
+        .side-panel.closed { transform: translateX(100%); }
+
+        /* Hide scrollbar utility */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
         /* Drag-over state for mnemonic drop zone */
         .drag-over {
             border-color: #6366f1 !important;
@@ -604,7 +624,7 @@
             <!-- Navigation Tabs + Review Toggles -->
             <div class="flex justify-between items-center border-b border-slate-100">
                 <div class="flex gap-4 md:gap-8 overflow-x-auto pb-1">
-                    <button onclick="switchTab('core')" id="tab-core" class="nav-tab active whitespace-nowrap">Core Words</button>
+                    <button onclick="switchTab('core')" id="tab-core" class="nav-tab active whitespace-nowrap">Decks 🗂️</button>
                     <button onclick="switchTab('inventory')" id="tab-inventory" class="nav-tab whitespace-nowrap">Inventory 🎒</button>
                     <button onclick="switchTab('read')" id="tab-read" class="nav-tab whitespace-nowrap">Stories 📖</button>
                     <button onclick="switchTab('songs')" id="tab-songs" class="nav-tab whitespace-nowrap">Songs 🎵</button>
@@ -643,26 +663,63 @@
     <!-- Main Content Area -->
     <main class="max-w-6xl mx-auto px-4 md:px-6 relative">
         
-        <!-- ================= VIEW: CORE WORDS ================= -->
+        <!-- ================= VIEW: CORE / DECKS ================= -->
         <div id="view-core">
-            <!-- Motivational Banner -->
-            <div class="relative w-full h-48 md:h-64 rounded-3xl overflow-hidden mb-8 shadow-xl group">
-                <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80" 
-                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
-                     alt="Scenic Landscape">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-6 md:p-10">
-                    <div class="max-w-2xl transform transition-transform duration-500 group-hover:-translate-y-1">
-                        <h2 class="text-2xl md:text-4xl font-bold text-white mb-2 tracking-tight">Semangat! (Keep going!) 🔥</h2>
-                        <p class="text-white/90 font-medium text-sm md:text-lg leading-relaxed">Focus on your daily words. Weeks are grouped below.</p>
+
+            <!-- ── Decks Overview (Grid) ── -->
+            <div id="view-decks-overview">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-slate-800">My Decks</h2>
+                        <p class="text-slate-500 text-sm mt-1">Your vocabulary organized by day.</p>
+                    </div>
+                    <button onclick="openDeckModal('create')" class="hidden md:flex bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-sm items-center gap-2 transition-colors shadow-md shadow-indigo-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        New Deck
+                    </button>
+                </div>
+                <div id="decks-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                    <!-- JS populated -->
+                </div>
+            </div>
+
+            <!-- ── Deck Detail (Inner View) ── -->
+            <div id="view-deck-detail" class="hidden">
+                <!-- Back + Review Toggle -->
+                <div class="flex items-center justify-between mb-6">
+                    <button onclick="closeDeckDetail()" class="flex items-center gap-2 text-slate-500 hover:text-indigo-600 font-semibold transition-colors px-2 py-1 -ml-2 rounded-lg hover:bg-slate-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        Back to Decks
+                    </button>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:inline">Review Mode</span>
+                        <label class="relative inline-block w-10 h-5 align-middle select-none cursor-pointer">
+                            <input type="checkbox" id="deck-review-toggle" class="sr-only peer" onchange="toggleDeckReviewMode(this)" />
+                            <div class="absolute inset-0 bg-slate-200 rounded-full transition-colors duration-300 peer-checked:bg-indigo-500"></div>
+                            <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Deck Hero Card -->
+                <div class="bg-white rounded-[2rem] p-6 md:p-8 mb-8 border border-slate-100 flex flex-col sm:flex-row items-center sm:items-start gap-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                    <div id="detail-deck-icon" class="w-24 h-24 rounded-3xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-5xl shadow-inner flex-shrink-0"></div>
+                    <div class="flex-1 text-center sm:text-left">
+                        <h2 id="detail-deck-title" class="text-3xl font-bold text-slate-800 mb-2"></h2>
+                        <p id="detail-deck-desc" class="text-slate-500 mb-5"></p>
+                        <span id="detail-deck-progress" class="text-sm font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-4 py-1.5 rounded-full"></span>
+                    </div>
+                </div>
+
+                <!-- Word List Grid -->
+                <div>
+                    <h3 id="detail-word-count" class="text-xl font-bold text-slate-800 mb-4 px-2"></h3>
+                    <div id="deck-word-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 bg-white p-4 md:p-6 rounded-3xl border border-slate-100 shadow-sm">
+                        <!-- JS populated -->
                     </div>
                 </div>
             </div>
-            
 
-            <!-- Changed from Grid to just a container, grid happens inside weeks -->
-            <div id="days-container" class="w-full">
-                <!-- JS will populate Weeks and Days here -->
-            </div>
         </div>
         
         <!-- ================= VIEW: INVENTORY ================= -->
@@ -1044,6 +1101,117 @@
     <!-- Hidden Audio Element -->
     <audio id="audio-player" preload="metadata"></audio>
 
+    <!-- ── Mobile FAB (Decks tab only) ── -->
+    <button id="deck-fab" onclick="toggleAddWordPanel()" class="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-300 hover:bg-indigo-700 hover:scale-105 active:scale-95 z-30 hidden">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+    </button>
+
+    <!-- ── Add Word Panel Overlay ── -->
+    <div id="add-word-overlay" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300" onclick="toggleAddWordPanel()"></div>
+
+    <!-- ── Add Word Side Panel ── -->
+    <div id="add-word-panel" class="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-white shadow-2xl z-50 side-panel closed flex flex-col border-l border-slate-100">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <div>
+                <h3 class="text-xl font-bold text-slate-800">Add New Word</h3>
+                <p class="text-xs text-slate-500 mt-1">Add to your custom deck</p>
+            </div>
+            <button onclick="toggleAddWordPanel()" class="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-200 p-2 rounded-full transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50">
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Indonesian Word</label>
+                <input type="text" id="add-indo-word-input" placeholder="e.g. Semangka" class="w-full bg-white border border-slate-200 text-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-sm text-lg font-medium transition-all">
+            </div>
+            <div class="relative group">
+                <label class="block text-sm font-bold text-slate-700 mb-2 flex justify-between items-center">
+                    Mnemonic Image <span class="text-[10px] font-normal text-slate-400 uppercase tracking-wider">Optional</span>
+                </label>
+                <div id="add-drop-zone" onclick="document.getElementById('add-image-upload').click()" class="border-2 border-dashed border-slate-300 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/50 transition-all bg-white relative overflow-hidden h-36 shadow-sm">
+                    <div id="add-drop-content" class="flex flex-col items-center pointer-events-none">
+                        <div class="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center mb-2">
+                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        </div>
+                        <span class="text-sm font-bold text-slate-600">Drag & drop image</span>
+                        <span class="text-xs text-slate-400 mt-1">or click to browse</span>
+                    </div>
+                    <img id="add-image-preview" src="" alt="Preview" class="hidden absolute inset-0 w-full h-full object-cover rounded-xl" />
+                    <input type="file" id="add-image-upload" accept="image/*" class="hidden" />
+                </div>
+            </div>
+            <hr class="border-slate-200">
+            <button type="button" id="add-ai-generate-btn" class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold py-3 px-4 rounded-xl shadow-md shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-2">
+                <span class="text-lg">✨</span>
+                <span id="add-ai-btn-text">Auto-fill Meaning & Emoji</span>
+            </button>
+            <div class="flex gap-4 opacity-60 transition-opacity duration-500" id="add-ai-results-area">
+                <div class="w-20">
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Emoji</label>
+                    <div id="add-output-emoji" class="w-full bg-slate-100 border border-dashed border-slate-200 text-center rounded-xl py-3 shadow-inner text-2xl h-[60px] flex items-center justify-center">
+                        <span class="text-slate-400 text-sm font-medium">?</span>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">English</label>
+                    <div id="add-output-eng" class="w-full bg-slate-100 border border-dashed border-slate-200 text-slate-800 rounded-xl px-4 py-3 shadow-inner h-[60px] flex items-center">
+                        <span class="text-slate-400 text-sm font-medium italic">Waiting for AI...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t border-slate-100 bg-white">
+            <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-200 transition-transform active:scale-95">
+                Save Word
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Create / Edit Deck Modal ── -->
+    <div id="deck-modal-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300" onclick="closeDeckModal()"></div>
+    <div id="deck-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white rounded-[2rem] shadow-2xl z-50 opacity-0 pointer-events-none transition-all duration-300 scale-95 flex flex-col overflow-hidden border border-slate-100">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h3 id="deck-modal-title" class="text-xl font-bold text-slate-800">Create New Deck</h3>
+            <button onclick="closeDeckModal()" class="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-200 p-2 rounded-full transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="p-6 space-y-5 bg-slate-50/50">
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Deck Title</label>
+                <input type="text" id="deck-input-title" placeholder="e.g. Travel Basics" class="w-full bg-white border border-slate-200 text-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 shadow-sm font-medium transition-all">
+            </div>
+            <div class="flex gap-4">
+                <div class="w-20">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Icon</label>
+                    <input type="text" id="deck-input-icon" placeholder="✈️" class="w-full bg-white border border-slate-200 text-center rounded-xl px-2 py-3 focus:outline-none focus:border-indigo-500 shadow-sm text-2xl transition-all">
+                </div>
+                <div class="flex-1">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Description</label>
+                    <input type="text" id="deck-input-desc" placeholder="Words for my upcoming trip" class="w-full bg-white border border-slate-200 text-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 shadow-sm text-sm transition-all">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-3">Color Theme</label>
+                <div class="flex gap-4">
+                    <button type="button" onclick="selectDeckColor(this)" class="deck-color-btn w-8 h-8 rounded-full bg-indigo-500 ring-2 ring-offset-2 ring-slate-400 scale-110 transition-all"></button>
+                    <button type="button" onclick="selectDeckColor(this)" class="deck-color-btn w-8 h-8 rounded-full bg-emerald-500 hover:scale-110 transition-all"></button>
+                    <button type="button" onclick="selectDeckColor(this)" class="deck-color-btn w-8 h-8 rounded-full bg-amber-500 hover:scale-110 transition-all"></button>
+                    <button type="button" onclick="selectDeckColor(this)" class="deck-color-btn w-8 h-8 rounded-full bg-rose-500 hover:scale-110 transition-all"></button>
+                    <button type="button" onclick="selectDeckColor(this)" class="deck-color-btn w-8 h-8 rounded-full bg-cyan-500 hover:scale-110 transition-all"></button>
+                </div>
+            </div>
+        </div>
+        <div class="p-5 border-t border-slate-100 bg-white flex justify-between gap-3 items-center">
+            <button id="deck-modal-delete" class="hidden text-rose-500 text-sm font-bold px-3 py-2 hover:bg-rose-50 rounded-lg transition-colors">Delete Deck</button>
+            <div class="flex gap-3 w-full justify-end">
+                <button onclick="closeDeckModal()" class="text-slate-500 text-sm font-bold px-5 py-2.5 hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
+                <button onclick="closeDeckModal()" id="deck-modal-save" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-indigo-200 transition-transform active:scale-95">Create Deck</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ==========================================
         // 📊 DATA & STATE
@@ -1131,7 +1299,7 @@
                 document.getElementById('user-avatar').src = user.photoURL || '';
                 document.getElementById('user-name').textContent = user.displayName || user.email;
                 await loadProgressFromFirestore(user.uid);
-                renderCoreDays();
+                renderDecksOverview();
                 if (currentSong) { renderSongLyrics(); renderSongVocabList(); }
                 if (currentStory) loadStory(currentStory.id);
                 updateStats();
@@ -1260,7 +1428,7 @@
             setupSongReviewToggle();
             setupStoryReviewToggle();
             setupAudioPlayer();
-            renderCoreDays();
+            renderDecksOverview();
             setupSongSelector();
             setTimeout(renderLibrary, 100);
             updateStats();
@@ -1272,6 +1440,9 @@
         // ==========================================
 
         window.switchTab = function(tab) {
+            // Close deck detail if navigating away from core
+            if (tab !== 'core' && currentDeckDay !== null) closeDeckDetail();
+
             currentTab = tab;
             ['core', 'songs', 'inventory', 'read', 'tree', 'practice'].forEach(t => {
                 const view = document.getElementById(`view-${t}`);
@@ -1283,12 +1454,15 @@
             const coreWrapper = document.getElementById('core-toggle-wrapper');
             const songWrapper = document.getElementById('song-toggle-wrapper');
             const storyWrapper = document.getElementById('story-toggle-wrapper');
-            
+            const fab = document.getElementById('deck-fab');
+
             coreWrapper.classList.add('hidden');
             songWrapper.classList.add('hidden');
             storyWrapper.classList.add('hidden');
 
-            if (tab === 'core') coreWrapper.classList.remove('hidden');
+            // Show FAB only on core/decks tab on mobile
+            if (fab) fab.classList.toggle('hidden', tab !== 'core');
+
             if (tab === 'songs') songWrapper.classList.remove('hidden');
             if (tab === 'inventory') renderInventory();
             if (tab === 'read') renderLibrary();
@@ -1296,7 +1470,7 @@
 
             if (tab !== 'songs' && audioPlayer) pauseAudio();
             if (tab !== 'read') resetTheme();
-            
+
             updateStats();
         }
 
@@ -1794,10 +1968,212 @@
             localStorage.setItem(CORE_KEY, JSON.stringify(coreKnown));
             localStorage.setItem(TIMESTAMP_KEY, JSON.stringify(masteryTimestamps));
             saveProgress();
-            renderCoreDays();
+            if (currentDeckDay !== null) {
+                renderDeckWordList(currentDeckDay);
+                const deckWords = coreVocabulary.filter(w => w.day === currentDeckDay);
+                const knownCount = deckWords.filter(w => coreKnown.includes(w.originalIndex)).length;
+                document.getElementById('detail-deck-progress').textContent = `${knownCount}/${deckWords.length} Mastered`;
+            } else {
+                renderDecksOverview();
+            }
             if(currentTab === 'core') updateStats();
         }
         
+        // ==========================================
+        // 🗂️ DECKS VIEW LOGIC
+        // ==========================================
+
+        let currentDeckDay = null;
+
+        const deckAccentColors = [
+            { bg: 'bg-indigo-50',  border: 'border-indigo-100',  text: 'text-indigo-700',  bar: 'bg-indigo-500'  },
+            { bg: 'bg-emerald-50', border: 'border-emerald-100', text: 'text-emerald-700', bar: 'bg-emerald-500' },
+            { bg: 'bg-amber-50',   border: 'border-amber-100',   text: 'text-amber-700',   bar: 'bg-amber-500'   },
+            { bg: 'bg-rose-50',    border: 'border-rose-100',    text: 'text-rose-700',    bar: 'bg-rose-500'    },
+            { bg: 'bg-purple-50',  border: 'border-purple-100',  text: 'text-purple-700',  bar: 'bg-purple-500'  },
+            { bg: 'bg-cyan-50',    border: 'border-cyan-100',    text: 'text-cyan-700',    bar: 'bg-cyan-500'    },
+            { bg: 'bg-pink-50',    border: 'border-pink-100',    text: 'text-pink-700',    bar: 'bg-pink-500'    },
+        ];
+
+        function renderDecksOverview() {
+            const container = document.getElementById('decks-grid');
+            if (!container) return;
+
+            const groupedByDay = {};
+            coreVocabulary.forEach((word, index) => {
+                word.originalIndex = index;
+                if (!groupedByDay[word.day]) groupedByDay[word.day] = [];
+                groupedByDay[word.day].push(word);
+            });
+
+            const days = Object.keys(groupedByDay).map(Number).sort((a, b) => a - b);
+
+            if (days.length === 0) {
+                container.innerHTML = `<div class="col-span-4 text-center py-16 text-slate-400">No vocabulary loaded yet.</div>`;
+                return;
+            }
+
+            container.innerHTML = days.map((dayNum, idx) => {
+                const words = groupedByDay[dayNum];
+                const total = words.length;
+                const known = words.filter(w => coreKnown.includes(w.originalIndex)).length;
+                const percent = total === 0 ? 0 : Math.round((known / total) * 100);
+                const accent = deckAccentColors[idx % deckAccentColors.length];
+                const firstEmoji = words[0]?.emoji || '📚';
+
+                let statusLabel, statusClass;
+                if (known === total && total > 0) {
+                    statusLabel = '✅ Mastered'; statusClass = 'text-emerald-600 bg-emerald-50';
+                } else if (known > 0) {
+                    statusLabel = 'In Progress'; statusClass = `${accent.text} ${accent.bg}`;
+                } else {
+                    statusLabel = 'New'; statusClass = 'text-slate-500 bg-slate-100';
+                }
+
+                return `
+                <div onclick="openDeckDetail(${dayNum})" class="deck-card bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer relative overflow-hidden group">
+                    <div class="absolute bottom-0 left-0 h-1 ${accent.bar} transition-all" style="width:${percent}%"></div>
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-12 h-12 rounded-xl ${accent.bg} ${accent.border} border flex items-center justify-center text-2xl shadow-inner">${firstEmoji}</div>
+                        <span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Day ${dayNum}</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-1 group-hover:text-indigo-600 transition-colors">Day ${dayNum} Vocab</h3>
+                    <p class="text-xs text-slate-500 mb-4">${total} words to master</p>
+                    <div class="flex justify-between items-center text-xs font-semibold">
+                        <span class="${statusClass} px-2 py-0.5 rounded">${statusLabel}</span>
+                        <span class="text-slate-400">${known}/${total} words</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function openDeckDetail(dayNum) {
+            currentDeckDay = dayNum;
+            const words = coreVocabulary.filter(w => w.day === dayNum);
+            const total = words.length;
+            const known = words.filter(w => coreKnown.includes(w.originalIndex)).length;
+            const days = [...new Set(coreVocabulary.map(w => w.day))].sort((a, b) => a - b);
+            const idx = days.indexOf(dayNum);
+            const accent = deckAccentColors[idx % deckAccentColors.length];
+            const firstEmoji = words[0]?.emoji || '📚';
+
+            const iconEl = document.getElementById('detail-deck-icon');
+            iconEl.textContent = firstEmoji;
+            iconEl.className = `w-24 h-24 rounded-3xl ${accent.bg} ${accent.border} border flex items-center justify-center text-5xl shadow-inner flex-shrink-0`;
+            document.getElementById('detail-deck-title').textContent = `Day ${dayNum} Vocabulary`;
+            document.getElementById('detail-deck-desc').textContent = `${total} words from your Day ${dayNum} learning session.`;
+            document.getElementById('detail-deck-progress').textContent = `${known}/${total} Mastered`;
+
+            renderDeckWordList(dayNum);
+
+            document.getElementById('view-decks-overview').classList.add('hidden');
+            document.getElementById('view-deck-detail').classList.remove('hidden');
+
+            const toggle = document.getElementById('deck-review-toggle');
+            toggle.checked = false;
+            toggleDeckReviewMode(toggle);
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderDeckWordList(dayNum) {
+            const container = document.getElementById('deck-word-list');
+            const words = coreVocabulary.filter(w => w.day === dayNum);
+
+            document.getElementById('detail-word-count').textContent = `Vocabulary (${words.length})`;
+
+            let html = words.map(word => {
+                const isChecked = coreKnown.includes(word.originalIndex);
+                return `
+                <div id="word-card-${word.originalIndex}" onclick="openCoreModal(${word.originalIndex})"
+                     class="word-item ${isChecked ? 'checked' : ''} cursor-pointer rounded-2xl p-3 flex items-center justify-between group bg-white border border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div class="emoji-icon text-2xl transition-transform duration-300">${word.emoji}</div>
+                        <div>
+                            <div class="font-bold text-slate-800 leading-tight">${word.indo}</div>
+                            <div class="eng-text text-xs font-medium text-slate-400 mt-0.5 transition-all duration-300">${word.eng}</div>
+                        </div>
+                    </div>
+                    <div class="check-circle w-6 h-6 rounded-full border-2 border-slate-200 flex items-center justify-center bg-white shadow-sm flex-shrink-0">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                </div>`;
+            }).join('');
+
+            html += `
+            <div onclick="toggleAddWordPanel()" class="border-2 border-dashed border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 rounded-2xl p-3 flex items-center justify-center gap-2 cursor-pointer transition-colors text-slate-400 hover:text-indigo-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span class="font-bold text-sm">Add Word to Deck</span>
+            </div>`;
+
+            container.innerHTML = html;
+        }
+
+        function closeDeckDetail() {
+            document.getElementById('view-deck-detail').classList.add('hidden');
+            document.getElementById('view-decks-overview').classList.remove('hidden');
+            currentDeckDay = null;
+            const toggle = document.getElementById('deck-review-toggle');
+            toggle.checked = false;
+            toggleDeckReviewMode(toggle);
+        }
+
+        function toggleDeckReviewMode(checkbox) {
+            const container = document.getElementById('deck-word-list');
+            if (!container) return;
+            checkbox.checked ? container.classList.add('review-active') : container.classList.remove('review-active');
+        }
+
+        function toggleAddWordPanel() {
+            const panel   = document.getElementById('add-word-panel');
+            const overlay = document.getElementById('add-word-overlay');
+            if (!panel) return;
+            if (panel.classList.contains('closed')) {
+                panel.classList.replace('closed', 'open');
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+                overlay.classList.add('opacity-100', 'pointer-events-auto');
+            } else {
+                panel.classList.replace('open', 'closed');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+                overlay.classList.remove('opacity-100', 'pointer-events-auto');
+            }
+        }
+
+        function openDeckModal(mode) {
+            const overlay  = document.getElementById('deck-modal-overlay');
+            const modal    = document.getElementById('deck-modal');
+            const titleEl  = document.getElementById('deck-modal-title');
+            const saveBtn  = document.getElementById('deck-modal-save');
+            const deleteBtn = document.getElementById('deck-modal-delete');
+            if (mode === 'create') {
+                titleEl.textContent = 'Create New Deck';
+                saveBtn.textContent = 'Create Deck';
+                deleteBtn.classList.add('hidden');
+                document.getElementById('deck-input-title').value = '';
+                document.getElementById('deck-input-icon').value  = '';
+                document.getElementById('deck-input-desc').value  = '';
+            }
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            overlay.classList.add('opacity-100', 'pointer-events-auto');
+            modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+            modal.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+        }
+
+        function closeDeckModal() {
+            const overlay = document.getElementById('deck-modal-overlay');
+            const modal   = document.getElementById('deck-modal');
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+            overlay.classList.remove('opacity-100', 'pointer-events-auto');
+            modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+            modal.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+        }
+
+        function selectDeckColor(btn) {
+            document.querySelectorAll('.deck-color-btn').forEach(b =>
+                b.classList.remove('ring-2', 'ring-offset-2', 'ring-slate-400', 'scale-110'));
+            btn.classList.add('ring-2', 'ring-offset-2', 'ring-slate-400', 'scale-110');
+        }
+
         window.toggleWeek = function(weekNum) { document.getElementById(`week-container-${weekNum}`).classList.toggle('active'); }
         function renderCoreDays() {
             const container = document.getElementById('days-container');
