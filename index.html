@@ -1387,6 +1387,7 @@
                 document.getElementById('user-info').classList.remove('hidden');
                 document.getElementById('user-avatar').src = user.photoURL || '';
                 document.getElementById('user-name').textContent = user.displayName || user.email;
+                clearAllUserData(); // always wipe before loading new user's data
                 await loadProgressFromFirestore(user.uid);
                 renderDecksOverview();
                 if (currentSong) { renderSongLyrics(); renderSongVocabList(); }
