@@ -1294,6 +1294,7 @@
         const CUSTOM_WORDS_KEY = 'indoAdventure_customWords';
         const CUSTOM_KNOWN_KEY = 'indoAdventure_customKnown';
         const HIDDEN_CORE_KEY  = 'indoAdventure_hiddenCore';
+        const DELETED_DECKS_KEY = 'indoAdventure_deletedDecks';
         
         
         let coreKnown = [];
@@ -1304,6 +1305,7 @@
         let customWords = {};   // { dayNum: [{id, indo, eng, emoji}] }
         let customKnown = [];   // array of known custom word IDs
         let hiddenCoreWords = []; // array of originalIndex values hidden by user
+        let deletedDecks = [];    // array of dayNum values for fully deleted decks
         let pendingImportWords = [];
         
         let currentTab = 'core';
@@ -1419,7 +1421,9 @@
                     if (data.mnemonics) mnemonics = data.mnemonics;
                     if (data.masteryTimestamps) masteryTimestamps = data.masteryTimestamps;
                     if (data.hiddenCoreWords) hiddenCoreWords = data.hiddenCoreWords;
+                    if (data.deletedDecks) deletedDecks = data.deletedDecks;
                     localStorage.setItem(HIDDEN_CORE_KEY, JSON.stringify(hiddenCoreWords));
+                    localStorage.setItem(DELETED_DECKS_KEY, JSON.stringify(deletedDecks));
                     if (!masteryTimestamps.core) masteryTimestamps.core = {};
                     if (!masteryTimestamps.songs) masteryTimestamps.songs = {};
                     if (!masteryTimestamps.stories) masteryTimestamps.stories = {};
@@ -1455,6 +1459,7 @@
                         masteryTimestamps,
                         mnemonics,
                         hiddenCoreWords,
+                        deletedDecks,
                         updatedAt: new Date().toISOString()
                     });
                     showSyncIndicator();
@@ -2151,12 +2156,17 @@
                 const h = localStorage.getItem(HIDDEN_CORE_KEY);
                 if (h) hiddenCoreWords = JSON.parse(h);
             } catch(e) { hiddenCoreWords = []; }
+            try {
+                const d = localStorage.getItem(DELETED_DECKS_KEY);
+                if (d) deletedDecks = JSON.parse(d);
+            } catch(e) { deletedDecks = []; }
         }
 
         function saveCustomWords() {
             localStorage.setItem(CUSTOM_WORDS_KEY, JSON.stringify(customWords));
             localStorage.setItem(CUSTOM_KNOWN_KEY, JSON.stringify(customKnown));
             localStorage.setItem(HIDDEN_CORE_KEY, JSON.stringify(hiddenCoreWords));
+            localStorage.setItem(DELETED_DECKS_KEY, JSON.stringify(deletedDecks));
         }
 
         function removeCoreWord(index) {
@@ -2185,15 +2195,15 @@
             coreKnown = coreKnown.filter(i => !dayIndices.includes(i));
             dayIndices.forEach(i => delete masteryTimestamps.core[i]);
             hiddenCoreWords = hiddenCoreWords.filter(i => !dayIndices.includes(i));
+            if (!deletedDecks.includes(dayNum)) deletedDecks.push(dayNum);
             const customIds = (customWords[dayNum] || []).map(w => w.id);
             customWords[dayNum] = [];
             customKnown = customKnown.filter(k => !customIds.includes(k));
             saveCustomWords();
             saveProgress();
             closeDeckModal();
-            renderDeckWordList(dayNum);
-            const total = coreVocabulary.filter(w => w.day === dayNum).length;
-            document.getElementById('detail-deck-progress').textContent = `0/${total} Mastered`;
+            closeDeckDetail();
+            renderDecksOverview();
             updateStats();
         }
 
@@ -2403,7 +2413,7 @@
                 groupedByDay[word.day].push(word);
             });
 
-            const days = Object.keys(groupedByDay).map(Number).sort((a, b) => a - b);
+            const days = Object.keys(groupedByDay).map(Number).sort((a, b) => a - b).filter(d => !deletedDecks.includes(d));
 
             if (days.length === 0) {
                 container.innerHTML = `<div class="col-span-4 text-center py-16 text-slate-400">No vocabulary loaded yet.</div>`;
@@ -2585,7 +2595,7 @@
                 titleEl.textContent = 'Edit Deck';
                 saveBtn.textContent = 'Save';
                 deleteBtn.classList.remove('hidden');
-                deleteBtn.textContent = 'Reset Deck';
+                deleteBtn.textContent = 'Delete Deck';
                 deleteBtn.onclick = () => resetDeck(currentDeckDay);
             }
             overlay.classList.remove('opacity-0', 'pointer-events-none');
