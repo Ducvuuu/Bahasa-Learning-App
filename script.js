@@ -1083,6 +1083,7 @@ function confirmImport() {
     if (!customWords[currentDeckDay]) customWords[currentDeckDay] = [];
     customWords[currentDeckDay].push(...pendingImportWords);
     saveCustomWords();
+    saveProgress();
     clearImportPreview();
     toggleAddWordPanel();
     renderDeckWordList(currentDeckDay);
@@ -1108,6 +1109,7 @@ function saveSingleWord() {
     if (!customWords[currentDeckDay]) customWords[currentDeckDay] = [];
     customWords[currentDeckDay].push(word);
     saveCustomWords();
+    saveProgress();
     document.getElementById('add-indo-word-input').value = '';
     document.getElementById('add-output-emoji').value    = '';
     document.getElementById('add-output-eng').value      = '';
