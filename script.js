@@ -1002,6 +1002,7 @@ function toggleCustomWord(id) {
         if (el) { el.classList.add('checked'); el.classList.add('anim-squish'); setTimeout(() => el.classList.remove('anim-squish'), 300); }
     }
     saveCustomWords();
+    saveProgress();
     // update hero progress count
     if (currentDeckDay !== null) {
         const total = (coreVocabulary.filter(w => w.day === currentDeckDay).length) + (customWords[currentDeckDay]||[]).length;
