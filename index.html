@@ -2179,46 +2179,57 @@
         }
 
         async function autoFillWordMeaning() {
-            const word = document.getElementById('add-indo-word-input').value.trim();
+            const wordInput = document.getElementById('add-indo-word-input');
+            const word = wordInput.value.trim();
             if (!word) {
-                document.getElementById('add-indo-word-input').focus();
-                document.getElementById('add-indo-word-input').classList.add('ring-2', 'ring-rose-300', 'border-rose-300');
-                setTimeout(() => document.getElementById('add-indo-word-input').classList.remove('ring-2', 'ring-rose-300', 'border-rose-300'), 1500);
+                wordInput.focus();
+                wordInput.classList.add('ring-2', 'ring-rose-300', 'border-rose-300');
+                setTimeout(() => wordInput.classList.remove('ring-2', 'ring-rose-300', 'border-rose-300'), 1500);
                 return;
             }
 
             const key = localStorage.getItem(GEMINI_KEY_STORAGE);
             if (!key) {
-                alert('No Gemini API key found. Go to the Practice tab to add your key first.');
+                alert('No Gemini API key found. Go to the Practice tab to save your key first.');
                 return;
             }
 
-            const btn = document.getElementById('add-ai-generate-btn');
+            const btn     = document.getElementById('add-ai-generate-btn');
             const btnText = document.getElementById('add-ai-btn-text');
-            btn.disabled = true;
+            btn.disabled  = true;
             btnText.textContent = 'Thinking...';
 
             try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`, {
+                const res = await fetch(getGeminiUrl(), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ role: 'user', parts: [{ text: `For the Indonesian word or phrase "${word}", respond with ONLY a JSON object in this exact format with no other text: {"emoji":"🍉","english":"Watermelon"}` }] }],
-                        generationConfig: { temperature: 0.2, maxOutputTokens: 60 }
+                        contents: [{
+                            role: 'user',
+                            parts: [{ text: `Translate the Indonesian word or phrase "${word}" to English and pick one fitting emoji. Reply with ONLY this JSON, no extra text:\n{"emoji":"🍉","english":"Watermelon"}` }]
+                        }],
+                        generationConfig: { temperature: 0.1, maxOutputTokens: 80 }
                     })
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
-                const raw = data.candidates[0].content.parts[0].text.trim();
-                const json = JSON.parse(raw.replace(/```json|```/g, '').trim());
-                document.getElementById('add-output-emoji').value = json.emoji || '✨';
-                document.getElementById('add-output-eng').value   = json.english || '';
+
+                const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+                // Extract first {...} block from response (handles markdown fences and extra text)
+                const match = raw.match(/\{[\s\S]*?\}/);
+                if (!match) throw new Error(`Unexpected response: ${raw.slice(0, 80)}`);
+
+                const result = JSON.parse(match[0]);
+                document.getElementById('add-output-emoji').value = result.emoji   || '✨';
+                document.getElementById('add-output-eng').value   = result.english || '';
+
                 btnText.textContent = '✓ Generated!';
                 setTimeout(() => { btnText.textContent = 'Auto-fill Meaning & Emoji'; }, 2000);
             } catch (err) {
                 console.error('Auto-fill error:', err);
-                btnText.textContent = 'Failed — edit manually';
-                setTimeout(() => { btnText.textContent = 'Auto-fill Meaning & Emoji'; }, 2500);
+                btnText.textContent = `Error: ${err.message.slice(0, 40)}`;
+                setTimeout(() => { btnText.textContent = 'Auto-fill Meaning & Emoji'; }, 3000);
             }
             btn.disabled = false;
         }
