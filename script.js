@@ -1253,6 +1253,7 @@ function openDeckDetail(dayNum) {
 
     document.getElementById('view-decks-overview').classList.add('hidden');
     document.getElementById('view-deck-detail').classList.remove('hidden');
+    document.getElementById('core-toggle-wrapper').classList.add('hidden');
 
     const toggle = document.getElementById('deck-review-toggle');
     toggle.checked = false;
@@ -1324,6 +1325,7 @@ function closeDeckDetail() {
     const toggle = document.getElementById('deck-review-toggle');
     toggle.checked = false;
     toggleDeckReviewMode(toggle);
+    document.getElementById('core-toggle-wrapper').classList.remove('hidden');
 }
 
 function toggleDeckReviewMode(checkbox) {
@@ -1475,6 +1477,7 @@ function openUserDeckDetail(deckId) {
     renderDeckWordList(deckId);
     document.getElementById('view-decks-overview').classList.add('hidden');
     document.getElementById('view-deck-detail').classList.remove('hidden');
+    document.getElementById('core-toggle-wrapper').classList.add('hidden');
     const toggle = document.getElementById('deck-review-toggle');
     toggle.checked = false;
     toggleDeckReviewMode(toggle);
