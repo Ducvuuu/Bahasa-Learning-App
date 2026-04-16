@@ -2206,23 +2206,31 @@
                     body: JSON.stringify({
                         contents: [{
                             role: 'user',
-                            parts: [{ text: `Translate the Indonesian word or phrase "${word}" to English and pick one fitting emoji. Reply with ONLY this JSON, no extra text:\n{"emoji":"🍉","english":"Watermelon"}` }]
+                            parts: [{ text: `Translate the Indonesian word or phrase "${word}" to English and pick one fitting emoji.` }]
                         }],
-                        generationConfig: { temperature: 0.1, maxOutputTokens: 80 }
+                        generationConfig: {
+                            temperature: 0.1,
+                            maxOutputTokens: 80,
+                            responseMimeType: 'application/json',
+                            responseSchema: {
+                                type: 'object',
+                                properties: {
+                                    emoji:   { type: 'string' },
+                                    english: { type: 'string' }
+                                },
+                                required: ['emoji', 'english']
+                            }
+                        }
                     })
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
 
-                const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                const raw    = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                const result = JSON.parse(raw);
 
-                // Extract fields directly with regex — works regardless of JSON formatting or markdown fences
-                const emojiMatch   = raw.match(/"emoji"\s*:\s*"([^"]+)"/);
-                const englishMatch = raw.match(/"english"\s*:\s*"([^"]+)"/);
-                if (!emojiMatch || !englishMatch) throw new Error(`Could not parse response: ${raw.slice(0, 60)}`);
-
-                document.getElementById('add-output-emoji').value = emojiMatch[1];
-                document.getElementById('add-output-eng').value   = englishMatch[1];
+                document.getElementById('add-output-emoji').value = result.emoji   || '✨';
+                document.getElementById('add-output-eng').value   = result.english || '';
 
                 btnText.textContent = '✓ Generated!';
                 setTimeout(() => { btnText.textContent = 'Auto-fill Meaning & Emoji'; }, 2000);
