@@ -2213,8 +2213,8 @@
                 });
 
                 const [emoji, english] = await Promise.all([
-                    call(`Reply with ONE emoji that best represents the Indonesian word "${word}". Only the emoji, nothing else.`, 5),
-                    call(`Translate the Indonesian word "${word}" to English. Reply with only the English word or short phrase, nothing else.`, 20)
+                    call(`The following is an Indonesian word or phrase: "${word}". Reply with ONE emoji that best represents its meaning. Only the emoji character, nothing else.`, 5),
+                    call(`The following is an Indonesian word or phrase: "${word}". Translate it from Indonesian to English. Reply with only the English translation, nothing else.`, 20)
                 ]);
 
                 document.getElementById('add-output-emoji').value = emoji   || '✨';
