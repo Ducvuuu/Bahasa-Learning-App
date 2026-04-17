@@ -2119,7 +2119,7 @@ async function loadPastSessions() {
             const label = diffDays === 0 ? 'Today' : diffDays === 1 ? 'Yesterday' : ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             const isToday = diffDays === 0;
             const preview = d.messages?.find(m => m.role === 'model')?.text?.slice(0, 80) || '—';
-            return `<div class="p-4 rounded-2xl border ${isToday ? 'border-indigo-100 bg-indigo-50/30 hover:border-indigo-300 hover:bg-indigo-50' : 'border-slate-100 bg-white hover:border-indigo-200 hover:bg-indigo-50/50'} cursor-pointer transition-all group">
+            return `<div onclick="openPastSession('${doc.id}')" class="p-4 rounded-2xl border ${isToday ? 'border-indigo-100 bg-indigo-50/30 hover:border-indigo-300 hover:bg-indigo-50' : 'border-slate-100 bg-white hover:border-indigo-200 hover:bg-indigo-50/50'} cursor-pointer transition-all group">
                 <div class="flex justify-between items-start mb-2">
                     <div class="font-bold ${isToday ? 'text-indigo-900' : 'text-slate-800'} group-hover:text-indigo-700 text-sm flex items-center gap-2">
                         <span>${['🗣️','🔄','📝','🎯','✏️'][i % 5]}</span> Session ${i === 0 ? '(Current)' : `#${snap.docs.length - i}`}
@@ -2131,6 +2131,45 @@ async function loadPastSessions() {
             </div>`;
         }).join('');
     } catch (e) { container.innerHTML = '<p class="text-xs text-red-400 py-4 text-center">Failed to load sessions.</p>'; }
+}
+
+async function openPastSession(sessionId) {
+    if (!currentUser) return;
+    togglePastSessions(); // close the panel
+
+    const messagesEl = document.getElementById('practice-messages');
+    messagesEl.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Loading session…</p>';
+    practiceActive = false;
+    practiceConversation = [];
+
+    try {
+        const doc = await db.collection('users').doc(currentUser.uid)
+            .collection('practiceHistory').doc(sessionId).get();
+        if (!doc.exists) { messagesEl.innerHTML = '<p class="text-xs text-red-400 text-center py-4">Session not found.</p>'; return; }
+
+        const d = doc.data();
+        const ts = new Date(d.createdAt).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        messagesEl.innerHTML = '';
+
+        // Banner
+        const banner = document.createElement('div');
+        banner.className = 'text-center text-xs text-slate-400 bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 mx-auto max-w-xs';
+        banner.textContent = `Past session · ${ts}`;
+        messagesEl.appendChild(banner);
+
+        // Render each saved message
+        (d.messages || []).forEach(m => appendPracticeMessage(m.role, m.text));
+
+        // Footer prompt to start a fresh session
+        const footer = document.createElement('div');
+        footer.className = 'text-center text-xs text-slate-400 mt-2';
+        footer.innerHTML = `End of session. <button onclick="startNewPracticeSession()" class="text-indigo-500 font-bold hover:underline">Start a new session →</button>`;
+        messagesEl.appendChild(footer);
+
+        practiceScrollBottom();
+    } catch (e) {
+        messagesEl.innerHTML = '<p class="text-xs text-red-400 text-center py-4">Failed to load session.</p>';
+    }
 }
 
 function togglePastSessions() {
