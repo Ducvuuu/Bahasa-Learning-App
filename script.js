@@ -151,6 +151,7 @@ async function loadProgressFromFirestore(uid) {
             if (!masteryTimestamps.core) masteryTimestamps.core = {};
             if (!masteryTimestamps.songs) masteryTimestamps.songs = {};
             if (!masteryTimestamps.stories) masteryTimestamps.stories = {};
+            if (!masteryTimestamps.custom) masteryTimestamps.custom = {};
             localStorage.setItem(CORE_KEY, JSON.stringify(coreKnown));
             localStorage.setItem(SONGS_KEY, JSON.stringify(songProgress));
             localStorage.setItem(STORIES_KEY, JSON.stringify(storyProgress));
@@ -255,6 +256,7 @@ async function init() {
         if (!masteryTimestamps.core) masteryTimestamps.core = {};
         if (!masteryTimestamps.songs) masteryTimestamps.songs = {};
         if (!masteryTimestamps.stories) masteryTimestamps.stories = {};
+        if (!masteryTimestamps.custom) masteryTimestamps.custom = {};
     }
 
     loadCustomWords();
@@ -1007,9 +1009,11 @@ function toggleCustomWord(id) {
     const idx = customKnown.indexOf(id);
     if (idx > -1) {
         customKnown.splice(idx, 1);
+        delete masteryTimestamps.custom[id];
         if (el) el.classList.remove('checked');
     } else {
         customKnown.push(id);
+        masteryTimestamps.custom[id] = new Date().toISOString();
         if (el) { el.classList.add('checked'); el.classList.add('anim-squish'); setTimeout(() => el.classList.remove('anim-squish'), 300); }
     }
     saveCustomWords();
@@ -1867,21 +1871,20 @@ function getPracticeWords() {
             if (w) bucket({ indo: w.indo, eng: w.eng, emoji: w.emoji || '📖' }, id, 'stories');
         });
     });
-    // Custom deck words (no mastery timestamps — treat as new so they're prioritised)
+    // Custom deck words — use mastery timestamps just like core words
     customKnown.forEach(id => {
-        const dayWords = Object.values(customWords).flat();
-        const w = dayWords.find(v => v.id === id);
-        if (w) newWords.push({ indo: w.indo, eng: w.eng, emoji: w.emoji || '📝' });
+        const w = Object.values(customWords).flat().find(v => v.id === id);
+        if (w) bucket({ indo: w.indo, eng: w.eng, emoji: w.emoji || '📝' }, id, 'custom');
     });
 
     const shuffle = a => [...a].sort(() => Math.random() - 0.5);
     const selected = [
-        ...shuffle(newWords).slice(0, 8),
-        ...shuffle(reviewWords).slice(0, 4),
-        ...shuffle(oldWords).slice(0, 2)
+        ...shuffle(newWords),
+        ...shuffle(reviewWords),
+        ...shuffle(oldWords)
     ];
 
-    return { selected, newCount: Math.min(newWords.length, 8), reviewCount: Math.min(reviewWords.length, 4), hasWords: selected.length > 0 };
+    return { selected, newCount: newWords.length, reviewCount: reviewWords.length, hasWords: selected.length > 0 };
 }
 
 function buildSystemPrompt(words) {
