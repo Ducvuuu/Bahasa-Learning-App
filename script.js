@@ -2103,34 +2103,79 @@ async function savePracticeMessage(role, text) {
         .catch(() => {});
 }
 
+let _lastSessionDoc = null;   // Firestore cursor for pagination
+let _sessionCount   = 0;      // total sessions rendered so far
+
 async function loadPastSessions() {
     if (!currentUser) return;
+    _lastSessionDoc = null;
+    _sessionCount   = 0;
     const container = document.getElementById('past-sessions-list');
     container.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">Loading…</p>';
     try {
         const snap = await db.collection('users').doc(currentUser.uid)
             .collection('practiceHistory').orderBy('createdAt', 'desc').limit(5).get();
         if (snap.empty) { container.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">No past sessions yet.</p>'; return; }
-        const now = Date.now();
-        container.innerHTML = snap.docs.map((doc, i) => {
-            const d = doc.data();
-            const ts = new Date(d.createdAt);
-            const diffDays = Math.floor((now - ts.getTime()) / 86400000);
-            const label = diffDays === 0 ? 'Today' : diffDays === 1 ? 'Yesterday' : ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            const isToday = diffDays === 0;
-            const preview = d.messages?.find(m => m.role === 'model')?.text?.slice(0, 80) || '—';
-            return `<div onclick="openPastSession('${doc.id}')" class="p-4 rounded-2xl border ${isToday ? 'border-indigo-100 bg-indigo-50/30 hover:border-indigo-300 hover:bg-indigo-50' : 'border-slate-100 bg-white hover:border-indigo-200 hover:bg-indigo-50/50'} cursor-pointer transition-all group">
-                <div class="flex justify-between items-start mb-2">
-                    <div class="font-bold ${isToday ? 'text-indigo-900' : 'text-slate-800'} group-hover:text-indigo-700 text-sm flex items-center gap-2">
-                        <span>${['🗣️','🔄','📝','🎯','✏️'][i % 5]}</span> Session ${i === 0 ? '(Current)' : `#${snap.docs.length - i}`}
-                    </div>
-                    <span class="text-[10px] font-bold ${isToday ? 'text-indigo-500 bg-indigo-100' : 'text-slate-400 bg-slate-100'} px-2 py-1 rounded-md uppercase tracking-wider">${label}</span>
-                </div>
-                <p class="text-sm text-slate-500 line-clamp-2">${preview.replace(/</g,'&lt;')}</p>
-                <p class="text-[10px] text-slate-400 mt-2">${d.wordsTested?.length || 0} words · ${d.messages?.length || 0} messages</p>
-            </div>`;
-        }).join('');
+        container.innerHTML = '';
+        _renderSessionDocs(snap.docs, container);
     } catch (e) { container.innerHTML = '<p class="text-xs text-red-400 py-4 text-center">Failed to load sessions.</p>'; }
+}
+
+async function loadMoreSessions() {
+    if (!currentUser || !_lastSessionDoc) return;
+    const btn = document.getElementById('sessions-load-more');
+    if (btn) { btn.textContent = 'Loading…'; btn.disabled = true; }
+    try {
+        const snap = await db.collection('users').doc(currentUser.uid)
+            .collection('practiceHistory').orderBy('createdAt', 'desc').startAfter(_lastSessionDoc).limit(5).get();
+        const container = document.getElementById('past-sessions-list');
+        if (btn) btn.remove();
+        if (!snap.empty) _renderSessionDocs(snap.docs, container);
+    } catch (e) {
+        if (btn) { btn.textContent = 'See more'; btn.disabled = false; }
+    }
+}
+
+function _renderSessionDocs(docs, container) {
+    const now = Date.now();
+    const icons = ['🗣️','🔄','📝','🎯','✏️','💬','🧠','✍️','🎯','📚'];
+    docs.forEach(doc => {
+        const d = doc.data();
+        const ts = new Date(d.createdAt);
+        const diffDays = Math.floor((now - ts.getTime()) / 86400000);
+        const label = diffDays === 0 ? 'Today' : diffDays === 1 ? 'Yesterday' : ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const isToday = diffDays === 0;
+        const isCurrent = _sessionCount === 0;
+        const preview = d.messages?.find(m => m.role === 'model')?.text?.slice(0, 80) || '—';
+        const icon = icons[_sessionCount % icons.length];
+        const sessionLabel = isCurrent ? 'Latest' : ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        _sessionCount++;
+
+        const card = document.createElement('div');
+        card.onclick = () => openPastSession(doc.id);
+        card.className = `p-4 rounded-2xl border ${isToday ? 'border-indigo-100 bg-indigo-50/30 hover:border-indigo-300 hover:bg-indigo-50' : 'border-slate-100 bg-white hover:border-indigo-200 hover:bg-indigo-50/50'} cursor-pointer transition-all group`;
+        card.innerHTML = `
+            <div class="flex justify-between items-start mb-2">
+                <div class="font-bold ${isToday ? 'text-indigo-900' : 'text-slate-800'} group-hover:text-indigo-700 text-sm flex items-center gap-2">
+                    <span>${icon}</span> ${sessionLabel}
+                </div>
+                <span class="text-[10px] font-bold ${isToday ? 'text-indigo-500 bg-indigo-100' : 'text-slate-400 bg-slate-100'} px-2 py-1 rounded-md uppercase tracking-wider">${label}</span>
+            </div>
+            <p class="text-sm text-slate-500 line-clamp-2">${preview.replace(/</g,'&lt;')}</p>
+            <p class="text-[10px] text-slate-400 mt-2">${d.wordsTested?.length || 0} words · ${d.messages?.length || 0} messages</p>`;
+        container.appendChild(card);
+        _lastSessionDoc = doc;
+    });
+
+    // Add "See more" button if a full page was returned (might be more)
+    if (docs.length === 5) {
+        const btn = document.createElement('button');
+        btn.id = 'sessions-load-more';
+        btn.onclick = loadMoreSessions;
+        btn.className = 'w-full text-xs font-bold text-indigo-500 hover:text-indigo-700 py-3 rounded-2xl border border-dashed border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50/50 transition-all';
+        btn.textContent = 'See more';
+        container.appendChild(btn);
+    }
 }
 
 async function openPastSession(sessionId) {
