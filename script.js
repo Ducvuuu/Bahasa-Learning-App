@@ -2199,19 +2199,28 @@ async function openPastSession(sessionId) {
         // Banner
         const banner = document.createElement('div');
         banner.className = 'text-center text-xs text-slate-400 bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 mx-auto max-w-xs';
-        banner.textContent = `Past session · ${ts}`;
+        banner.textContent = `Session from ${ts} — continued`;
         messagesEl.appendChild(banner);
 
-        // Render each saved message
-        (d.messages || []).forEach(m => appendPracticeMessage(m.role, m.text));
+        // Render each saved message and rebuild conversation history for Gemini
+        (d.messages || []).forEach(m => {
+            appendPracticeMessage(m.role, m.text);
+            practiceConversation.push({ role: m.role, parts: [{ text: m.text }] });
+        });
 
-        // Footer prompt to start a fresh session
-        const footer = document.createElement('div');
-        footer.className = 'text-center text-xs text-slate-400 mt-2';
-        footer.innerHTML = `End of session. <button onclick="startNewPracticeSession()" class="text-indigo-500 font-bold hover:underline">Start a new session →</button>`;
-        messagesEl.appendChild(footer);
+        // Restore the word list so the system prompt stays consistent
+        practiceWords = {
+            selected: (d.wordsTested || []).map(w => ({ indo: w.indo, eng: w.eng, emoji: w.emoji || '📝' })),
+            newCount: 0, reviewCount: 0,
+            hasWords: (d.wordsTested || []).length > 0
+        };
 
+        // Resume the session
+        currentPracticeSessionId = sessionId;
+        practiceActive = true;
+        setPracticeInputLock(false);
         practiceScrollBottom();
+        document.getElementById('practice-input').focus();
     } catch (e) {
         messagesEl.innerHTML = '<p class="text-xs text-red-400 text-center py-4">Failed to load session.</p>';
     }
