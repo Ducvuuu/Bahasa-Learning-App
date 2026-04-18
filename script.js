@@ -114,6 +114,7 @@ auth.onAuthStateChanged(async (user) => {
         document.getElementById('user-name').textContent = user.displayName || user.email;
         clearAllUserData(); // always wipe before loading new user's data
         await loadProgressFromFirestore(user.uid);
+        await loadSharedApiKey();
         renderDecksOverview();
         if (currentSong) { renderSongLyrics(); renderSongVocabList(); }
         if (currentStory) loadStory(currentStory.id);
@@ -1807,14 +1808,28 @@ function getGeminiUrl() {
     return `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`;
 }
 
+async function loadSharedApiKey() {
+    if (localStorage.getItem(GEMINI_KEY_STORAGE)) return; // personal key already loaded
+    try {
+        const doc = await db.collection('config').doc('app').get();
+        if (doc.exists && doc.data().geminiApiKey) {
+            localStorage.setItem(GEMINI_KEY_STORAGE, doc.data().geminiApiKey);
+        }
+    } catch (e) { /* silently ignore — user may need to enter key manually */ }
+}
+
 function saveGeminiKey() {
     const input = document.getElementById('gemini-key-input');
     const key = input.value.trim();
     if (!key) return;
     localStorage.setItem(GEMINI_KEY_STORAGE, key);
-    // Sync to Firestore so it's available on all devices
     if (currentUser) {
+        // Save to personal user doc (cross-device sync for this user)
         db.collection('users').doc(currentUser.uid)
+          .set({ geminiApiKey: key }, { merge: true })
+          .catch(console.error);
+        // Save to shared config so all users get it automatically on login
+        db.collection('config').doc('app')
           .set({ geminiApiKey: key }, { merge: true })
           .catch(console.error);
     }
@@ -1826,6 +1841,7 @@ function clearGeminiKey() {
     if (!confirm('Remove your saved API key?')) return;
     localStorage.removeItem(GEMINI_KEY_STORAGE);
     if (currentUser) {
+        // Only clear the personal copy — keep the shared key intact for other users
         db.collection('users').doc(currentUser.uid)
           .set({ geminiApiKey: firebase.firestore.FieldValue.delete() }, { merge: true })
           .catch(console.error);
