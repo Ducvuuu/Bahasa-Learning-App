@@ -614,9 +614,11 @@ window.renderInventory = function() {
     const emptyState = document.getElementById('inventory-empty');
     const countLabel = document.getElementById('inventory-count');
     
-    let allMastered = coreVocabulary
-        .map((word, index) => ({...word, originalIndex: index, type: 'core'}))
-        .filter(word => coreKnown.includes(word.originalIndex));
+    let allMastered = [];
+    userDecks.forEach(deck => {
+        const words = (customWords[deck.id] || []).filter(w => customKnown.includes(w.id));
+        allMastered = allMastered.concat(words.map(w => ({...w, type: 'custom', source: deck.title})));
+    });
 
     if (window.songs) {
         Object.values(window.songs).forEach(song => {
@@ -690,66 +692,6 @@ window.renderInventory = function() {
     container.innerHTML = html;
 }
 
-// ==========================================
-// 🌳 TREE VIEW LOGIC
-// ==========================================
-
-const AFFIX_MASTER_LIST = [
-   { id: 'me-', label: 'Me-', type: 'verb' },
-   { id: 'ber-', label: 'Ber-', type: 'verb' },
-   { id: 'di-', label: 'Di-', type: 'verb' },
-   { id: 'ter-', label: 'Ter-', type: 'verb' },
-   { id: 'pe-', label: 'Pe-', type: 'noun' },
-   { id: '-an', label: '-an', type: 'noun' },
-   { id: 'pe-an', label: 'Pe-...-an', type: 'abstract' },
-   { id: 'ke-an', label: 'Ke-...-an', type: 'abstract' },
-   { id: 'me-kan', label: 'Me-...-kan', type: 'causative' },
-   { id: 'me-i', label: 'Me-...-i', type: 'causative' }
-];
-
-window.openTree = function(index) {
-    const word = coreVocabulary[index];
-    if(!word || !word.family) return;
-
-    const container = document.getElementById('tree-canvas');
-    container.innerHTML = '';
-
-    // 1. Render ROOT Node
-    const rootNode = document.createElement('div');
-    rootNode.className = 'tree-node root';
-    rootNode.innerHTML = `
-        <div class="text-3xl mb-1">${word.emoji}</div>
-        <div class="node-word text-2xl">${word.indo}</div>
-        <div class="node-meaning text-indigo-500 font-medium">${word.family.root_meaning}</div>
-    `;
-    container.appendChild(rootNode);
-
-    // 2. Render Branches based on Master List
-    AFFIX_MASTER_LIST.forEach(affix => {
-        const branchData = word.family.trees[affix.id];
-        const node = document.createElement('div');
-        
-        if (branchData) {
-            // Active Branch (True)
-            node.className = 'tree-node active';
-            node.innerHTML = `
-                <div class="node-affix">${affix.label}</div>
-                <div class="node-word">${branchData.text}</div>
-                <div class="node-meaning">${branchData.meaning}</div>
-            `;
-        } else {
-            // Dead Branch (False/Implied)
-            node.className = 'tree-node dead';
-            node.innerHTML = `
-                <div class="node-affix">${affix.label}</div>
-                <div class="node-word text-slate-300">---</div>
-            `;
-        }
-        container.appendChild(node);
-    });
-
-    switchTab('tree');
-}
 
 
 window.openCustomWordModal = function(id) {
@@ -959,14 +901,9 @@ function confirmImport() {
     clearImportPreview();
     toggleAddWordPanel();
     renderDeckWordList(currentDeckId);
-    // update hero progress
-    const allWords = coreVocabulary.filter(w => w.deckId === currentDeckId);
-    const custom   = customWords[currentDeckId] || [];
-    const total    = allWords.length + custom.length;
-    const known    = allWords.filter(w => coreKnown.includes(w.originalIndex)).length
-                   + custom.filter(w => customKnown.includes(w.id)).length;
-    document.getElementById('detail-deck-progress').textContent = `${known}/${total} Mastered`;
-    document.getElementById('detail-word-count').textContent    = `Vocabulary (${total})`;
+    refreshDeckProgress(currentDeckId);
+    const words = customWords[currentDeckId] || [];
+    document.getElementById('detail-word-count').textContent = `Vocabulary (${words.length})`;
 }
 
 function saveSingleWord() {
@@ -994,16 +931,6 @@ function saveSingleWord() {
 // ==========================================
 
 let currentDeckId = null;
-
-const coreDeckTitles = {
-    'pronouns-questions': 'Pronouns & Questions',
-    'food-actions':       'Food & Actions',
-    'home-everyday':      'Home & Everyday',
-    'time-calendar':      'Time & Calendar',
-    'indonesian-food':    'Indonesian Food',
-    'places-locations':   'Places & Locations',
-    'family':             'Family',
-};
 
 const deckAccentColors = [
     { bg: 'bg-indigo-50',  border: 'border-indigo-100',  text: 'text-indigo-700',  bar: 'bg-indigo-500'  },
@@ -1123,7 +1050,7 @@ function toggleAddWordPanel() {
         if (labelEl) {
             if (currentDeckId !== null) {
                 const ud = userDecks.find(d => d.id === currentDeckId);
-                labelEl.textContent = ud ? ud.title : (coreDeckTitles[currentDeckId] || currentDeckId);
+                labelEl.textContent = ud ? ud.title : currentDeckId;
             } else {
                 labelEl.textContent = 'to current deck';
             }
@@ -1812,7 +1739,7 @@ async function startNewPracticeSession() {
     practiceWords = getPracticeWords();
     document.getElementById('practice-messages').innerHTML = '';
 
-    const totalMastered = coreKnown.length + Object.values(songProgress).flat().length + Object.values(storyProgress).flat().length + customKnown.length;
+    const totalMastered = Object.values(songProgress).flat().length + Object.values(storyProgress).flat().length + customKnown.length;
     document.getElementById('practice-word-count-badge').textContent = `${totalMastered} Words Mastered`;
     const summary = document.getElementById('practice-word-summary');
     if (!practiceWords.hasWords) {

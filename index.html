@@ -82,13 +82,6 @@
                 <div class="flex items-center gap-2 pb-2 pl-4">
                     <span class="text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:inline">Review</span>
                     
-                    <!-- Core Review Toggle -->
-                    <label id="core-toggle-wrapper" class="relative inline-block w-10 h-5 align-middle select-none cursor-pointer">
-                        <input type="checkbox" id="review-toggle" class="sr-only peer" />
-                        <div class="absolute inset-0 bg-slate-200 rounded-full transition-colors duration-300 peer-checked:bg-indigo-500"></div>
-                        <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
-                    </label>
-
                     <!-- Song Review Toggle (Hidden initially) -->
                     <label id="song-toggle-wrapper" class="relative inline-block w-10 h-5 align-middle select-none cursor-pointer hidden">
                         <input type="checkbox" id="song-review-toggle" class="sr-only peer" />
@@ -210,27 +203,6 @@
                 <div id="inventory-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                     <!-- Stickers populated by JS -->
                 </div>
-            </div>
-        </div>
-
-        <!-- ================= VIEW: TREE MAP (NEW) ================= -->
-        <div id="view-tree" class="hidden">
-            <div class="max-w-4xl mx-auto">
-                <div class="flex items-center justify-between mb-6">
-                    <button onclick="switchTab('inventory')" class="text-sm font-bold text-slate-400 hover:text-slate-600 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                        Back to Inventory
-                    </button>
-                    <span class="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Family Tree 🌳</span>
-                </div>
-
-                <!-- Tree Card -->
-                <div class="tree-container">
-                    <div id="tree-canvas" class="tree-grid">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-
             </div>
         </div>
 
