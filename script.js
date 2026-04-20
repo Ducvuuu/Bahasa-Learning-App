@@ -251,19 +251,17 @@ window.switchTab = function(tab) {
     if (tab !== 'core' && currentDeckId !== null) closeDeckDetail();
 
     currentTab = tab;
-    ['core', 'songs', 'inventory', 'read', 'tree', 'practice'].forEach(t => {
+    ['core', 'songs', 'inventory', 'read', 'practice'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
         const btn = document.getElementById(`tab-${t}`);
         if(view) view.classList.toggle('hidden', t !== tab);
         if(btn) btn.classList.toggle('active', t === tab);
     });
 
-    const coreWrapper = document.getElementById('core-toggle-wrapper');
     const songWrapper = document.getElementById('song-toggle-wrapper');
     const storyWrapper = document.getElementById('story-toggle-wrapper');
     const fab = document.getElementById('deck-fab');
 
-    coreWrapper.classList.add('hidden');
     songWrapper.classList.add('hidden');
     storyWrapper.classList.add('hidden');
 
