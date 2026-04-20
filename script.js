@@ -1398,20 +1398,29 @@ function displayMnemonicInModal(vocabId) {
 }
 
 function resizeImageToBlob(file, maxW, maxH, quality) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         const reader = new FileReader();
+        reader.onerror = () => reject(new Error('FileReader failed'));
         reader.onload = (e) => {
             const img = new Image();
+            img.onerror = () => reject(new Error('Image failed to load'));
             img.onload = () => {
-                let { width, height } = img;
-                const ratio = Math.min(maxW / width, maxH / height, 1);
-                width = Math.round(width * ratio);
-                height = Math.round(height * ratio);
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                canvas.toBlob(resolve, 'image/jpeg', quality);
+                try {
+                    let { width, height } = img;
+                    const ratio = Math.min(maxW / width, maxH / height, 1);
+                    width = Math.round(width * ratio);
+                    height = Math.round(height * ratio);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    canvas.toBlob((blob) => {
+                        if (blob) resolve(blob);
+                        else reject(new Error('canvas.toBlob returned null'));
+                    }, 'image/jpeg', quality);
+                } catch (err) {
+                    reject(err);
+                }
             };
             img.src = e.target.result;
         };
