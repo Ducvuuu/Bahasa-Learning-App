@@ -2,28 +2,22 @@
 // 📊 DATA & STATE
 // ==========================================
 
-const CORE_KEY         = 'indoAdventure_coreKnown';
 const SONGS_KEY        = 'indoAdventure_songProgress';
 const STORIES_KEY      = 'indoAdventure_storyProgress';
 const TIMESTAMP_KEY    = 'indoAdventure_timestamps';
 const MNEMONICS_KEY    = 'indoAdventure_mnemonics';
 const CUSTOM_WORDS_KEY = 'indoAdventure_customWords';
 const CUSTOM_KNOWN_KEY = 'indoAdventure_customKnown';
-const HIDDEN_CORE_KEY  = 'indoAdventure_hiddenCore';
-const DELETED_DECKS_KEY = 'indoAdventure_deletedDecks';
 const USER_DECKS_KEY    = 'indoAdventure_userDecks';
 
 
-let coreKnown = [];
 let songProgress = {};
 let storyProgress = {};
-let masteryTimestamps = { core: {}, songs: {}, stories: {} };
+let masteryTimestamps = { songs: {}, stories: {}, custom: {} };
 let mnemonics = {};
-let customWords = {};   // { dayNum: [{id, indo, eng, emoji}] }
+let customWords = {};   // { deckId: [{id, indo, eng, emoji}] }
 let customKnown = [];   // array of known custom word IDs
-let hiddenCoreWords = []; // array of originalIndex values hidden by user
-let deletedDecks = [];    // array of dayNum values for fully deleted decks
-let userDecks = [];       // [{id, title, icon, desc, colorIdx}]
+let userDecks = [];     // [{id, title, icon, desc, colorIdx}]
 let pendingImportWords = [];
 
 let currentTab = 'core';
@@ -53,9 +47,6 @@ const accents = [
     { bg: 'bg-teal-100', text: 'text-teal-700' }
 ];
 
-// Initializing empty (populated by folder)
-window.coreVocabulary = window.coreVocabulary || [];
-
 // ==========================================
 // 🔥 FIREBASE & AUTH
 // ==========================================
@@ -72,6 +63,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+const storage = firebase.storage();
 
 let currentUser = null;
 let saveTimer = null;
@@ -86,23 +78,21 @@ function signOutUser() {
 }
 
 function clearAllUserData() {
-    // Clear localStorage
-    localStorage.removeItem(CORE_KEY);
     localStorage.removeItem(SONGS_KEY);
     localStorage.removeItem(STORIES_KEY);
     localStorage.removeItem(TIMESTAMP_KEY);
     localStorage.removeItem(MNEMONICS_KEY);
     localStorage.removeItem(CUSTOM_WORDS_KEY);
     localStorage.removeItem(CUSTOM_KNOWN_KEY);
+    localStorage.removeItem(USER_DECKS_KEY);
     localStorage.removeItem(GEMINI_KEY_STORAGE);
-    // Reset in-memory state
-    coreKnown = [];
     songProgress = {};
     storyProgress = {};
-    masteryTimestamps = { core: {}, songs: {}, stories: {} };
+    masteryTimestamps = { songs: {}, stories: {}, custom: {} };
     mnemonics = {};
     customWords = {};
     customKnown = [];
+    userDecks = [];
 }
 
 auth.onAuthStateChanged(async (user) => {
@@ -134,31 +124,23 @@ async function loadProgressFromFirestore(uid) {
         const docSnap = await db.collection('users').doc(uid).get();
         if (docSnap.exists) {
             const data = docSnap.data();
-            if (data.coreKnown) coreKnown = data.coreKnown;
             if (data.songProgress) songProgress = data.songProgress;
             if (data.storyProgress) storyProgress = data.storyProgress;
             if (data.mnemonics) mnemonics = data.mnemonics;
             if (data.masteryTimestamps) masteryTimestamps = data.masteryTimestamps;
-            if (data.hiddenCoreWords) hiddenCoreWords = data.hiddenCoreWords;
-            if (data.deletedDecks) deletedDecks = data.deletedDecks;
             if (data.userDecks) userDecks = data.userDecks;
             if (data.customWords) customWords = data.customWords;
             if (data.customKnown) customKnown = data.customKnown;
-            localStorage.setItem(HIDDEN_CORE_KEY, JSON.stringify(hiddenCoreWords));
-            localStorage.setItem(DELETED_DECKS_KEY, JSON.stringify(deletedDecks));
-            localStorage.setItem(USER_DECKS_KEY, JSON.stringify(userDecks));
-            localStorage.setItem(CUSTOM_WORDS_KEY, JSON.stringify(customWords));
-            localStorage.setItem(CUSTOM_KNOWN_KEY, JSON.stringify(customKnown));
-            if (!masteryTimestamps.core) masteryTimestamps.core = {};
             if (!masteryTimestamps.songs) masteryTimestamps.songs = {};
             if (!masteryTimestamps.stories) masteryTimestamps.stories = {};
             if (!masteryTimestamps.custom) masteryTimestamps.custom = {};
-            localStorage.setItem(CORE_KEY, JSON.stringify(coreKnown));
+            localStorage.setItem(USER_DECKS_KEY, JSON.stringify(userDecks));
+            localStorage.setItem(CUSTOM_WORDS_KEY, JSON.stringify(customWords));
+            localStorage.setItem(CUSTOM_KNOWN_KEY, JSON.stringify(customKnown));
             localStorage.setItem(SONGS_KEY, JSON.stringify(songProgress));
             localStorage.setItem(STORIES_KEY, JSON.stringify(storyProgress));
             localStorage.setItem(TIMESTAMP_KEY, JSON.stringify(masteryTimestamps));
             localStorage.setItem(MNEMONICS_KEY, JSON.stringify(mnemonics));
-            // Restore Gemini key across devices
             if (data.geminiApiKey && !localStorage.getItem(GEMINI_KEY_STORAGE)) {
                 localStorage.setItem(GEMINI_KEY_STORAGE, data.geminiApiKey);
             }
@@ -169,7 +151,6 @@ async function loadProgressFromFirestore(uid) {
 }
 
 function saveProgress() {
-    localStorage.setItem(CORE_KEY, JSON.stringify(coreKnown));
     localStorage.setItem(SONGS_KEY, JSON.stringify(songProgress));
     localStorage.setItem(STORIES_KEY, JSON.stringify(storyProgress));
     localStorage.setItem(TIMESTAMP_KEY, JSON.stringify(masteryTimestamps));
@@ -179,13 +160,10 @@ function saveProgress() {
     saveTimer = setTimeout(async () => {
         try {
             await db.collection('users').doc(currentUser.uid).set({
-                coreKnown,
                 songProgress,
                 storyProgress,
                 masteryTimestamps,
                 mnemonics,
-                hiddenCoreWords,
-                deletedDecks,
                 userDecks,
                 customWords,
                 customKnown,
@@ -214,10 +192,6 @@ async function loadAllContent() {
     try {
         const manifest = await fetch('manifest.json').then(r => r.json());
 
-        window.coreVocabulary = [];
-        const coreData = await Promise.all(manifest.coreFiles.map(f => fetch(f).then(r => r.json()).catch(() => [])));
-        coreData.forEach(dayData => { if (Array.isArray(dayData)) window.coreVocabulary.push(...dayData); });
-
         localStories = [];
         const storyData = await Promise.all(manifest.storyFiles.map(f => fetch(f).then(r => r.json()).catch(() => null)));
         storyData.forEach(story => { if (story && story.id && story.content) localStories.push(story); });
@@ -242,26 +216,22 @@ async function loadAllContent() {
 async function init() {
     await loadAllContent();
 
-    const savedCore = localStorage.getItem(CORE_KEY);
     const savedSongs = localStorage.getItem(SONGS_KEY);
     const savedStories = localStorage.getItem(STORIES_KEY);
     const savedTimestamps = localStorage.getItem(TIMESTAMP_KEY);
     const savedMnemonics = localStorage.getItem(MNEMONICS_KEY);
 
-    if (savedCore) coreKnown = JSON.parse(savedCore);
     if (savedSongs) songProgress = JSON.parse(savedSongs);
     if (savedStories) storyProgress = JSON.parse(savedStories);
     if (savedMnemonics) mnemonics = JSON.parse(savedMnemonics);
     if (savedTimestamps) {
         masteryTimestamps = JSON.parse(savedTimestamps);
-        if (!masteryTimestamps.core) masteryTimestamps.core = {};
         if (!masteryTimestamps.songs) masteryTimestamps.songs = {};
         if (!masteryTimestamps.stories) masteryTimestamps.stories = {};
         if (!masteryTimestamps.custom) masteryTimestamps.custom = {};
     }
 
     loadCustomWords();
-    setupCoreToggle();
     setupSongReviewToggle();
     setupStoryReviewToggle();
     setupAudioPlayer();
@@ -278,7 +248,7 @@ async function init() {
 
 window.switchTab = function(tab) {
     // Close deck detail if navigating away from core
-    if (tab !== 'core' && currentDeckDay !== null) closeDeckDetail();
+    if (tab !== 'core' && currentDeckId !== null) closeDeckDetail();
 
     currentTab = tab;
     ['core', 'songs', 'inventory', 'read', 'tree', 'practice'].forEach(t => {
@@ -320,14 +290,6 @@ window.switchTab = function(tab) {
     if (tab !== 'read') resetTheme();
 
     updateStats();
-}
-
-function setupCoreToggle() {
-    const toggle = document.getElementById('review-toggle');
-    const container = document.getElementById('days-container');
-    toggle.addEventListener('change', (e) => {
-        e.target.checked ? container.classList.add('review-active') : container.classList.remove('review-active');
-    });
 }
 
 // ==========================================
@@ -790,35 +752,9 @@ window.openTree = function(index) {
 }
 
 
-// Shared Logic
-window.openCoreModal = function(index) {
-    const word = coreVocabulary.find(w => w.originalIndex === index);
-    if(!word) return;
-    
-    document.getElementById('modal-indo').innerText = word.indo;
-    document.getElementById('modal-eng').innerText = word.eng;
-    
-    // Hide cultural note for core vocab
-    document.getElementById('modal-note').classList.add('hidden');
-    
-    // Display mnemonic image
-    displayMnemonicInModal(index);
-    
-    const btn = document.getElementById('modal-action-btn');
-    const isKnown = coreKnown.includes(index);
-    updateModalButton(btn, isKnown);
-    const delBtn = document.getElementById('modal-delete-word-btn');
-    delBtn.textContent = 'Remove Word';
-    delBtn.classList.remove('hidden');
-    delBtn.onclick = function() { removeCoreWord(index); };
-    document.getElementById('word-modal').classList.add('active');
-    document.getElementById('word-modal-overlay').classList.add('active');
-    btn.onclick = function() { toggleCoreWord(index); closeModal(); };
-}
-
 window.openCustomWordModal = function(id) {
-    const dayNum = Object.keys(customWords).find(d => (customWords[d] || []).some(w => w.id === id));
-    const word = dayNum ? (customWords[dayNum] || []).find(w => w.id === id) : null;
+    const deckKey = Object.keys(customWords).find(d => (customWords[d] || []).some(w => w.id === id));
+    const word = deckKey ? (customWords[deckKey] || []).find(w => w.id === id) : null;
     if (!word) return;
 
     document.getElementById('modal-indo').innerText = word.indo;
@@ -840,35 +776,6 @@ window.openCustomWordModal = function(id) {
     btn.onclick = function() { toggleCustomWord(id); closeModal(); };
 }
 
-window.toggleCoreWord = function(index) {
-    const el = document.getElementById(`word-card-${index}`);
-    if (coreKnown.includes(index)) { 
-        // Removing
-        coreKnown = coreKnown.filter(i => i !== index); 
-        delete masteryTimestamps.core[index]; // Remove timestamp
-        if(el) el.classList.remove('checked'); 
-    } else { 
-        // Adding / Ticking
-        coreKnown.push(index); 
-        masteryTimestamps.core[index] = new Date().toISOString(); // Timestamp
-        if(el) el.classList.add('checked'); 
-        if(el) el.classList.add('anim-squish'); 
-        setTimeout(() => { if(el) el.classList.remove('anim-squish'); }, 300); 
-    }
-    localStorage.setItem(CORE_KEY, JSON.stringify(coreKnown));
-    localStorage.setItem(TIMESTAMP_KEY, JSON.stringify(masteryTimestamps));
-    saveProgress();
-    if (currentDeckDay !== null) {
-        renderDeckWordList(currentDeckDay);
-        const deckWords = coreVocabulary.filter(w => w.day === currentDeckDay);
-        const knownCount = deckWords.filter(w => coreKnown.includes(w.originalIndex)).length;
-        document.getElementById('detail-deck-progress').textContent = `${knownCount}/${deckWords.length} Mastered`;
-    } else {
-        renderDecksOverview();
-    }
-    if(currentTab === 'core') updateStats();
-}
-
 // ==========================================
 // 📦 CUSTOM WORDS — LOAD & PERSIST
 // ==========================================
@@ -883,14 +790,6 @@ function loadCustomWords() {
         if (k) customKnown = JSON.parse(k);
     } catch(e) { customKnown = []; }
     try {
-        const h = localStorage.getItem(HIDDEN_CORE_KEY);
-        if (h) hiddenCoreWords = JSON.parse(h);
-    } catch(e) { hiddenCoreWords = []; }
-    try {
-        const d = localStorage.getItem(DELETED_DECKS_KEY);
-        if (d) deletedDecks = JSON.parse(d);
-    } catch(e) { deletedDecks = []; }
-    try {
         const u = localStorage.getItem(USER_DECKS_KEY);
         if (u) userDecks = JSON.parse(u);
     } catch(e) { userDecks = []; }
@@ -899,8 +798,6 @@ function loadCustomWords() {
 function saveCustomWords() {
     localStorage.setItem(CUSTOM_WORDS_KEY, JSON.stringify(customWords));
     localStorage.setItem(CUSTOM_KNOWN_KEY, JSON.stringify(customKnown));
-    localStorage.setItem(HIDDEN_CORE_KEY, JSON.stringify(hiddenCoreWords));
-    localStorage.setItem(DELETED_DECKS_KEY, JSON.stringify(deletedDecks));
     localStorage.setItem(USER_DECKS_KEY, JSON.stringify(userDecks));
 }
 
@@ -915,44 +812,12 @@ function saveCustomKnownNow() {
     }).catch(err => console.error('Firestore customKnown save failed:', err));
 }
 
-function removeCoreWord(index) {
-    if (!hiddenCoreWords.includes(index)) hiddenCoreWords.push(index);
-    coreKnown = coreKnown.filter(i => i !== index);
-    delete masteryTimestamps.core[index];
-    saveCustomWords();
-    saveProgress();
-    closeModal();
-    if (currentDeckDay !== null) {
-        renderDeckWordList(currentDeckDay);
-        const visibleCore = coreVocabulary.filter(w => w.day === currentDeckDay && !hiddenCoreWords.includes(w.originalIndex));
-        const custom = customWords[currentDeckDay] || [];
-        const total = visibleCore.length + custom.length;
-        const known = visibleCore.filter(w => coreKnown.includes(w.originalIndex)).length
-                    + custom.filter(w => customKnown.includes(w.id)).length;
-        document.getElementById('detail-deck-progress').textContent = `${known}/${total} Mastered`;
-    } else {
-        renderDecksOverview();
-    }
-    updateStats();
-}
-
-function resetDeck(dayNum) {
-    const customIds = (customWords[dayNum] || []).map(w => w.id);
-    customWords[dayNum] = [];
+function resetDeck(deckId) {
+    const customIds = (customWords[deckId] || []).map(w => w.id);
+    customWords[deckId] = [];
     customKnown = customKnown.filter(k => !customIds.includes(k));
-
-    const userDeck = userDecks.find(d => d.id === dayNum);
-    if (userDeck) {
-        // Remove the user-created deck entirely
-        userDecks = userDecks.filter(d => d.id !== dayNum);
-    } else {
-        // Hide core deck from overview and clear its progress
-        const dayIndices = coreVocabulary.filter(w => w.day === dayNum).map(w => w.originalIndex);
-        coreKnown = coreKnown.filter(i => !dayIndices.includes(i));
-        dayIndices.forEach(i => delete masteryTimestamps.core[i]);
-        hiddenCoreWords = hiddenCoreWords.filter(i => !dayIndices.includes(i));
-        if (!deletedDecks.includes(dayNum)) deletedDecks.push(dayNum);
-    }
+    customIds.forEach(id => delete masteryTimestamps.custom[id]);
+    userDecks = userDecks.filter(d => d.id !== deckId);
     saveCustomWords();
     saveProgress();
     closeDeckModal();
@@ -970,38 +835,33 @@ function resetStory(storyId) {
 }
 
 function deleteCustomWord(id) {
-    const dayNum = Object.keys(customWords).find(d => (customWords[d] || []).some(w => w.id === id));
-    if (!dayNum) return;
-    customWords[dayNum] = (customWords[dayNum] || []).filter(w => w.id !== id);
+    const deckKey = Object.keys(customWords).find(d => (customWords[d] || []).some(w => w.id === id));
+    if (!deckKey) return;
+    customWords[deckKey] = (customWords[deckKey] || []).filter(w => w.id !== id);
     customKnown = customKnown.filter(k => k !== id);
     saveCustomWords();
     saveProgress();
     closeModal();
-    if (currentDeckDay !== null) {
-        renderDeckWordList(currentDeckDay);
-        const total = (coreVocabulary.filter(w => w.day === currentDeckDay).length) + (customWords[currentDeckDay] || []).length;
-        const known = coreVocabulary.filter(w => w.day === currentDeckDay && coreKnown.includes(w.originalIndex)).length
-                    + (customWords[currentDeckDay] || []).filter(w => customKnown.includes(w.id)).length;
-        document.getElementById('detail-deck-progress').textContent = `${known}/${total} Mastered`;
+    if (currentDeckId !== null) {
+        renderDeckWordList(currentDeckId);
+        refreshDeckProgress(currentDeckId);
     } else {
         renderDecksOverview();
     }
     updateStats();
 }
 
-function deleteDeckCustomWords(dayNum) {
-    const words = customWords[dayNum] || [];
+function deleteDeckCustomWords(deckId) {
+    const words = customWords[deckId] || [];
     if (words.length === 0) { closeDeckModal(); return; }
     const ids = words.map(w => w.id);
-    customWords[dayNum] = [];
+    customWords[deckId] = [];
     customKnown = customKnown.filter(k => !ids.includes(k));
     saveCustomWords();
     saveProgress();
     closeDeckModal();
-    renderDeckWordList(dayNum);
-    const total = coreVocabulary.filter(w => w.day === dayNum).length;
-    const known = coreVocabulary.filter(w => w.day === dayNum && coreKnown.includes(w.originalIndex)).length;
-    document.getElementById('detail-deck-progress').textContent = `${known}/${total} Mastered`;
+    renderDeckWordList(deckId);
+    refreshDeckProgress(deckId);
     updateStats();
 }
 
@@ -1020,13 +880,7 @@ function toggleCustomWord(id) {
     saveCustomWords();
     saveProgress();
     saveCustomKnownNow();
-    // update hero progress count
-    if (currentDeckDay !== null) {
-        const total = (coreVocabulary.filter(w => w.day === currentDeckDay).length) + (customWords[currentDeckDay]||[]).length;
-        const known = coreVocabulary.filter(w => w.day === currentDeckDay && coreKnown.includes(w.originalIndex)).length
-                    + (customWords[currentDeckDay]||[]).filter(w => customKnown.includes(w.id)).length;
-        document.getElementById('detail-deck-progress').textContent = `${known}/${total} Mastered`;
-    }
+    if (currentDeckId !== null) refreshDeckProgress(currentDeckId);
     updateStats();
 }
 
@@ -1066,7 +920,7 @@ function processImportFile(file) {
             if (!Array.isArray(data)) throw new Error('File must be a JSON array.');
             const words = data.map((w, i) => {
                 if (!w.indo || !w.eng) throw new Error(`Item ${i+1} is missing "indo" or "eng" field.`);
-                return { id: `custom_${currentDeckDay}_${Date.now()}_${i}`, indo: String(w.indo).trim(), eng: String(w.eng).trim(), emoji: String(w.emoji || '📝').trim() };
+                return { id: `custom_${currentDeckId}_${Date.now()}_${i}`, indo: String(w.indo).trim(), eng: String(w.eng).trim(), emoji: String(w.emoji || '📝').trim() };
             });
             if (words.length === 0) throw new Error('No words found in file.');
             showImportPreview(words);
@@ -1097,17 +951,17 @@ function clearImportPreview() {
 }
 
 function confirmImport() {
-    if (!pendingImportWords.length || currentDeckDay === null) return;
-    if (!customWords[currentDeckDay]) customWords[currentDeckDay] = [];
-    customWords[currentDeckDay].push(...pendingImportWords);
+    if (!pendingImportWords.length || currentDeckId === null) return;
+    if (!customWords[currentDeckId]) customWords[currentDeckId] = [];
+    customWords[currentDeckId].push(...pendingImportWords);
     saveCustomWords();
     saveProgress();
     clearImportPreview();
     toggleAddWordPanel();
-    renderDeckWordList(currentDeckDay);
+    renderDeckWordList(currentDeckId);
     // update hero progress
-    const allWords = coreVocabulary.filter(w => w.day === currentDeckDay);
-    const custom   = customWords[currentDeckDay] || [];
+    const allWords = coreVocabulary.filter(w => w.deckId === currentDeckId);
+    const custom   = customWords[currentDeckId] || [];
     const total    = allWords.length + custom.length;
     const known    = allWords.filter(w => coreKnown.includes(w.originalIndex)).length
                    + custom.filter(w => customKnown.includes(w.id)).length;
@@ -1123,23 +977,33 @@ function saveSingleWord() {
         alert('Please fill in both the Indonesian word and English meaning.');
         return;
     }
-    const word = { id: `custom_${currentDeckDay}_${Date.now()}_0`, indo, eng, emoji };
-    if (!customWords[currentDeckDay]) customWords[currentDeckDay] = [];
-    customWords[currentDeckDay].push(word);
+    const word = { id: `custom_${currentDeckId}_${Date.now()}_0`, indo, eng, emoji };
+    if (!customWords[currentDeckId]) customWords[currentDeckId] = [];
+    customWords[currentDeckId].push(word);
     saveCustomWords();
     saveProgress();
     document.getElementById('add-indo-word-input').value = '';
     document.getElementById('add-output-emoji').value    = '';
     document.getElementById('add-output-eng').value      = '';
     toggleAddWordPanel();
-    renderDeckWordList(currentDeckDay);
+    renderDeckWordList(currentDeckId);
 }
 
 // ==========================================
 // 🗂️ DECKS VIEW LOGIC
 // ==========================================
 
-let currentDeckDay = null;
+let currentDeckId = null;
+
+const coreDeckTitles = {
+    'pronouns-questions': 'Pronouns & Questions',
+    'food-actions':       'Food & Actions',
+    'home-everyday':      'Home & Everyday',
+    'time-calendar':      'Time & Calendar',
+    'indonesian-food':    'Indonesian Food',
+    'places-locations':   'Places & Locations',
+    'family':             'Family',
+};
 
 const deckAccentColors = [
     { bg: 'bg-indigo-50',  border: 'border-indigo-100',  text: 'text-indigo-700',  bar: 'bg-indigo-500'  },
@@ -1166,50 +1030,7 @@ function renderDecksOverview() {
         return;
     }
 
-    const groupedByDay = {};
-    coreVocabulary.forEach((word, index) => {
-        word.originalIndex = index;
-        if (!groupedByDay[word.day]) groupedByDay[word.day] = [];
-        groupedByDay[word.day].push(word);
-    });
-
-    const days = Object.keys(groupedByDay).map(Number).sort((a, b) => a - b).filter(d => !deletedDecks.includes(d));
-
-    container.innerHTML = days.length === 0 ? '' : days.map((dayNum, idx) => {
-        const words = groupedByDay[dayNum].filter(w => !hiddenCoreWords.includes(w.originalIndex));
-        const total = words.length;
-        const known = words.filter(w => coreKnown.includes(w.originalIndex)).length;
-        const percent = total === 0 ? 0 : Math.round((known / total) * 100);
-        const accent = deckAccentColors[idx % deckAccentColors.length];
-        const firstEmoji = words[0]?.emoji || '📚';
-
-        let statusLabel, statusClass;
-        if (known === total && total > 0) {
-            statusLabel = '✅ Mastered'; statusClass = 'text-emerald-600 bg-emerald-50';
-        } else if (known > 0) {
-            statusLabel = 'In Progress'; statusClass = `${accent.text} ${accent.bg}`;
-        } else {
-            statusLabel = 'New'; statusClass = 'text-slate-500 bg-slate-100';
-        }
-
-        return `
-        <div onclick="openDeckDetail(${dayNum})" class="deck-card bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer relative overflow-hidden group">
-            <div class="absolute bottom-0 left-0 h-1 ${accent.bar} transition-all" style="width:${percent}%"></div>
-            <div class="flex justify-between items-start mb-4">
-                <div class="w-12 h-12 rounded-xl ${accent.bg} ${accent.border} border flex items-center justify-center text-2xl shadow-inner">${firstEmoji}</div>
-                <span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Day ${dayNum}</span>
-            </div>
-            <h3 class="text-lg font-bold text-slate-800 mb-1 group-hover:text-indigo-600 transition-colors">Day ${dayNum} Vocab</h3>
-            <p class="text-xs text-slate-500 mb-4">${total} words to master</p>
-            <div class="flex justify-between items-center text-xs font-semibold">
-                <span class="${statusClass} px-2 py-0.5 rounded">${statusLabel}</span>
-                <span class="text-slate-400">${known}/${total} words</span>
-            </div>
-        </div>`;
-    }).join('');
-
-    // Append user-created deck cards
-    container.innerHTML += userDecks.map(deck => {
+    container.innerHTML = userDecks.map(deck => {
         const custom  = customWords[deck.id] || [];
         const total   = custom.length;
         const known   = custom.filter(w => customKnown.includes(w.id)).length;
@@ -1237,67 +1058,23 @@ function renderDecksOverview() {
     }).join('');
 }
 
-function openDeckDetail(dayNum) {
-    currentDeckDay = dayNum;
-    const words = coreVocabulary.filter(w => w.day === dayNum);
-    const total = words.length;
-    const known = words.filter(w => coreKnown.includes(w.originalIndex)).length;
-    const days = [...new Set(coreVocabulary.map(w => w.day))].sort((a, b) => a - b);
-    const idx = days.indexOf(dayNum);
-    const accent = deckAccentColors[idx % deckAccentColors.length];
-    const firstEmoji = words[0]?.emoji || '📚';
-
-    const iconEl = document.getElementById('detail-deck-icon');
-    iconEl.textContent = firstEmoji;
-    iconEl.className = `w-24 h-24 rounded-3xl ${accent.bg} ${accent.border} border flex items-center justify-center text-5xl shadow-inner flex-shrink-0`;
-    document.getElementById('detail-deck-title').textContent = `Day ${dayNum} Vocabulary`;
-    document.getElementById('detail-deck-desc').textContent = `${total} words from your Day ${dayNum} learning session.`;
-    document.getElementById('detail-deck-progress').textContent = `${known}/${total} Mastered`;
-
-    renderDeckWordList(dayNum);
-
-    document.getElementById('view-decks-overview').classList.add('hidden');
-    document.getElementById('view-deck-detail').classList.remove('hidden');
-    document.getElementById('core-toggle-wrapper').classList.add('hidden');
-
-    const toggle = document.getElementById('deck-review-toggle');
-    toggle.checked = false;
-    toggleDeckReviewMode(toggle);
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+function refreshDeckProgress(deckId) {
+    const words = customWords[deckId] || [];
+    const known = words.filter(w => customKnown.includes(w.id)).length;
+    document.getElementById('detail-deck-progress').textContent = `${known}/${words.length} Mastered`;
 }
 
-function renderDeckWordList(dayNum) {
+function renderDeckWordList(deckId) {
     const container = document.getElementById('deck-word-list');
-    const words = coreVocabulary.filter(w => w.day === dayNum && !hiddenCoreWords.includes(w.originalIndex));
-    const custom = customWords[dayNum] || [];
-    const total = words.length + custom.length;
+    const words = customWords[deckId] || [];
 
-    document.getElementById('detail-word-count').textContent = `Vocabulary (${total})`;
+    document.getElementById('detail-word-count').textContent = `Vocabulary (${words.length})`;
 
     let html = words.map(word => {
-        const isChecked = coreKnown.includes(word.originalIndex);
-        return `
-        <div id="word-card-${word.originalIndex}" onclick="openCoreModal(${word.originalIndex})"
-             class="word-item ${isChecked ? 'checked' : ''} cursor-pointer rounded-2xl p-3 flex items-center justify-between group bg-white border border-slate-100">
-            <div class="flex items-center gap-3">
-                <div class="emoji-icon text-2xl transition-transform duration-300">${word.emoji}</div>
-                <div>
-                    <div class="font-bold text-slate-800 leading-tight">${word.indo}</div>
-                    <div class="eng-text text-xs font-medium text-slate-400 mt-0.5 transition-all duration-300">${word.eng}</div>
-                </div>
-            </div>
-            <div class="check-circle w-6 h-6 rounded-full border-2 border-slate-200 flex items-center justify-center bg-white shadow-sm flex-shrink-0">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-            </div>
-        </div>`;
-    }).join('');
-
-    html += custom.map(word => {
         const isChecked = customKnown.includes(word.id);
         return `
         <div id="word-card-${word.id}" onclick="openCustomWordModal('${word.id}')"
-             class="word-item ${isChecked ? 'checked' : ''} cursor-pointer rounded-2xl p-3 flex items-center justify-between group bg-white border border-indigo-100">
+             class="word-item ${isChecked ? 'checked' : ''} cursor-pointer rounded-2xl p-3 flex items-center justify-between group bg-white border border-slate-100">
             <div class="flex items-center gap-3">
                 <div class="emoji-icon text-2xl transition-transform duration-300">${word.emoji || '📝'}</div>
                 <div>
@@ -1305,11 +1082,8 @@ function renderDeckWordList(dayNum) {
                     <div class="eng-text text-xs font-medium text-slate-400 mt-0.5 transition-all duration-300">${word.eng || ''}</div>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <span class="text-xs text-indigo-300 font-medium">custom</span>
-                <div class="check-circle w-6 h-6 rounded-full border-2 border-slate-200 flex items-center justify-center bg-white shadow-sm flex-shrink-0">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                </div>
+            <div class="check-circle w-6 h-6 rounded-full border-2 border-slate-200 flex items-center justify-center bg-white shadow-sm flex-shrink-0">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
             </div>
         </div>`;
     }).join('');
@@ -1326,7 +1100,7 @@ function renderDeckWordList(dayNum) {
 function closeDeckDetail() {
     document.getElementById('view-deck-detail').classList.add('hidden');
     document.getElementById('view-decks-overview').classList.remove('hidden');
-    currentDeckDay = null;
+    currentDeckId = null;
     const toggle = document.getElementById('deck-review-toggle');
     toggle.checked = false;
     toggleDeckReviewMode(toggle);
@@ -1347,9 +1121,9 @@ function toggleAddWordPanel() {
         // Set deck label
         const labelEl = document.getElementById('add-panel-deck-label');
         if (labelEl) {
-            if (currentDeckDay !== null) {
-                const ud = userDecks.find(d => d.id === currentDeckDay);
-                labelEl.textContent = ud ? ud.title : `Day ${currentDeckDay} Deck`;
+            if (currentDeckId !== null) {
+                const ud = userDecks.find(d => d.id === currentDeckId);
+                labelEl.textContent = ud ? ud.title : (coreDeckTitles[currentDeckId] || currentDeckId);
             } else {
                 labelEl.textContent = 'to current deck';
             }
@@ -1386,9 +1160,9 @@ function openDeckModal(mode) {
         saveBtn.textContent = 'Save';
         deleteBtn.classList.remove('hidden');
         deleteBtn.textContent = 'Delete Deck';
-        deleteBtn.onclick = () => resetDeck(currentDeckDay);
+        deleteBtn.onclick = () => resetDeck(currentDeckId);
         // Populate form if editing a user deck
-        const userDeck = userDecks.find(d => d.id === currentDeckDay);
+        const userDeck = userDecks.find(d => d.id === currentDeckId);
         if (userDeck) {
             document.getElementById('deck-input-title').value = userDeck.title || '';
             document.getElementById('deck-input-icon').value  = userDeck.icon  || '';
@@ -1443,16 +1217,16 @@ function saveUserDeck() {
     const icon     = document.getElementById('deck-input-icon').value.trim() || '📚';
     const desc     = document.getElementById('deck-input-desc').value.trim();
     const colorIdx = getSelectedDeckColorIndex();
-    const isUserDeck = typeof currentDeckDay === 'string';
+    const isUserDeck = typeof currentDeckId === 'string';
 
     if (isUserDeck) {
         // Edit existing user deck
-        const deck = userDecks.find(d => d.id === currentDeckDay);
+        const deck = userDecks.find(d => d.id === currentDeckId);
         if (deck) { deck.title = title; deck.icon = icon; deck.desc = desc; deck.colorIdx = colorIdx; }
         saveCustomWords();
         saveProgress();
         closeDeckModal();
-        openUserDeckDetail(currentDeckDay);
+        openUserDeckDetail(currentDeckId);
     } else {
         // Create new deck
         const id = `deck_${Date.now()}`;
@@ -1467,7 +1241,7 @@ function saveUserDeck() {
 function openUserDeckDetail(deckId) {
     const deck = userDecks.find(d => d.id === deckId);
     if (!deck) return;
-    currentDeckDay = deckId;
+    currentDeckId = deckId;
     const accent = deckAccentColors[deck.colorIdx % deckAccentColors.length];
     const custom = customWords[deckId] || [];
     const known  = custom.filter(w => customKnown.includes(w.id)).length;
@@ -1539,40 +1313,6 @@ async function autoFillWordMeaning() {
         setTimeout(() => { btnText.textContent = 'Auto-fill Meaning & Emoji'; }, 3000);
     }
     btn.disabled = false;
-}
-
-window.toggleWeek = function(weekNum) { document.getElementById(`week-container-${weekNum}`).classList.toggle('active'); }
-function renderCoreDays() {
-    const container = document.getElementById('days-container');
-    const openWeeks = Array.from(document.querySelectorAll('.week-container.active')).map(el => el.id);
-    container.innerHTML = '';
-    const groupedByWeek = {};
-    let maxWeek = 0;
-    coreVocabulary.forEach((word, index) => {
-        word.originalIndex = index; const weekNum = Math.ceil(word.day / 7); if (weekNum > maxWeek) maxWeek = weekNum;
-        if (!groupedByWeek[weekNum]) groupedByWeek[weekNum] = []; groupedByWeek[weekNum].push(word);
-    });
-    Object.keys(groupedByWeek).forEach((weekNumStr) => {
-        const weekNum = parseInt(weekNumStr); const wordsInWeek = groupedByWeek[weekNum];
-        const totalInWeek = wordsInWeek.length; const knownInWeek = wordsInWeek.filter(w => coreKnown.includes(w.originalIndex)).length;
-        const isComplete = knownInWeek === totalInWeek; let isActive = openWeeks.length > 0 ? openWeeks.includes(`week-container-${weekNum}`) : (weekNum === maxWeek);
-        const groupedDays = wordsInWeek.reduce((acc, word) => { if (!acc[word.day]) acc[word.day] = []; acc[word.day].push(word); return acc; }, {});
-        const weekDiv = document.createElement('div'); weekDiv.id = `week-container-${weekNum}`; weekDiv.className = `week-container ${isActive ? 'active' : ''}`;
-        const progressColor = isComplete ? 'text-emerald-600 bg-emerald-50' : 'text-slate-500 bg-slate-100';
-        let html = `<div class="week-header p-5 flex items-center justify-between" onclick="toggleWeek(${weekNum})"><div class="flex items-center gap-4"><h3 class="text-xl font-bold text-slate-800">Week ${weekNum}</h3><span class="text-xs font-bold px-3 py-1 rounded-full ${progressColor}">${knownInWeek}/${totalInWeek} Mastered</span></div><div class="week-chevron text-slate-400"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></div></div><div class="week-content px-4 md:px-6"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">`;
-        Object.keys(groupedDays).forEach((dayNum) => {
-            const words = groupedDays[dayNum]; const accent = accents[(dayNum - 1) % accents.length];
-            const halfPoint = Math.ceil(words.length / 2); const showHalftime = words.length > 12;
-            html += `<div class="day-card p-5 flex flex-col h-full"><div class="flex items-center justify-between mb-4"><div class="flex items-center gap-3"><span class="${accent.bg} ${accent.text} text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Day ${dayNum}</span></div><span class="text-xs font-semibold text-slate-400">${words.length} words</span></div><div class="grid grid-cols-1 xl:grid-cols-2 gap-x-3 gap-y-2 flex-1">`;
-            words.forEach((word, index) => {
-                if (showHalftime && index === halfPoint) { html += `<div class="col-span-1 xl:col-span-2 py-2 flex items-center gap-3 opacity-60"><div class="h-px bg-slate-200 flex-1"></div><span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Rest Stop</span><div class="h-px bg-slate-200 flex-1"></div></div>`; }
-                const isChecked = coreKnown.includes(word.originalIndex);
-                html += `<div id="word-card-${word.originalIndex}" onclick="event.stopPropagation(); openCoreModal(${word.originalIndex})" class="word-item ${isChecked ? 'checked' : ''} cursor-pointer rounded-xl p-2 flex items-center justify-between group"><div class="flex items-center gap-3"><div class="emoji-icon text-xl transition-transform duration-300">${word.emoji}</div><div><div class="font-semibold text-sm text-slate-800 leading-tight">${word.indo}</div><div class="eng-text text-xs font-medium text-slate-400 mt-0.5 transition-all duration-300">${word.eng}</div></div></div><div class="check-circle w-5 h-5 rounded-full border-2 border-slate-200 flex items-center justify-center bg-white shadow-sm flex-shrink-0"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></div></div>`;
-            });
-            html += `</div></div>`;
-        });
-        html += `</div></div>`; weekDiv.innerHTML = html; container.appendChild(weekDiv);
-    });
 }
 
 function setupAudioPlayer() { 
@@ -1730,7 +1470,7 @@ function displayMnemonicInModal(vocabId) {
     }
 }
 
-function resizeImageToBase64(file, maxW, maxH, quality) {
+function resizeImageToBlob(file, maxW, maxH, quality) {
     return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -1744,7 +1484,7 @@ function resizeImageToBase64(file, maxW, maxH, quality) {
                 canvas.width = width;
                 canvas.height = height;
                 canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                resolve(canvas.toDataURL('image/jpeg', quality));
+                canvas.toBlob(resolve, 'image/jpeg', quality);
             };
             img.src = e.target.result;
         };
@@ -1754,18 +1494,37 @@ function resizeImageToBase64(file, maxW, maxH, quality) {
 
 async function handleMnemonicFile(file) {
     if (!file || !file.type.startsWith('image/')) return;
-    const base64 = await resizeImageToBase64(file, 600, 400, 0.82);
-    mnemonics[currentVocabId] = base64;
-    localStorage.setItem(MNEMONICS_KEY, JSON.stringify(mnemonics));
-    saveProgress();
-    displayMnemonicInModal(currentVocabId);
+    if (!currentUser) {
+        alert('Sign in to save mnemonic images.');
+        return;
+    }
+
+    const dropLabel = document.getElementById('mnemonic-drop-label');
+    dropLabel.textContent = 'Uploading…';
+
+    try {
+        const blob = await resizeImageToBlob(file, 600, 400, 0.82);
+        const ref = storage.ref(`mnemonics/${currentUser.uid}/${currentVocabId}`);
+        await ref.put(blob, { contentType: 'image/jpeg' });
+        const url = await ref.getDownloadURL();
+        mnemonics[currentVocabId] = url;
+        saveProgress();
+        displayMnemonicInModal(currentVocabId);
+    } catch (e) {
+        console.error('Mnemonic upload failed:', e);
+        alert('Upload failed — check your connection and try again.');
+        dropLabel.textContent = 'Drop image here';
+    }
 }
 
 function removeMnemonic() {
     if (!confirm('Remove this mnemonic image?')) return;
-    
+
+    if (currentUser) {
+        const ref = storage.ref(`mnemonics/${currentUser.uid}/${currentVocabId}`);
+        ref.delete().catch(() => {}); // best-effort; don't block UI
+    }
     delete mnemonics[currentVocabId];
-    localStorage.setItem(MNEMONICS_KEY, JSON.stringify(mnemonics));
     saveProgress();
     displayMnemonicInModal(currentVocabId);
 }
@@ -1774,22 +1533,28 @@ function closeModal() { document.getElementById('word-modal').classList.remove('
 
 function updateStats() {
     let total = 0, known = 0;
-    if (currentTab === 'core') { total = coreVocabulary.length; known = coreKnown.length; }
-    else if (currentTab === 'songs') { if(currentSong) { total = currentSong.vocabulary.length; known = (songProgress[currentSong.id]||[]).length; } }
-    else { // Inventory & Stories: Show Global
-        const coreT = coreVocabulary.length; const coreK = coreKnown.length;
-        let songT = 0, songK = 0, storyT = 0, storyK = 0;
-        if(window.songs) Object.values(window.songs).forEach(s => { if(s.vocabulary) { songT += s.vocabulary.length; songK += (songProgress[s.id]||[]).length; } });
+    if (currentTab === 'core') {
+        userDecks.forEach(deck => {
+            const words = customWords[deck.id] || [];
+            total += words.length;
+            known += words.filter(w => customKnown.includes(w.id)).length;
+        });
+    } else if (currentTab === 'songs') {
+        if (currentSong) { total = currentSong.vocabulary.length; known = (songProgress[currentSong.id]||[]).length; }
+    } else {
+        let deckT = 0, deckK = 0, songT = 0, songK = 0, storyT = 0, storyK = 0;
+        userDecks.forEach(deck => { const words = customWords[deck.id] || []; deckT += words.length; deckK += words.filter(w => customKnown.includes(w.id)).length; });
+        if (window.songs) Object.values(window.songs).forEach(s => { if (s.vocabulary) { songT += s.vocabulary.length; songK += (songProgress[s.id]||[]).length; } });
         const library = [...(window.stories||[]), ...localStories];
         library.forEach(s => { storyT += s.vocabulary.length; storyK += (storyProgress[s.id]||[]).length; });
-        total = coreT + songT + storyT; known = coreK + songK + storyK;
+        total = deckT + songT + storyT; known = deckK + songK + storyK;
     }
-    
+
     const percent = total === 0 ? 0 : Math.round((known / total) * 100);
     document.getElementById('progress-bar').style.width = `${percent}%`;
     document.getElementById('progress-text').innerText = `${percent}%`;
-    
-    const labels = {core:'Core Mastery', songs:'Song Mastery', inventory:'Global Mastery', read:'Global Mastery'};
+
+    const labels = {core:'Deck Progress', songs:'Song Mastery', inventory:'Global Mastery', read:'Global Mastery'};
     document.getElementById('progress-label').innerText = labels[currentTab] || 'Mastery';
 }
 
@@ -1867,10 +1632,6 @@ function getPracticeWords() {
         else oldWords.push(word);
     };
 
-    coreKnown.forEach(idx => {
-        const w = coreVocabulary[idx];
-        if (w) bucket({ indo: w.indo, eng: w.eng, emoji: w.emoji || '📝' }, idx, 'core');
-    });
     Object.entries(songProgress).forEach(([songId, ids]) => {
         const song = window.songs?.[songId];
         if (!song) return;

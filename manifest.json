@@ -1,13 +1,4 @@
 {
-  "coreFiles": [
-    "core_volcab/day_01.json",
-    "core_volcab/day_02.json",
-    "core_volcab/day_03.json",
-    "core_volcab/day_04.json",
-    "core_volcab/day_05.json",
-    "core_volcab/day_06.json",
-    "core_volcab/day_07_family.json"
-  ],
   "storyFiles": [
     "my_stories/pagi-di-warung-kopi.json",
     "my_stories/jam-karet-waktu-indonesia.json",
