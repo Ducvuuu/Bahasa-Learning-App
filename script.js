@@ -1441,7 +1441,9 @@ async function handleMnemonicFile(file) {
     try {
         const blob = await resizeImageToBlob(file, 600, 400, 0.82);
         const ref = storage.ref(`mnemonics/${currentUser.uid}/${currentVocabId}`);
-        await ref.put(blob, { contentType: 'image/jpeg' });
+        await new Promise((resolve, reject) => {
+            ref.put(blob, { contentType: 'image/jpeg' }).on('state_changed', null, reject, resolve);
+        });
         const url = await ref.getDownloadURL();
         mnemonics[currentVocabId] = url;
         saveProgress();
