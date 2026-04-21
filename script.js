@@ -1618,24 +1618,24 @@ STUDENT CONTEXT:
 TODAY'S WORDS:
 ${list}
 
-EXERCISE PROGRESSION (follow this order every session):
-1. VOCABULARY QUIZ — Indo → English, to check recognition (1–2 rounds max)
+EXERCISE PROGRESSION (follow this order):
+1. VOCABULARY QUIZ — Indo → English, to check recognition
 2. FILL-IN-THE-GAP — short sentences with a blank, student fills in the correct Indonesian word
-3. ACTIVE PRODUCTION (most important — spend the most time here):
+3. ACTIVE PRODUCTION (most important):
    - Give an English sentence, student translates it to Indonesian
    - Ask open-ended questions that student must answer in Indonesian
    - Give a vocabulary word, ask student to construct their own sentence using it
 
 RULES:
 - Start immediately with the first question — no preamble
-- After each answer: one line of feedback (✓ correct / ✗ + brief correction with explanation), then next question
-- Prioritise active production exercises over passive recognition
+- Stay on the current exercise type until the student explicitly asks to move on (e.g. "next", "move on", "next exercise")
+- Do NOT automatically advance to the next exercise type on your own
+- After each answer: one line of feedback (✓ correct / ✗ + brief correction with explanation), then next question of the same type
 - Do NOT rely on multiple choice — student must construct their own answers
 - Grammar tolerance: don't penalise minor grammar mistakes early on; focus on vocabulary use and sentence construction
 - Keep responses SHORT: feedback + next question in 3–4 sentences max
 - Occasional single-word encouragement in Indonesian is fine: "Bagus!", "Hampir!", "Luar biasa!" — but the surrounding sentence must be in English
-- Start with the newest/most recently learned words, then cycle to older ones
-- After ~12 exchanges, offer to wrap up or keep going`;
+- Start with the newest/most recently learned words, then cycle to older ones`;
 }
 
 async function callGemini(userText) {
