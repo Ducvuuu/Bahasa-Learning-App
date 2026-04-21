@@ -1563,7 +1563,7 @@ function getPracticeWords() {
     const bucket = (word, tsKey, tsSource) => {
         const ts = masteryTimestamps[tsSource]?.[tsKey];
         const age = ts ? now - new Date(ts).getTime() : Infinity;
-        if (age < 7 * DAY) newWords.push(word);
+        if (age < 7 * DAY) newWords.push({ ...word, _ts: ts });
         else if (age < 30 * DAY) reviewWords.push(word);
         else oldWords.push(word);
     };
@@ -1591,8 +1591,10 @@ function getPracticeWords() {
     });
 
     const shuffle = a => [...a].sort(() => Math.random() - 0.5);
+    // New words: most recently learned first; review + old: shuffled
+    const sortedNew = [...newWords].sort((a, b) => new Date(b._ts) - new Date(a._ts));
     const selected = [
-        ...shuffle(newWords),
+        ...sortedNew,
         ...shuffle(reviewWords),
         ...shuffle(oldWords)
     ];
