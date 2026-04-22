@@ -1554,6 +1554,7 @@ function clearGeminiKey() {
 let practiceConversation = [];
 let currentPracticeSessionId = null;
 let practiceWords = null;
+let struggledWords = []; // { indo, eng, emoji } words the student got wrong this session
 let practiceActive = false;
 
 function getPracticeWords() {
@@ -1604,6 +1605,10 @@ function getPracticeWords() {
 
 function buildSystemPrompt(words) {
     const list = words.map(w => `${w.emoji} ${w.indo} = "${w.eng}"`).join('\n');
+    const struggledList = struggledWords.length
+        ? '\nSTRUGGLED WORDS (student got these wrong this session — prioritise re-testing these):\n' +
+          struggledWords.map(w => `${w.emoji} ${w.indo} = "${w.eng}"`).join('\n')
+        : '';
     return `You are Kak Indo, an encouraging Bahasa Indonesia tutor for a beginner student living in Jakarta.
 
 LANGUAGE RULE (CRITICAL — never break this):
@@ -1616,7 +1621,7 @@ STUDENT CONTEXT:
 - Always address the student in ENGLISH
 
 TODAY'S WORDS:
-${list}
+${list}${struggledList}
 
 EXERCISE PROGRESSION (follow this order):
 1. VOCABULARY QUIZ — Indo → English, to check recognition
@@ -1635,7 +1640,9 @@ RULES:
 - Grammar tolerance: don't penalise minor grammar mistakes early on; focus on vocabulary use and sentence construction
 - Keep responses SHORT: feedback + next question in 3–4 sentences max
 - Occasional single-word encouragement in Indonesian is fine: "Bagus!", "Hampir!", "Luar biasa!" — but the surrounding sentence must be in English
-- Start with the newest/most recently learned words, then cycle to older ones`;
+- Start with the newest/most recently learned words, then cycle to older ones
+- MISTAKE TRACKING: when the student gets a word wrong (you give ✗ feedback), add it to your internal struggled list and re-test it later in the same exercise before moving on — do not let a wrong word disappear; keep circling back until the student gets it right at least twice in a row
+- Words in the STRUGGLED WORDS list above must be re-tested early and often across all exercise types`;
 }
 
 async function callGemini(userText) {
@@ -1653,6 +1660,21 @@ async function callGemini(userText) {
     const data = await res.json();
     const reply = data.candidates[0].content.parts[0].text;
     practiceConversation.push({ role: 'model', parts: [{ text: reply }] });
+
+    // If the AI marked the answer wrong, find which word was being tested and track it
+    if (reply.includes('✗')) {
+        // Look at the last model turn before this to find the word being tested
+        const allWords = practiceWords.selected;
+        const replyLower = reply.toLowerCase();
+        const alreadyTracked = new Set(struggledWords.map(w => w.indo.toLowerCase()));
+        for (const w of allWords) {
+            if (!alreadyTracked.has(w.indo.toLowerCase()) && replyLower.includes(w.indo.toLowerCase())) {
+                struggledWords.push({ indo: w.indo, eng: w.eng, emoji: w.emoji || '📝' });
+                break;
+            }
+        }
+    }
+
     return reply;
 }
 
@@ -1746,6 +1768,7 @@ async function sendPracticeMessage() {
 
 async function startNewPracticeSession() {
     practiceConversation = [];
+    struggledWords = [];
     practiceActive = true;
     practiceWords = getPracticeWords();
     document.getElementById('practice-messages').innerHTML = '';
